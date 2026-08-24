@@ -26,7 +26,7 @@
 
 /* Size variants */
 .card-small {
-  width: 80px;
+  width: 116px;
   padding: 8px;
   font-size: 0.7rem;
 }
@@ -164,4 +164,57 @@
 
 .card-type-Artifact {
   --border-color: #6a7a4a;
+}
+
+/* --- Phase B additions --- */
+
+.card-visual.disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  filter: saturate(0.5);
+}
+
+.card-visual.disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.card-visual.exhausted {
+  transform: rotate(1.5deg);
+  border-style: dashed;
+}
+
+.card-visual:focus-visible {
+  outline: 2px solid #9bc4e2;
+  outline-offset: 2px;
+}
+
+/* Memory / transformation state, the marker the GDD asks to stay readable. */
+.card-state {
+  align-self: flex-start;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(155, 196, 226, 0.45);
+  border-radius: 2px;
+  color: #9bc4e2;
+}
+
+.card-flag {
+  margin-top: auto;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #d9a05b;
+}
+
+.card-affinities {
+  gap: 3px;
+}
+
+.card-small .description,
+.card-small .card-state {
+  display: none;
 }

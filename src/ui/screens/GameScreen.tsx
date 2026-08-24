@@ -1,71 +1,78 @@
-import { GameState, getCurrentPlayer } from '../../core/game/gameState';
+import { getCurrentPlayer, PHASE_ORDER } from '../../core/game/gameState';
+import { useGameStore } from '../../store/gameStore';
 import PhaseIndicator from '../components/HUD/PhaseIndicator';
 import Board from '../components/Board/Board';
 import Hand from '../components/Hand/Hand';
 import './GameScreen.css';
 
-interface GameScreenProps {
-  gameState: GameState;
-}
+export default function GameScreen() {
+  const { gameState, dispatch, lastError, check } = useGameStore();
+  if (!gameState) return null;
 
-export default function GameScreen({ gameState }: GameScreenProps) {
-  const currentPlayer = getCurrentPlayer(gameState);
+  const player = getCurrentPlayer(gameState);
+  const isLastPhase = gameState.phase === PHASE_ORDER[PHASE_ORDER.length - 1];
+
+  const drawAction = { type: 'DrawCard' as const, playerId: player.id };
+  const drawVerdict = check(drawAction);
 
   return (
     <div className="game-screen">
       <header className="game-header">
-        <h1>ENCANTARIAS — Lendas do Maranhão</h1>
-        <div className="game-info">
-          <div className="turn-info">
-            Turn {gameState.turn} · {currentPlayer.name}
-          </div>
-          <PhaseIndicator phase={gameState.phase} />
+        <h1>ENCANTARIAS</h1>
+        <div className="turn-info">
+          Turno {gameState.turn} · <strong>{player.name}</strong>
         </div>
+        <PhaseIndicator phase={gameState.phase} />
       </header>
 
-      <div className="game-main">
+      <main className="game-main">
         <div className="board-area">
-          <Board gameState={gameState} />
+          <Board player={player} isActivePlayer />
         </div>
 
-        <div className="player-area">
-          <div className="player-panel active">
-            <h3>{currentPlayer.name}</h3>
-            {currentPlayer.activeTerritory && (
-              <div className="territory-info">
-                <strong>Territory:</strong> {currentPlayer.activeTerritory.name}
-              </div>
-            )}
-            <div className="resources">
-              <div className="resource">
-                <span className="label">Vínculo:</span>
-                <span className="value">{currentPlayer.resources?.vínculo || 0}</span>
-              </div>
-              <div className="resource">
-                <span className="label">Memória:</span>
-                <span className="value">{currentPlayer.resources?.memoria || 0}</span>
-              </div>
+        <aside className="side-panel">
+          <div className="resources">
+            <div className="resource">
+              <span>Vínculo</span><strong>{player.resources.vinculo}</strong>
             </div>
-            <div className="deck-info">
-              <span>Deck: {currentPlayer.deck.length}</span>
-              <span>Hand: {currentPlayer.hand.length}</span>
-              <span>Discard: {currentPlayer.discard.length}</span>
+            <div className="resource">
+              <span>Memória</span><strong>{player.resources.memoria}</strong>
+            </div>
+            <div className="resource">
+              <span>Deck</span><strong>{player.deck.length}</strong>
             </div>
           </div>
 
-          <div className="hand-area">
-            <h4>Your Hand</h4>
-            <Hand cards={currentPlayer.hand} />
-          </div>
-        </div>
-      </div>
+          {gameState.phase === 'Memory' && (
+            <button
+              className="primary"
+              disabled={!drawVerdict.valid}
+              title={drawVerdict.reason}
+              onClick={() => dispatch(drawAction)}
+            >
+              Recuperar Memória
+            </button>
+          )}
+
+          <h4>Mão</h4>
+          <Hand cards={player.hand} playerId={player.id} />
+        </aside>
+      </main>
 
       <footer className="game-footer">
-        <div className="phase-controls">
-          <button>← Previous Phase</button>
-          <button>Next Phase →</button>
-          <button>End Turn</button>
+        {lastError && <div className="error-banner" role="alert">{lastError}</div>}
+
+        <div className="log">
+          {gameState.log.slice(-4).map((entry, i) => (
+            <div key={i} className="log-entry">
+              <span className="log-phase">{entry.phase}</span> {entry.message}
+            </div>
+          ))}
         </div>
+
+        <button className="primary" onClick={() => dispatch({ type: 'PassPhase', playerId: player.id })}>
+          {isLastPhase ? 'Encerrar turno →' : 'Avançar fase →'}
+        </button>
       </footer>
     </div>
   );

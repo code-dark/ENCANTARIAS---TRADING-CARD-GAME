@@ -1,78 +1,123 @@
-import { GameState, getCurrentPlayer } from '../../../core/game/gameState';
+import { Player, activeTerritoryOf } from '../../../core/game/gameState';
+import { getCard } from '../../../core/cards/cardRegistry';
+import { TerritoryCard } from '../../../core/cards/types';
+import { useGameStore } from '../../../store/gameStore';
 import CardVisual from '../Card/CardVisual';
 import './Board.css';
 
 interface BoardProps {
-  gameState: GameState;
+  player: Player;
+  isActivePlayer: boolean;
 }
 
-export default function Board({ gameState }: BoardProps) {
-  const currentPlayer = getCurrentPlayer(gameState);
-  const territory = currentPlayer.activeTerritory;
+export default function Board({ player, isActivePlayer }: BoardProps) {
+  const { dispatch, check } = useGameStore();
+  const active = activeTerritoryOf(player);
 
-  if (!territory) {
-    return <div className="board">No active territory</div>;
+  if (!active) {
+    return <div className="board board-empty">Sem Território ativo</div>;
   }
+
+  const territory = getCard(active.cardId) as TerritoryCard;
+
+  // Manifestations still rooted in the territory the player left behind.
+  const here = player.inPlay.filter((c) => c.linkedTo === active.instanceId);
+  const elsewhere = player.inPlay.filter((c) => c.linkedTo !== active.instanceId);
 
   return (
     <div className="board">
-      <div className="board-center">
-        <div className="territory-card-wrapper">
-          <CardVisual card={territory} />
-          <div className="territory-label">Active Territory</div>
+      <section className="territory-panel">
+        <header>
+          <h2>{territory.name}</h2>
+          <span className="territory-category">{territory.category}</span>
+        </header>
+
+        <div className="affinity-list">
+          {territory.affinities.map((aff) => (
+            <span key={aff} className="affinity-tag">{aff}</span>
+          ))}
         </div>
 
-        <div className="territory-details">
-          <h3>{territory.name}</h3>
-          <p className="territory-category">{territory.category}</p>
-
-          {territory.affinities && territory.affinities.length > 0 && (
-            <div className="affinities">
-              <label>Affinities:</label>
-              <div className="affinity-list">
-                {territory.affinities.map((aff) => (
-                  <span key={aff} className="affinity-tag">
-                    {aff}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {territory.permanentEffect && (
-            <div className="effect-box">
-              <strong>Permanent Effect:</strong>
-              <p>{territory.permanentEffect.description}</p>
-            </div>
-          )}
-
-          {territory.placeAction && (
-            <div className="action-box">
-              <strong>{territory.placeAction.name}</strong>
-              {territory.placeAction.description && (
-                <p>{territory.placeAction.description}</p>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="linked-cards">
-        <h4>Linked Cards</h4>
-        {currentPlayer.linkedCards.size > 0 ? (
-          <div className="linked-cards-grid">
-            {Array.from(currentPlayer.linkedCards.values()).map((cards) =>
-              cards.map((card) => (
-                <div key={card.id} className="linked-card">
-                  <CardVisual card={card} size="small" />
-                </div>
-              ))
-            )}
-          </div>
-        ) : (
-          <div className="no-linked">No linked cards</div>
+        {territory.permanentEffect && (
+          <p className="effect">{territory.permanentEffect.description}</p>
         )}
-      </div>
+
+        <div className="territory-switcher">
+          <h4>Seus Territórios</h4>
+          <div className="territory-options">
+            {player.territories.map((t) => {
+              const def = getCard(t.cardId);
+              const isActive = t.instanceId === active.instanceId;
+              const action = {
+                type: 'Traverse' as const,
+                playerId: player.id,
+                territoryInstanceId: t.instanceId,
+              };
+              const verdict = isActivePlayer ? check(action) : { valid: false, reason: undefined };
+
+              return (
+                <button
+                  key={t.instanceId}
+                  className={isActive ? 'territory-option active' : 'territory-option'}
+                  disabled={!verdict.valid}
+                  title={verdict.valid ? `Travessia para ${def.name}` : verdict.reason}
+                  onClick={() => dispatch(action)}
+                >
+                  {def.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="manifestations">
+        <h4>Manifestações aqui ({here.length})</h4>
+        <div className="card-row">
+          {here.length === 0 && <p className="muted">Nada manifestado neste Território.</p>}
+          {here.map((c) => {
+            const action = {
+              type: 'ActivateResonance' as const,
+              playerId: player.id,
+              instanceId: c.instanceId,
+            };
+            const verdict = isActivePlayer ? check(action) : { valid: false, reason: undefined };
+
+            return (
+              <CardVisual
+                key={c.instanceId}
+                definition={getCard(c.cardId)}
+                instance={c}
+                size="small"
+                disabledReason={verdict.valid ? undefined : verdict.reason}
+                onClick={verdict.valid ? () => dispatch(action) : undefined}
+              />
+            );
+          })}
+        </div>
+
+        {elsewhere.length > 0 && (
+          <>
+            <h4 className="left-behind-title">
+              Ficaram para trás ({elsewhere.length})
+            </h4>
+            <p className="muted">
+              Permaneceram enraizadas no Território de origem após a Travessia.
+            </p>
+            <div className="card-row dimmed">
+              {elsewhere.map((c) => (
+                <CardVisual
+                  key={c.instanceId}
+                  definition={getCard(c.cardId)}
+                  instance={c}
+                  size="small"
+                  disabledReason="Ficou no Território anterior."
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </section>
     </div>
   );
 }

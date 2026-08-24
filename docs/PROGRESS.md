@@ -1,6 +1,6 @@
 # ENCANTARIAS Implementation Progress
 
-## Current Status: Phase A Complete ✓
+## Current Status: Phase B Complete ✓
 
 **Completed: Foundation & Core Game Logic**
 
@@ -61,134 +61,55 @@
 
 ---
 
-## Next: Phase B (Core Loop) 
+## Phase B: Playable Turn Loop ✓
 
-**Estimated: Days 3-4**
+**Card instances.** Phase A stored play state on shared card definitions, so
+two players holding the same card would have shared exhaustion and counters.
+Definitions are now immutable data resolved through `cards/cardRegistry.ts`,
+and every copy in a zone is a `CardInstance` carrying its own exhaustion,
+counters and memory state.
 
-### Action Validation & Play Mechanics
-- [ ] isValidAction() implementation
-- [ ] Card play logic (hand → board)
-- [ ] Territory activation
-- [ ] Resource management
-- [ ] Deck draw mechanics
+**Zones.** Added `inPlay` (manifestations) and a per-player `territories` pool
+with one `activeTerritoryId`. A manifestation records the territory instance it
+is linked to, which is what makes "this Memory stayed behind" visible on the
+table rather than merely implied.
 
-### Turn Resolution
-- [ ] Turn phase advancement
-- [ ] Phase-specific valid actions
-- [ ] Exaustão (exhaustion) tracking
-- [ ] Effect resolution order
-- [ ] Trigger system
+**Validation with reasons.** `game/validators.ts` returns a player-readable
+reason for every refusal ("Serpent Encantada costs 3 Memória; you have 1"),
+which the UI shows on hover and in an error banner. Nothing mutates state.
 
-### Integration Tests
-- [ ] Turn order tests
-- [ ] Card play tests
-- [ ] Phase transition tests
-- [ ] Draw/discard tests
+**Turn resolution.** `rules/turnResolver.ts` is the single entry point.
+Phase-gated actions: Memory draws, Movement traverses, Manifestation plays,
+Action resonates. Awaken runs automatically for the incoming player and clears
+exhaustion. Per-turn flags cap draw and Travessia at one each.
 
----
+**UI wired to the engine.** The store holds no rules; it dispatches actions and
+surfaces refusals. Clicking a hand card manifests it, territory buttons perform
+Travessia, table cards activate Ressonância, and the log narrates what happened.
 
-## Remaining Phases (Estimated Timeline)
+**Tests: 24, covering** phase order, turn hand-off, turn ownership, draw limits,
+empty deck, cost refusal, territory-to-pool play, Travessia persistence
+(Roots stays / Shared travels), one-Travessia-per-turn, foreign territory,
+the state-driven persistence rules, Ressonância hit and miss, exhaustion, and
+Awaken clearing it.
 
-### Phase C: ENCANTARIAS Mechanics (Days 5-7)
-- Resonance activation
-- Traversal resolution
-- Memory state persistence
-- Transformation triggers
-- Comprehensive tests
+**Verified in a real browser** (Chromium via Playwright): full loop of
+Awaken → draw → Travessia → manifest, no console errors. Two layout defects
+found and fixed that the build could not have caught — the phase indicator
+overlapping the header, and small cards too narrow to hold a title.
 
-### Phase D: Victory + UX (Days 8-9)
-- Jornada progress tracking
-- Game end detection
-- Action log
-- Better tooltips
-- Player resources display
+### Known gaps carried into Phase C
 
-### Phase E: Visual Foundation (Days 10-12)
-- 3D card mesh (Three.js)
-- Board layout in 3D
-- Territory visual emphasis
-- Hover effects
-- Transitions
+- Ressonância detects and logs the unlocked manifestation and grants Vínculo,
+  but the unlocked *effects* are not executed yet.
+- Every shipped Memory declares an explicit `traversalBehavior`, which wins over
+  its `memoryState`. The state-driven rules are proven by unit tests but are
+  currently unreachable from card data — worth resolving as a design decision.
+- Journeys are dealt and displayed but progress is not evaluated.
+- Economy is provisional: one Memória per turn against costs of 1-3 makes the
+  opening turns tight. Needs playtesting, not guessing.
+- The board's centre is largely empty; visual weight is Milestone 5.
 
-### Phase F: Game Feel (Days 13-15)
-- Card play animations
-- Resonance VFX
-- Traversal transitions
-- Transformation effects
-- Placeholder audio
-- Button feedback
+## Next: Phase C (Ressonância effects, Transformação, Jornadas)
 
-### Phase G: QA + Balancing (Days 16-17)
-- Unit tests (80%+ coverage)
-- Playtesting
-- Balance pass
-- Bug triage
-
-### Phase H: Polish (Day 18)
-- Documentation
-- Code cleanup
-- Build optimization
-- Performance audit
-
----
-
-## Known Issues & Blockers
-
-None currently. Build system working, types checking, components rendering.
-
----
-
-## Key Files
-
-| File | Purpose |
-|------|---------|
-| `src/core/game/gameState.ts` | Central state machine |
-| `src/core/mechanics/*.ts` | Affinity, Resonance, Traversal, Transformation |
-| `src/core/cards/types.ts` | Card data schemas |
-| `src/core/cards/data/*.ts` | Card definitions |
-| `src/store/gameStore.ts` | Zustand store |
-| `src/ui/screens/GameScreen.tsx` | Main game UI |
-| `vite.config.ts` | Build configuration |
-
----
-
-## Architectural Notes
-
-- **Game Logic:** Core mechanics have zero React/Three.js dependencies. Can be tested and ported independently.
-- **State Management:** Single source of truth via Zustand. All mutations through defined actions.
-- **Card System:** Fully data-driven. New cards can be added without touching core logic.
-- **UI Component Hierarchy:**
-  ```
-  App
-  └─ GameScreen
-     ├─ PhaseIndicator
-     ├─ Board
-     │  └─ CardVisual (Territory + Linked)
-     ├─ Hand
-     │  └─ CardVisual[]
-     └─ Footer (Phase Controls)
-  ```
-
----
-
-## Testing Strategy
-
-- **Unit Tests:** Core mechanics (affinity, resonance, traversal, transformation)
-- **Integration Tests:** Full game turn flow
-- **Acceptance Tests:** Card play, territory switching, jornada progress
-- **QA Checklist:** No loops, dominance, impossible states, ambiguous text
-
----
-
-## Next Steps (When Phase B Starts)
-
-1. Implement `isValidAction()` in validators.ts
-2. Add card play handler to game state
-3. Test first playable state
-4. Verify turn structure works
-5. Run integration test
-
----
-
-Last Updated: 2026-08-23  
-Status: Ready for Phase B
+See the plan file for the full milestone list.

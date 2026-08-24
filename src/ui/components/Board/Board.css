@@ -129,3 +129,102 @@
   opacity: 0.5;
   font-style: italic;
 }
+
+/* --- Phase B board --- */
+
+.board-empty {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.territory-panel {
+  background: linear-gradient(135deg, rgba(42, 63, 95, 0.55), rgba(15, 22, 41, 0.75));
+  border-left: 4px solid #7aa3d5;
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.territory-panel header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.territory-panel h2 {
+  margin: 0;
+  color: #cfe2f3;
+  font-size: 1.35rem;
+}
+
+.territory-category {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7aa3d5;
+}
+
+.territory-panel .effect {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: #b8cde0;
+  border-left: 2px solid rgba(122, 163, 213, 0.4);
+  padding-left: 10px;
+}
+
+.territory-switcher {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(122, 163, 213, 0.2);
+}
+
+.territory-switcher h4 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7aa3d5;
+}
+
+.territory-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.territory-option.active {
+  border-color: #9bc4e2;
+  background-color: rgba(122, 163, 213, 0.28);
+  color: #eaf2fa;
+}
+
+.manifestations h4 {
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7aa3d5;
+}
+
+.left-behind-title {
+  margin-top: 20px !important;
+  color: #d9a05b !important;
+}
+
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-row.dimmed {
+  opacity: 0.75;
+}
+
+.muted {
+  font-size: 0.85rem;
+  color: rgba(184, 205, 224, 0.6);
+  font-style: italic;
+  margin: 0 0 8px;
+}

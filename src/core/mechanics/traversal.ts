@@ -3,7 +3,7 @@
  * Territory swaps with memory persistence rules
  */
 
-import { AnyCard, MemoryCard, TerritoryCard } from '../cards/types';
+import { AnyCard, MemoryCard, MemoryState, TerritoryCard } from '../cards/types';
 
 export type MemoryPersistence = 'stays' | 'travels' | 'transforms';
 
@@ -13,13 +13,21 @@ export type MemoryPersistence = 'stays' | 'travels' | 'transforms';
 export function evaluateMemoryPersistence(
   memory: AnyCard,
   _oldTerritory: TerritoryCard,
-  newTerritory: TerritoryCard
+  newTerritory: TerritoryCard,
+  /**
+   * The state of the specific copy in play, which may have been transformed
+   * away from what its definition started with.
+   */
+  currentState?: MemoryState
 ): MemoryPersistence {
   if (memory.type !== 'Memory') {
     return 'travels'; // Non-memories travel by default
   }
 
-  const memoryCard = memory as MemoryCard;
+  const definition = memory as MemoryCard;
+  const memoryCard: MemoryCard = currentState
+    ? { ...definition, memoryState: currentState }
+    : definition;
 
   // Explicit behavior
   if (memoryCard.traversalBehavior) {

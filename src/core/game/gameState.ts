@@ -1,17 +1,20 @@
 /**
- * Central Game State
- * Single source of truth for all game logic
+ * Central game state.
+ *
+ * Zones hold CardInstances, never definitions — see cards/cardRegistry.ts.
+ * Every function here is pure: it returns a new state and never mutates its
+ * argument, so the action log can replay a match from the start.
  */
 
-import { AnyCard, TerritoryCard } from '../cards/types';
+import { CardInstance } from '../cards/types';
 
 export type GamePhase =
-  | 'Awaken'      // Reactivate cards
-  | 'Memory'      // Draw/manage resources
-  | 'Movement'    // Stay or traverse territory
-  | 'Manifestation' // Play cards
-  | 'Action'      // Activate abilities/resonances
-  | 'Consequence'; // Resolve effects
+  | 'Awaken'
+  | 'Memory'
+  | 'Movement'
+  | 'Manifestation'
+  | 'Action'
+  | 'Consequence';
 
 export const PHASE_ORDER: GamePhase[] = [
   'Awaken',
@@ -22,30 +25,44 @@ export const PHASE_ORDER: GamePhase[] = [
   'Consequence',
 ];
 
-export interface Player {
-  id: string;
-  name: string;
-  hand: AnyCard[];
-  deck: AnyCard[];
-  discard: AnyCard[];
-  activeTerritory?: TerritoryCard;
-  linkedCards: Map<string, AnyCard[]>; // cardId -> linked cards
-  journeyProgress?: JourneyProgress;
-  resources?: {
-    vínculo?: number;
-    memoria?: number;
-    circulation?: number;
-  };
+/** What each phase lets a player do, beyond always being able to pass. */
+export const PHASE_ACTIONS: Record<GamePhase, string[]> = {
+  Awaken: [],
+  Memory: ['DrawCard'],
+  Movement: ['Traverse'],
+  Manifestation: ['PlayCard'],
+  Action: ['ActivateResonance', 'ActivatePlaceAction'],
+  Consequence: [],
+};
+
+export interface PlayerResources {
+  vinculo: number;
+  memoria: number;
+  circulacao: number;
 }
 
 export interface JourneyProgress {
   journeyId: string;
-  objectives: {
-    id: string;
-    description: string;
-    completed: boolean;
-  }[];
+  objectives: { id: string; description: string; completed: boolean }[];
   completed: boolean;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+
+  // Zones
+  deck: CardInstance[];
+  hand: CardInstance[];
+  /** Manifestations on the table, each linked to a territory or a legend. */
+  inPlay: CardInstance[];
+  discard: CardInstance[];
+  /** The player's own territory cards; exactly one is active at a time. */
+  territories: CardInstance[];
+  activeTerritoryId: string;
+
+  resources: PlayerResources;
+  journeyProgress?: JourneyProgress;
 }
 
 export interface GameState {
@@ -54,95 +71,87 @@ export interface GameState {
   turn: number;
   currentPlayerIndex: number;
   players: Player[];
-
-  // Shared zones
-  commonEvents: AnyCard[]; // Shared events on the table
-
-  // History for undo/replay
-  actionHistory: GameAction[];
-
-  // Game flags
+  log: LogEntry[];
+  /** Once-per-turn allowances, cleared when the turn passes. */
+  turnFlags: TurnFlags;
   isEnded: boolean;
-  winner?: string;
-  maxTurns?: number;
+  winnerId?: string;
+  maxTurns: number;
 }
 
-export type GameAction =
-  | { type: 'PlayCard'; playerId: string; card: AnyCard }
-  | { type: 'Traverse'; playerId: string; fromTerritory: TerritoryCard; toTerritory: TerritoryCard }
-  | { type: 'ActivateResonance'; playerId: string; cardId: string; resonanceEffect: string }
-  | { type: 'ActivateAbility'; playerId: string; cardId: string }
-  | { type: 'PassPhase'; playerId: string }
-  | { type: 'EndTurn'; playerId: string }
-  | { type: 'DrawCard'; playerId: string; card: AnyCard }
-  | { type: 'Discard'; playerId: string; card: AnyCard }
-  | { type: 'TransformCard'; playerId: string; cardId: string; newState: string };
-
 /**
- * Creates initial game state
+ * Guards the actions the GDD limits to one per turn. Without these, Memory
+ * would draw a whole deck and Movement would make Travessia free.
  */
-export function createGameState(players: Player[]): GameState {
+export interface TurnFlags {
+  hasDrawn: boolean;
+  hasTraversed: boolean;
+}
+
+export const FRESH_TURN_FLAGS: TurnFlags = { hasDrawn: false, hasTraversed: false };
+
+export interface LogEntry {
+  turn: number;
+  phase: GamePhase;
+  playerId: string;
+  message: string;
+}
+
+export function createGameState(players: Player[], maxTurns = 20): GameState {
   return {
     id: `game_${Date.now()}`,
     phase: 'Awaken',
     turn: 1,
     currentPlayerIndex: 0,
     players,
-    commonEvents: [],
-    actionHistory: [],
+    log: [],
+    turnFlags: { ...FRESH_TURN_FLAGS },
     isEnded: false,
-    maxTurns: 20,
+    maxTurns,
   };
 }
 
-/**
- * Get current active player
- */
 export function getCurrentPlayer(state: GameState): Player {
   return state.players[state.currentPlayerIndex];
 }
 
-/**
- * Get next player index (circular)
- */
-export function getNextPlayerIndex(state: GameState): number {
-  return (state.currentPlayerIndex + 1) % state.players.length;
+export function getPlayer(state: GameState, playerId: string): Player | undefined {
+  return state.players.find((p) => p.id === playerId);
 }
 
-/**
- * Advance to next phase
- */
-export function advancePhase(state: GameState): GameState {
-  const currentIndex = PHASE_ORDER.indexOf(state.phase);
-  const isLastPhase = currentIndex === PHASE_ORDER.length - 1;
+export function activeTerritoryOf(player: Player): CardInstance | undefined {
+  return player.territories.find((t) => t.instanceId === player.activeTerritoryId);
+}
 
+/** Find an instance anywhere in a player's zones. */
+export function findInstance(
+  player: Player,
+  instanceId: string
+): CardInstance | undefined {
+  return (
+    player.hand.find((c) => c.instanceId === instanceId) ??
+    player.inPlay.find((c) => c.instanceId === instanceId) ??
+    player.deck.find((c) => c.instanceId === instanceId) ??
+    player.discard.find((c) => c.instanceId === instanceId) ??
+    player.territories.find((c) => c.instanceId === instanceId)
+  );
+}
+
+/** Replace one player in the state, leaving the others untouched. */
+export function updatePlayer(
+  state: GameState,
+  playerId: string,
+  update: (player: Player) => Player
+): GameState {
   return {
     ...state,
-    phase: isLastPhase ? 'Awaken' : PHASE_ORDER[currentIndex + 1],
+    players: state.players.map((p) => (p.id === playerId ? update(p) : p)),
   };
 }
 
-/**
- * End current turn and move to next player
- */
-export function endTurn(state: GameState): GameState {
-  const nextPlayerIndex = getNextPlayerIndex(state);
-  const isTurnComplete = nextPlayerIndex === 0;
-
+export function appendLog(state: GameState, playerId: string, message: string): GameState {
   return {
     ...state,
-    currentPlayerIndex: nextPlayerIndex,
-    turn: isTurnComplete ? state.turn + 1 : state.turn,
-    phase: 'Awaken', // Reset to first phase
-  };
-}
-
-/**
- * Add action to history (for replay/undo)
- */
-export function recordAction(state: GameState, action: GameAction): GameState {
-  return {
-    ...state,
-    actionHistory: [...state.actionHistory, action],
+    log: [...state.log, { turn: state.turn, phase: state.phase, playerId, message }],
   };
 }

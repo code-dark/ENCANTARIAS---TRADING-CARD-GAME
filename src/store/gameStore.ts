@@ -1,76 +1,54 @@
 /**
- * Game State Store (Zustand)
- * Manages all game state mutations
+ * Zustand store. It owns no rules — every change goes through applyAction, so
+ * the UI cannot reach a state the engine would reject.
  */
 
 import { create } from 'zustand';
-import {
-  GameState,
-  GameAction,
-  Player,
-  createGameState,
-  advancePhase,
-  endTurn,
-  recordAction,
-} from '../core/game/gameState';
+import { GameState } from '../core/game/gameState';
+import { GameAction } from '../core/game/actions';
+import { applyAction } from '../core/rules/turnResolver';
+import { validateAction } from '../core/game/validators';
 
 interface GameStore {
   gameState: GameState | null;
-  selectedCardId: string | null;
+  /** Why the last attempted action was refused, for the player to read. */
+  lastError: string | null;
+  selectedInstanceId: string | null;
 
-  // State mutations
-  initializeGame: (players: Player[]) => void;
-  nextPhase: () => void;
-  nextTurn: () => void;
-  recordGameAction: (action: GameAction) => void;
-  selectCard: (cardId: string | null) => void;
-  endGame: (winnerId: string) => void;
+  setGame: (state: GameState) => void;
+  dispatch: (action: GameAction) => void;
+  select: (instanceId: string | null) => void;
+  /** Ask the engine whether an action would be allowed, without taking it. */
+  check: (action: GameAction) => { valid: boolean; reason?: string };
 }
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   gameState: null,
-  selectedCardId: null,
+  lastError: null,
+  selectedInstanceId: null,
 
-  initializeGame: (players: Player[]) => {
-    const initialState = createGameState(players);
-    set({ gameState: initialState });
-  },
+  setGame: (state) => set({ gameState: state, lastError: null }),
 
-  nextPhase: () => {
-    set((state) => {
-      if (!state.gameState) return state;
-      return { gameState: advancePhase(state.gameState) };
+  dispatch: (action) => {
+    const current = get().gameState;
+    if (!current) return;
+
+    const { state, error } = applyAction(current, action);
+    set({
+      gameState: state,
+      lastError: error ?? null,
+      // Keep a rejected card selected so the player can try something else.
+      selectedInstanceId: error ? get().selectedInstanceId : null,
     });
   },
 
-  nextTurn: () => {
-    set((state) => {
-      if (!state.gameState) return state;
-      return { gameState: endTurn(state.gameState) };
-    });
-  },
+  select: (instanceId) => set({ selectedInstanceId: instanceId, lastError: null }),
 
-  recordGameAction: (action: GameAction) => {
-    set((state) => {
-      if (!state.gameState) return state;
-      return { gameState: recordAction(state.gameState, action) };
-    });
-  },
+  check: (action) => {
+    const current = get().gameState;
+    if (!current) return { valid: false, reason: 'No match in progress.' };
 
-  selectCard: (cardId: string | null) => {
-    set({ selectedCardId: cardId });
-  },
-
-  endGame: (winnerId: string) => {
-    set((state) => {
-      if (!state.gameState) return state;
-      return {
-        gameState: {
-          ...state.gameState,
-          isEnded: true,
-          winner: winnerId,
-        },
-      };
-    });
+    const result = validateAction(current, action);
+    return result.valid ? { valid: true } : { valid: false, reason: result.reason };
   },
 }));

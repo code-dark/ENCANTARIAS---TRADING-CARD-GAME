@@ -1,74 +1,83 @@
 import { useEffect } from 'react';
 import { useGameStore } from './store/gameStore';
-import { Player } from './core/game/gameState';
-import { territories } from './core/cards/data/territories';
-import { legends } from './core/cards/data/legends';
-import { memories } from './core/cards/data/memories';
-import { characters } from './core/cards/data/characters';
-import { events } from './core/cards/data/events';
+import { createGameState, Player } from './core/game/gameState';
+import { emptyPlayer } from './core/rules/turnResolver';
+import { createInstance, createInstances } from './core/cards/cardRegistry';
 import { getRandomJourney } from './core/cards/data/journeys';
 import GameScreen from './ui/screens/GameScreen';
 import './App.css';
 
+/**
+ * Two provisional decks for the vertical slice. They lean on different
+ * affinities so the two ways of playing are visible from turn one:
+ * water/underground memory versus institution/circulation.
+ */
+const DECK_WATER = [
+  'legend_serpent_enchanted',
+  'character_listener',
+  'memory_oral_serpent',
+  'memory_enraizada_fountain',
+  'memory_transmitida_paths',
+  'event_festival',
+];
+
+const DECK_INSTITUTION = [
+  'legend_lady_of_bells',
+  'legend_keeper_of_paths',
+  'character_mediator',
+  'memory_territorial_bells',
+  'memory_institutional_bells',
+  'memory_midiatic_circulating',
+];
+
+function buildPlayer(
+  id: string,
+  name: string,
+  deckList: string[],
+  territoryIds: string[]
+): Player {
+  const player = emptyPlayer(id, name);
+
+  player.territories = territoryIds.map((t) => createInstance(t, id));
+  player.activeTerritoryId = player.territories[0].instanceId;
+
+  const cards = createInstances(deckList, id);
+  player.hand = cards.slice(0, 3);
+  player.deck = cards.slice(3);
+
+  const journey = getRandomJourney();
+  player.journeyProgress = {
+    journeyId: journey.id,
+    objectives: journey.objectives.map((o) => ({ ...o })),
+    completed: false,
+  };
+
+  return player;
+}
+
 function App() {
-  const { gameState, initializeGame } = useGameStore();
+  const { gameState, setGame } = useGameStore();
 
   useEffect(() => {
-    // Initialize game with test decks
-    const testDeck = [
-      territories[0],
-      territories[1],
-      legends[0],
-      legends[1],
-      characters[0],
-      memories[0],
-      memories[1],
-      memories[2],
-      events[0],
-    ];
+    const p1 = buildPlayer('p1', 'Jogador 1', DECK_WATER, [
+      'territorio_fonte_ribeirao',
+      'territorio_escadaria_reviver',
+    ]);
+    const p2 = buildPlayer('p2', 'Jogador 2', DECK_INSTITUTION, [
+      'territorio_igreja_se',
+      'territorio_ceprama',
+    ]);
 
-    const player1: Player = {
-      id: 'player1',
-      name: 'Player 1',
-      hand: testDeck.slice(0, 3),
-      deck: testDeck.slice(3),
-      discard: [],
-      activeTerritory: territories[0],
-      linkedCards: new Map(),
-      journeyProgress: {
-        journeyId: getRandomJourney().id,
-        objectives: [],
-        completed: false,
-      },
-      resources: { vínculo: 0, memoria: 0, circulation: 0 },
-    };
-
-    const player2: Player = {
-      id: 'player2',
-      name: 'Player 2',
-      hand: testDeck.slice(0, 3),
-      deck: testDeck.slice(3),
-      discard: [],
-      activeTerritory: territories[2],
-      linkedCards: new Map(),
-      journeyProgress: {
-        journeyId: getRandomJourney().id,
-        objectives: [],
-        completed: false,
-      },
-      resources: { vínculo: 0, memoria: 0, circulation: 0 },
-    };
-
-    initializeGame([player1, player2]);
-  }, [initializeGame]);
+    setGame(createGameState([p1, p2]));
+  }, [setGame]);
 
   if (!gameState) {
-    return <div className="app loading">Initializing ENCANTARIAS...</div>;
+    return <div className="app loading">Preparando a mesa…</div>;
   }
 
   return (
     <div className="app">
-      <GameScreen gameState={gameState} />
+      <GameScreen />
     </div>
   );
 }

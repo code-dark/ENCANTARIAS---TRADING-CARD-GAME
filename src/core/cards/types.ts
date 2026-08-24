@@ -158,3 +158,29 @@ export interface CardZone {
   cards: AnyCard[];
   isPublic: boolean;
 }
+
+/**
+ * A physical copy of a card in play.
+ *
+ * Card definitions (AnyCard above) are immutable shared data — two players can
+ * hold the same definition. Everything that varies per copy lives here, so
+ * exhausting one player's Serpent never touches another copy of it.
+ */
+export interface CardInstance {
+  instanceId: string;
+  cardId: string;
+  ownerId: string;
+
+  /** Spent this turn; cleared during Awaken. */
+  exhausted: boolean;
+
+  /** Vínculo, Circulação, Eco… keyed by name so new markers need no type change. */
+  counters: Record<string, number>;
+
+  /** Instance-level overrides of the definition's starting values. */
+  memoryState?: MemoryState;
+  transformationState?: TransformationState;
+
+  /** instanceId of the card this one is linked to (a Legend, or the Territory). */
+  linkedTo?: string;
+}
