@@ -200,10 +200,34 @@ export interface EventCard extends Card {
   duration?: 'instant' | 'persistent' | 'until_traversal';
 }
 
+/**
+ * What kind of material support this Object is. Open on purpose: a new kind of
+ * record should not require a new card type.
+ */
+export type ArtifactSubtype = 'storage' | 'document' | 'photograph';
+
 export interface ArtifactCard extends Card {
   type: 'Artifact';
-  linkedTo?: string; // Which card/territory it modifies
-  modifier?: string; // What it modifies
+  subtype: ArtifactSubtype;
+
+  /**
+   * For 'storage': how many Memories it holds. A stored Memory is out of
+   * circulation — it keeps its place in the game but stops taking part in
+   * Ressonância, which is the whole tension the object embodies.
+   */
+  capacity?: number;
+
+  /**
+   * Origins this object opens onto. An object never creates a Memory; it is
+   * access to one that already exists in the world.
+   */
+  accessSources?: string[];
+
+  /** Alternative reach: any Memory carrying these tags, in the current place. */
+  accessTags?: string[];
+
+  linkedTo?: string;
+  modifier?: string;
   effect?: string;
 }
 

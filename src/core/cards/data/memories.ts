@@ -130,6 +130,30 @@ export const memories: MemoryCard[] = [
     transformationOn: 'Decontextualized',
     effect: 'Gain resources for each Circulation marker. Loses Vínculo.',
   },
+
+  {
+    id: 'memory_beira_mar_imagem',
+    type: 'Memory',
+    name: 'Imagem Recorrente da Beira-Mar',
+    memoryState: 'Media',
+    discovery: {
+      // Reached through a record that points at the place, not by standing there.
+      via: ['artifact'],
+    },
+    affinities: ['City', 'Circulation', 'Memory'],
+    sources: ['beira_mar'],
+    tags: ['beira_mar', 'fotografia', 'midia', 'circulacao'],
+    traversalBehavior: 'travels',
+    cost: 0,
+    // [PROVISIONAL — REQUER VALIDAÇÃO CULTURAL/HISTÓRICA]
+    // Deliberately a claim about the circulation of images, not about any
+    // community, practice or event at the Beira-Mar. What that shoreline holds
+    // is research, not design.
+    description:
+      '[PROVISIONAL] Uma vista que retorna em cartões, jornais e álbuns. Circula mais do que é lembrada.',
+    flavor: 'A imagem viaja sozinha, e chega sem o que a cercava.',
+    effect: 'Só pode ser alcançada por um registro que aponte para a Beira-Mar.',
+  },
 ];
 
 export function getMemoryById(id: string): MemoryCard | undefined {

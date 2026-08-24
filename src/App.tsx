@@ -16,20 +16,24 @@ import './App.css';
  * Lendas, Personagens, Acontecimentos. Memories are not brought, they are
  * found, so they live in the world pool below.
  */
+// Order matters: the first three are the opening hand. Each deck opens with a
+// Personagem to listen with and something cheap to play on turn one.
 const DECK_WATER = [
-  'legend_serpent_enchanted',
   'character_listener',
+  'objeto_caixa_recordacoes',
+  'legend_serpent_enchanted',
   'character_wanderer',
   'event_festival',
   'event_forgetting',
 ];
 
 const DECK_INSTITUTION = [
-  'legend_lady_of_bells',
-  'legend_keeper_of_paths',
   'character_mediator',
+  'objeto_recorte_jornal',
+  'legend_lady_of_bells',
+  'objeto_fotografia_beira_mar',
+  'legend_keeper_of_paths',
   'event_institutional_embrace',
-  'event_transformation_wave',
 ];
 
 /**
@@ -43,6 +47,7 @@ const WORLD_MEMORIES = [
   'memory_transmitida_paths',
   'memory_institutional_bells',
   'memory_midiatic_circulating',
+  'memory_beira_mar_imagem',
 ];
 
 function buildPlayer(

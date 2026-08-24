@@ -249,3 +249,57 @@
 .territory-option:disabled .travessia-cost {
   opacity: 0.55;
 }
+
+/* --- Objects: kept versus in circulation --- */
+
+.table-card,
+.kept-card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: stretch;
+}
+
+button.tiny {
+  padding: 3px 6px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.containers {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(217, 160, 91, 0.28);
+}
+
+.containers > h4 {
+  color: #d9a05b !important;
+}
+
+.container-slot {
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border: 1px dashed rgba(217, 160, 91, 0.45);
+  border-radius: 5px;
+  background-color: rgba(217, 160, 91, 0.06);
+}
+
+.container-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.container-head strong {
+  color: #f0d0a0;
+  font-size: 0.92rem;
+}
+
+.container-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #d9a05b;
+}

@@ -191,6 +191,45 @@ filtering, default and explicit territory origins, resonance-as-origin, unknown
 origins returning empty rather than failing, multi-origin Memories, and two data
 integrity checks (every Memory names an origin; every Território carries tags).
 
+### Objects: the material supports of memory
+
+Three Objects, in the three categories the spec names, plus the rule that makes
+them mean something.
+
+**Storage — Caixa de Recordações (capacity 2).** A kept Memory points at the
+container instead of at the Território. That single link change is what takes
+it out of circulation: Ressonância reads the table, and the table is what is
+linked to the active Território, so exclusion follows from the structure rather
+than from a rule that has to remember to apply it. `preservação × circulação`
+is a real choice — the safest place for a Memory is also the place where it
+does nothing. `RetrieveMemory` brings it back, so keeping is never a trap.
+
+**Document — Recorte de Jornal.** Reaches a Memory tagged `midia` whose origins
+include the Território the player is standing in. Reach bounded by place.
+
+**Photograph — Fotografia da Beira-Mar.** Names the origin `beira_mar` and
+reaches a Memory of a place the player is *not* standing in. This is the case
+that shows why sources are addressable strings rather than territory ids.
+
+An Object never creates a Memory. When the world holds no answer, the object
+plays and nothing is added — there is a test asserting exactly that.
+
+**A board distinction that would have been a bug.** A kept Memory links to the
+container, so it would have rendered under "Ficaram para trás" — as if a
+Travessia had abandoned it. The board now separates three states: on the table
+here, kept in an object, and left behind in another Território. Those are three
+different things and the player has to be able to tell them apart.
+
+Tests: 12 new (68 total) covering keeping, out-of-circulation, capacity refusal,
+non-Memory and non-container refusals, retrieval, retrieving what was never
+kept, a photograph reaching across places, a clipping bounded by place, and an
+object creating nothing when the world is empty.
+
+**Not included: no sacred, ritual or restricted object was invented.** The three
+here are generic material categories — a container, a clipping, a photograph.
+The Beira-Mar Memory is marked `[PROVISIONAL]` and deliberately asserts only
+that images circulate, not anything about that shoreline's practices or people.
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,

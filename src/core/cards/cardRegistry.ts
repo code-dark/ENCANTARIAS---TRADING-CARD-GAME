@@ -12,6 +12,7 @@ import { legends } from './data/legends';
 import { characters } from './data/characters';
 import { memories } from './data/memories';
 import { events } from './data/events';
+import { artifacts } from './data/artifacts';
 
 export const ALL_CARDS: AnyCard[] = [
   ...territories,
@@ -19,6 +20,7 @@ export const ALL_CARDS: AnyCard[] = [
   ...characters,
   ...memories,
   ...events,
+  ...artifacts,
 ];
 
 const BY_ID = new Map<string, AnyCard>(ALL_CARDS.map((c) => [c.id, c]));

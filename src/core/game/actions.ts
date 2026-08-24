@@ -9,6 +9,8 @@ export type GameAction =
   | { type: 'Traverse'; playerId: string; territoryInstanceId: string }
   | { type: 'ActivateResonance'; playerId: string; instanceId: string }
   | { type: 'Explore'; playerId: string }
+  | { type: 'StoreMemory'; playerId: string; memoryInstanceId: string; containerInstanceId: string }
+  | { type: 'RetrieveMemory'; playerId: string; memoryInstanceId: string }
   | { type: 'PassPhase'; playerId: string };
 
 export type ActionType = GameAction['type'];

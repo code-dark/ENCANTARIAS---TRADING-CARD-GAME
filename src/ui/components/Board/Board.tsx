@@ -2,6 +2,7 @@ import { Player, activeTerritoryOf } from '../../../core/game/gameState';
 import { getCard } from '../../../core/cards/cardRegistry';
 import { TerritoryCard } from '../../../core/cards/types';
 import { traversalCost } from '../../../core/mechanics/traversal';
+import { isStorage, storedIn, capacityOf, openContainers } from '../../../core/mechanics/objects';
 import { useGameStore } from '../../../store/gameStore';
 import CardVisual from '../Card/CardVisual';
 import './Board.css';
@@ -21,9 +22,20 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
 
   const territory = getCard(active.cardId) as TerritoryCard;
 
-  // Manifestations still rooted in the territory the player left behind.
+  const containers = player.inPlay.filter(isStorage);
+  const containerIds = new Set(containers.map((c) => c.instanceId));
+  const inAContainer = (c: { linkedTo?: string }) =>
+    !!c.linkedTo && containerIds.has(c.linkedTo);
+
   const here = player.inPlay.filter((c) => c.linkedTo === active.instanceId);
-  const elsewhere = player.inPlay.filter((c) => c.linkedTo !== active.instanceId);
+
+  // Kept in an object is not the same as left behind by a Travessia: one is a
+  // choice to preserve, the other is what the ground would not release.
+  const elsewhere = player.inPlay.filter(
+    (c) => c.linkedTo !== active.instanceId && !inAContainer(c)
+  );
+
+  const spaceLeft = openContainers(player.inPlay);
 
   return (
     <div className="board">
@@ -92,18 +104,101 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
             };
             const verdict = isActivePlayer ? check(action) : { valid: false, reason: undefined };
 
+            const isMemory = getCard(c.cardId).type === 'Memory';
+            const box = spaceLeft[0];
+            const store = box && {
+              type: 'StoreMemory' as const,
+              playerId: player.id,
+              memoryInstanceId: c.instanceId,
+              containerInstanceId: box.instanceId,
+            };
+            const storeVerdict =
+              isActivePlayer && store ? check(store) : { valid: false, reason: undefined };
+
             return (
-              <CardVisual
-                key={c.instanceId}
-                definition={getCard(c.cardId)}
-                instance={c}
-                size="small"
-                disabledReason={verdict.valid ? undefined : verdict.reason}
-                onClick={verdict.valid ? () => dispatch(action) : undefined}
-              />
+              <div key={c.instanceId} className="table-card">
+                <CardVisual
+                  definition={getCard(c.cardId)}
+                  instance={c}
+                  size="small"
+                  disabledReason={verdict.valid ? undefined : verdict.reason}
+                  onClick={verdict.valid ? () => dispatch(action) : undefined}
+                />
+                {isMemory && store && (
+                  <button
+                    className="tiny"
+                    disabled={!storeVerdict.valid}
+                    title={
+                      storeVerdict.valid
+                        ? `Guardar em ${getCard(box.cardId).name} — sai de circulação`
+                        : storeVerdict.reason
+                    }
+                    onClick={() => dispatch(store)}
+                  >
+                    Guardar
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>
+
+        {containers.length > 0 && (
+          <div className="containers">
+            <h4>Guardado</h4>
+            {containers.map((box) => {
+              const kept = storedIn(player.inPlay, box.instanceId);
+              const def = getCard(box.cardId);
+
+              return (
+                <div key={box.instanceId} className="container-slot">
+                  <div className="container-head">
+                    <strong>{def.name}</strong>
+                    <span className="container-count">
+                      {kept.length}/{capacityOf(box)}
+                    </span>
+                  </div>
+
+                  {kept.length === 0 ? (
+                    <p className="muted">Vazia.</p>
+                  ) : (
+                    <div className="card-row">
+                      {kept.map((c) => {
+                        const retrieve = {
+                          type: 'RetrieveMemory' as const,
+                          playerId: player.id,
+                          memoryInstanceId: c.instanceId,
+                        };
+                        const verdict = isActivePlayer
+                          ? check(retrieve)
+                          : { valid: false, reason: undefined };
+
+                        return (
+                          <div key={c.instanceId} className="kept-card">
+                            <CardVisual
+                              definition={getCard(c.cardId)}
+                              instance={c}
+                              size="small"
+                              disabledReason="Fora de circulação enquanto guardada."
+                            />
+                            <button
+                              className="tiny"
+                              disabled={!verdict.valid}
+                              title={verdict.valid ? 'Devolver à circulação' : verdict.reason}
+                              onClick={() => dispatch(retrieve)}
+                            >
+                              Retirar
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {elsewhere.length > 0 && (
           <>

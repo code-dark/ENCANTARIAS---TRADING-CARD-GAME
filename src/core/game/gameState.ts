@@ -39,7 +39,7 @@ export const PHASE_ACTIONS: Record<GamePhase, string[]> = {
   Memoria: ['DrawCard'],
   Travessia: ['Traverse'],
   Manifestacao: ['PlayCard'],
-  Acao: ['ActivateResonance', 'Explore'],
+  Acao: ['ActivateResonance', 'Explore', 'StoreMemory', 'RetrieveMemory'],
   Acontecimento: [],
   Encerramento: [],
 };

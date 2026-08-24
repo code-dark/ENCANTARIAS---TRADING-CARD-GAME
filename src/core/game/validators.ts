@@ -17,6 +17,7 @@ import { getCard } from '../cards/cardRegistry';
 import { TerritoryCard } from '../cards/types';
 import { traversalCost } from '../mechanics/traversal';
 import { bestListener, escutaOf, findByExploring } from '../mechanics/memory';
+import { isStorage, remainingSpace, storedIn } from '../mechanics/objects';
 
 export function validateAction(state: GameState, action: GameAction): ValidationResult {
   if (state.isEnded) {
@@ -134,6 +135,57 @@ export function validateAction(state: GameState, action: GameAction): Validation
       return VALID;
     }
 
+    case 'StoreMemory': {
+      const memory = current.inPlay.find((c) => c.instanceId === action.memoryInstanceId);
+      if (!memory) {
+        return invalid('That Memória is not on your table.');
+      }
+      if (getCard(memory.cardId).type !== 'Memory') {
+        return invalid('Only a Memória can be kept in an object.');
+      }
+
+      const container = current.inPlay.find(
+        (c) => c.instanceId === action.containerInstanceId
+      );
+      if (!container) {
+        return invalid('That object is not on your table.');
+      }
+      if (!isStorage(container)) {
+        return invalid(`${getCard(container.cardId).name} does not keep Memórias.`);
+      }
+      if (memory.linkedTo === container.instanceId) {
+        return invalid('That Memória is already kept there.');
+      }
+      if (remainingSpace(current.inPlay, container) <= 0) {
+        const def = getCard(container.cardId);
+        return invalid(
+          `${def.name} is full (${storedIn(current.inPlay, container.instanceId).length}).`
+        );
+      }
+
+      return VALID;
+    }
+
+    case 'RetrieveMemory': {
+      const memory = current.inPlay.find((c) => c.instanceId === action.memoryInstanceId);
+      if (!memory) {
+        return invalid('That Memória is not on your table.');
+      }
+
+      const container = memory.linkedTo
+        ? current.inPlay.find((c) => c.instanceId === memory.linkedTo)
+        : undefined;
+      if (!container || !isStorage(container)) {
+        return invalid('That Memória is not being kept in an object.');
+      }
+
+      if (!activeTerritoryOf(current)) {
+        return invalid('You need an active Território to bring it back out.');
+      }
+
+      return VALID;
+    }
+
     case 'ActivateResonance': {
       const card = current.inPlay.find((c) => c.instanceId === action.instanceId);
       if (!card) {
@@ -162,6 +214,10 @@ function labelFor(type: GameAction['type']): string {
       return 'Travessia';
     case 'Explore':
       return 'Exploring the Território';
+    case 'StoreMemory':
+      return 'Keeping a Memória';
+    case 'RetrieveMemory':
+      return 'Bringing a Memória back out';
     case 'ActivateResonance':
       return 'Ressonância';
     default:

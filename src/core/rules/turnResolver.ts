@@ -22,6 +22,8 @@ import { CardInstance, TerritoryCard } from '../cards/types';
 import { evaluateMemoryPersistence, traversalCost } from '../mechanics/traversal';
 import { detectResonances } from '../mechanics/resonance';
 import { bestListener, escutaOf, findByExploring, findByResonance } from '../mechanics/memory';
+import { findByObject } from '../mechanics/objects';
+import { ArtifactCard } from '../cards/types';
 
 export interface ApplyResult {
   state: GameState;
@@ -46,6 +48,14 @@ export function applyAction(state: GameState, action: GameAction): ApplyResult {
       return { state: resolveResonance(state, action.playerId, action.instanceId) };
     case 'Explore':
       return { state: resolveExplore(state, action.playerId) };
+    case 'StoreMemory':
+      return {
+        state: resolveStore(
+          state, action.playerId, action.memoryInstanceId, action.containerInstanceId
+        ),
+      };
+    case 'RetrieveMemory':
+      return { state: resolveRetrieve(state, action.playerId, action.memoryInstanceId) };
     case 'PassPhase':
       return { state: advancePhase(state) };
   }
@@ -158,7 +168,32 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
       ? 'adds it to their Territórios'
       : 'manifests it';
 
-  return appendLog(next, playerId, `${player.name} plays ${def.name} and ${where}.`);
+  let out = appendLog(next, playerId, `${player.name} plays ${def.name} and ${where}.`);
+
+  // A document or a record reaches a Memory that already exists in the world.
+  // It never creates one: if nothing answers, nothing is added.
+  if (def.type === 'Artifact') {
+    const territory = activeTerritoryOf(out.players.find((p) => p.id === playerId)!);
+    if (territory) {
+      const reached = findByObject(
+        out.memoryPool,
+        def as ArtifactCard,
+        getCard(territory.cardId) as TerritoryCard
+      )[0];
+
+      if (reached) {
+        out = claimMemory(out, playerId, reached, territory.instanceId);
+        out = appendLog(
+          out, playerId,
+          `${def.name} reaches ${getCard(reached.cardId).name}.`
+        );
+      } else if (def.accessSources?.length || def.accessTags?.length) {
+        out = appendLog(out, playerId, `${def.name} points at nothing still unfound.`);
+      }
+    }
+  }
+
+  return out;
 }
 
 /**
@@ -273,6 +308,59 @@ function resolveExplore(state: GameState, playerId: string): GameState {
     playerId,
     `${getCard(listener.cardId).name} listens in ${territoryDef.name} and recovers ` +
       `${getCard(found.cardId).name}.`
+  );
+}
+
+/**
+ * Keeping a Memória in an object. It stays in the game and keeps its state,
+ * but it now points at the container rather than at the Território, which is
+ * exactly what takes it out of circulation: Ressonância reads the table.
+ */
+function resolveStore(
+  state: GameState,
+  playerId: string,
+  memoryInstanceId: string,
+  containerInstanceId: string
+): GameState {
+  const player = state.players.find((p) => p.id === playerId)!;
+  const memory = player.inPlay.find((c) => c.instanceId === memoryInstanceId)!;
+  const container = player.inPlay.find((c) => c.instanceId === containerInstanceId)!;
+
+  const next = updatePlayer(state, playerId, (p) => ({
+    ...p,
+    inPlay: p.inPlay.map((c) =>
+      c.instanceId === memoryInstanceId ? { ...c, linkedTo: containerInstanceId } : c
+    ),
+  }));
+
+  return appendLog(
+    next, playerId,
+    `${getCard(memory.cardId).name} is kept in ${getCard(container.cardId).name}, ` +
+      `protected and out of circulation.`
+  );
+}
+
+/** Taking a Memória back out, into the Território the player is standing in. */
+function resolveRetrieve(
+  state: GameState,
+  playerId: string,
+  memoryInstanceId: string
+): GameState {
+  const player = state.players.find((p) => p.id === playerId)!;
+  const memory = player.inPlay.find((c) => c.instanceId === memoryInstanceId)!;
+  const territory = activeTerritoryOf(player)!;
+
+  const next = updatePlayer(state, playerId, (p) => ({
+    ...p,
+    inPlay: p.inPlay.map((c) =>
+      c.instanceId === memoryInstanceId ? { ...c, linkedTo: territory.instanceId } : c
+    ),
+  }));
+
+  return appendLog(
+    next, playerId,
+    `${getCard(memory.cardId).name} returns to circulation in ` +
+      `${getCard(territory.cardId).name}.`
   );
 }
 
