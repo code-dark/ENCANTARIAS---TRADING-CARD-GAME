@@ -1,0 +1,74 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0a0e27;
+  color: #e0e0e0;
+}
+
+body {
+  overflow: hidden;
+}
+
+/* Typography */
+h1, h2, h3 { font-weight: 600; }
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.25rem; }
+
+/* Cards */
+.card {
+  background: linear-gradient(135deg, #1a1f3a 0%, #0f1629 100%);
+  border: 2px solid #2a3f5f;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #4a6fa5;
+  box-shadow: 0 8px 20px rgba(74, 111, 165, 0.3);
+}
+
+.card.selected {
+  border-color: #7aa3d5;
+  box-shadow: 0 0 15px rgba(122, 163, 213, 0.5);
+}
+
+/* Buttons */
+button {
+  background-color: #2a3f5f;
+  color: #e0e0e0;
+  border: 1px solid #4a6fa5;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  background-color: #3a4f7f;
+  border-color: #6a9fd5;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
