@@ -111,6 +111,72 @@ export const legends: LegendCard[] = [
       },
     ],
   },
+
+  {
+    id: 'legend_carruagem_ana_jansen',
+    type: 'Legend',
+    name: 'Carruagem de Ana Jansen',
+    affinities: ['City', 'Movement', 'History', 'Mystery'],
+    tags: ['aparicao', 'noite', 'deslocamento', 'memoria_urbana', 'ana_jansen'],
+    cost: 3,
+    linkedState: 'Manifestation',
+    vinculo: 1,
+    presence: 3,
+    mystery: 4,
+    // [PROVISIONAL — REQUER VALIDAÇÃO CULTURAL/HISTÓRICA]
+    // The card is about the apparition as it circulates in the city, not a
+    // biography. Ana Jansen was a real historical figure and the record of her
+    // life — including its violence — is research, not design. See the note in
+    // docs/PROGRESS.md before this card is finalised.
+    description:
+      '[PROVISIONAL] Uma carruagem que atravessa a cidade à noite. A narrativa circula muito além de onde começou.',
+    flavor: 'Ouve-se primeiro. Depois já passou.',
+
+    resonanceManifestations: {
+      'territorio_cemiterio_gaviao': {
+        name: 'Parada do Cortejo',
+        ability: 'A passagem encontra um ponto de parada e abre o Território.',
+      },
+      'territorio_escadaria_reviver': {
+        name: 'Rumor em Trânsito',
+        ability: 'Circula com facilidade: a narrativa ganha alcance ao se deslocar.',
+      },
+    },
+
+    transformations: [
+      {
+        trigger: 'Circulation > 3',
+        toState: 'Popularized',
+        newAbility: 'Reconhecida em toda a cidade; perde o que a prendia a um lugar.',
+      },
+    ],
+  },
+
+  {
+    id: 'legend_mula_carruagem_ana_jansen',
+    type: 'Legend',
+    // Named for its context on purpose: this is the manifestation tied to this
+    // narrative, not a claim that every Brazilian Mula-sem-Cabeça is the same
+    // tradition.
+    name: 'Mula-sem-Cabeça — Carruagem de Ana Jansen',
+    affinities: ['Movement', 'Mystery', 'City'],
+    tags: ['aparicao', 'carruagem_ana_jansen', 'cortejo', 'noite'],
+    cost: 2,
+    linkedState: 'Manifestation',
+    vinculo: 1,
+    presence: 3,
+    mystery: 3,
+    description:
+      '[PROVISIONAL] A montaria do cortejo, nomeada por este contexto e não por todos.',
+    flavor: 'Vem com a carruagem, e só com ela.',
+
+    resonanceManifestations: {
+      'territorio_cemiterio_gaviao': {
+        name: 'Montaria do Cortejo',
+        ability: 'Junto da Carruagem, compõe a passagem completa.',
+      },
+    },
+  },
 ];
 
 export function getLegendById(id: string): LegendCard | undefined {

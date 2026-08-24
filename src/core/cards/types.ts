@@ -92,6 +92,19 @@ export interface TerritoryCard extends Card {
     effect: string;
   }>;
 
+  /**
+   * Ressonâncias that need several cards present at once. A single card in the
+   * right place is one thing; a gathering is another, and some layers of a
+   * place only open to the whole gathering.
+   */
+  conjunctions?: Array<{
+    id: string;
+    name: string;
+    /** Every one of these card ids must be manifested here. */
+    requires: string[];
+    effect: string;
+  }>;
+
   possibleEvents?: string[]; // Event card IDs
 
   /**

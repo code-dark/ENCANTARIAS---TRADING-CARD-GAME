@@ -30,10 +30,10 @@ const DECK_WATER = [
 const DECK_INSTITUTION = [
   'character_mediator',
   'objeto_recorte_jornal',
-  'legend_lady_of_bells',
+  'legend_carruagem_ana_jansen',
+  'legend_mula_carruagem_ana_jansen',
   'objeto_fotografia_beira_mar',
-  'legend_keeper_of_paths',
-  'event_institutional_embrace',
+  'legend_lady_of_bells',
 ];
 
 /**
@@ -48,6 +48,7 @@ const WORLD_MEMORIES = [
   'memory_institutional_bells',
   'memory_midiatic_circulating',
   'memory_beira_mar_imagem',
+  'memory_cortejo_passagem',
 ];
 
 function buildPlayer(
@@ -85,9 +86,12 @@ function App() {
       'territorio_fonte_ribeirao',
       'territorio_escadaria_reviver',
     ]);
+    // Three Territórios: the cortejo needs somewhere to gather, and the extra
+    // choice is what makes Travessia a decision rather than a toggle.
     const p2 = buildPlayer('p2', 'Jogador 2', DECK_INSTITUTION, [
       'territorio_igreja_se',
       'territorio_ceprama',
+      'territorio_cemiterio_gaviao',
     ]);
 
     // Owned by the world, not by a player, until discovered.

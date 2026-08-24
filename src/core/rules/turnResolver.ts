@@ -20,8 +20,14 @@ import {
 import { getCard } from '../cards/cardRegistry';
 import { CardInstance, TerritoryCard } from '../cards/types';
 import { evaluateMemoryPersistence, traversalCost } from '../mechanics/traversal';
-import { detectResonances } from '../mechanics/resonance';
-import { bestListener, escutaOf, findByExploring, findByResonance } from '../mechanics/memory';
+import {
+  detectResonances,
+  detectConjunctions,
+  participantNames,
+} from '../mechanics/resonance';
+import {
+  bestListener, escutaOf, findByExploring, findByResonance, findBySourceId,
+} from '../mechanics/memory';
 import { findByObject } from '../mechanics/objects';
 import { ArtifactCard } from '../cards/types';
 
@@ -77,7 +83,61 @@ export function advancePhase(state: GameState): GameState {
   }
 
   const next = PHASE_ORDER[index + 1];
-  return { ...state, phase: next };
+  const moved: GameState = { ...state, phase: next };
+
+  // Encerramento reads what the turn produced rather than changing the world:
+  // gatherings that came together are recognised here.
+  return next === 'Encerramento' ? runEncerramento(moved) : moved;
+}
+
+/**
+ * Encerramento: recognise Ressonâncias that need a whole gathering.
+ *
+ * A conjunction fires once. The Território records which ones have already
+ * opened, so standing there with the same set every turn does not reopen it —
+ * that would be the infinite-Ressonância loop the GDD's QA section warns about.
+ */
+export function runEncerramento(state: GameState): GameState {
+  const player = getCurrentPlayer(state);
+  const territory = activeTerritoryOf(player);
+  if (!territory) return state;
+
+  const territoryDef = getCard(territory.cardId) as TerritoryCard;
+  const here = player.inPlay.filter((c) => c.linkedTo === territory.instanceId);
+
+  let next = state;
+
+  for (const match of detectConjunctions(here, territoryDef)) {
+    // Already opened here? Then it is part of the scenery now.
+    if (territory.counters[match.id]) continue;
+
+    next = updatePlayer(next, player.id, (p) => ({
+      ...p,
+      territories: p.territories.map((t) =>
+        t.instanceId === territory.instanceId
+          ? { ...t, counters: { ...t.counters, [match.id]: 1 } }
+          : t
+      ),
+      resources: { ...p.resources, vinculo: p.resources.vinculo + 1 },
+    }));
+
+    next = appendLog(
+      next, player.id,
+      `${match.name} forms in ${territoryDef.name} — ` +
+        `${participantNames(match).join(' + ')}. ${match.effect}`
+    );
+
+    // The gathering opens a layer nothing else reaches.
+    for (const memory of findBySourceId(next.memoryPool, match.id)) {
+      next = claimMemory(next, player.id, memory, territory.instanceId);
+      next = appendLog(
+        next, player.id,
+        `${match.name} uncovers ${getCard(memory.cardId).name}.`
+      );
+    }
+  }
+
+  return next;
 }
 
 export function endTurn(state: GameState): GameState {

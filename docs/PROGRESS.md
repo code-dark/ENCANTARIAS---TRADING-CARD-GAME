@@ -230,6 +230,50 @@ here are generic material categories — a container, a clipping, a photograph.
 The Beira-Mar Memory is marked `[PROVISIONAL]` and deliberately asserts only
 that images circulate, not anything about that shoreline's practices or people.
 
+### Cemitério do Gavião, the cortejo, and conjunction Ressonância
+
+**A Ressonância that needs a gathering.** Until now a Ressonância was one card
+in the right place. `Cortejo Maldito` needs three things at once — Carruagem de
+Ana Jansen, Mula-sem-Cabeça — Carruagem de Ana Jansen, and Cemitério do Gavião —
+so `TerritoryCard.conjunctions` declares sets that must all be manifested here,
+and `detectConjunctions` reads the table.
+
+Its effect is structural rather than numeric, as the spec asks: the gathering
+opens a layer of the place that nothing else reaches. `A Passagem Ouvida` is
+gated behind `ressonancia_cortejo_maldito` and no amount of Escuta finds it.
+
+**This gives Encerramento a job.** The phase was split out to "read what the
+change produced", and that is now literally what it does: conjunctions are
+recognised there. Each one fires **once** — the Território records it in its
+counters — so standing on the same table every turn does not reopen it. That is
+the infinite-Ressonância loop the GDD's QA section warns about, closed by
+construction and covered by a test.
+
+A participant kept in a Caixa is not present at the gathering. That falls out of
+the storage model rather than needing a rule, and there is a test for it.
+
+**The map problem improved on its own.** Cemitério do Gavião shares `Memory`
+with Fonte do Ribeirão, so the spring is no longer an island: it now has one
+cheap neighbour. This happened *without* editing any existing place's
+affinities, which is what was refused earlier for balance reasons. The map is
+now a path — Fonte — Cemitério — {Igreja, Escadaria} — CEPRAMA — with the spring
+and the market at opposite ends. CEPRAMA ↔ Cemitério remains 2.
+
+Tests: 10 new (78 total) covering partial gatherings, the full gathering, the
+gated Memory, firing once across a full round trip, a Território with no
+conjunction declared, a participant kept in an object, order independence, and
+the new map connectivity.
+
+**Open cultural question — Ana Jansen.** Ana Jansen was a real historical
+figure, and the record of her life includes documented violence. The card here
+is deliberately about the apparition *as it circulates in the city* and asserts
+nothing biographical, with everything marked `[PROVISIONAL]`. But presenting her
+name as a collectible Lenda without that history is itself a choice, and it is
+the author's to make, not the implementation's. This is the same reasoning that
+kept the enslaved coachman out of the card set: representing a fantastic
+apparition is not the same act as turning a person subjected to historical
+violence into a collectible unit. Flagged here rather than silently resolved.
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,

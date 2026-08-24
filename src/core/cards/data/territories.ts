@@ -156,6 +156,58 @@ export const territories: TerritoryCard[] = [
       },
     ],
   },
+
+  {
+    id: 'territorio_cemiterio_gaviao',
+    type: 'Territory',
+    name: 'Cemitério do Gavião',
+    category: 'Cemetery',
+    affinities: ['History', 'City', 'Memory'],
+    tags: ['cemiterio', 'noite', 'memoria_urbana', 'aparicao', 'urbano'],
+    memorySources: ['territorio_cemiterio_gaviao'],
+    cost: 0,
+    // [PROVISIONAL — REQUER VALIDAÇÃO CULTURAL/HISTÓRICA]
+    // A burial ground in São Luís. Nothing about the practices, beliefs or
+    // communities attached to it is asserted here: that is research.
+    historicalLayer: '[PROVISIONAL] Cemitério urbano de São Luís.',
+    narrativeLayer:
+      '[PROVISIONAL] Território associado a narrativas noturnas de aparição que circulam na cidade.',
+    description:
+      'Um campo de repouso dentro da cidade. As narrativas noturnas encontram aqui um ponto de parada.',
+    flavor: 'A cidade continua do outro lado do muro.',
+
+    permanentEffect: {
+      description: 'Narrativas de aparição encontram passagem neste Território.',
+      effect: 'apparitionPassage',
+    },
+
+    placeAction: {
+      name: 'Percorrer as Alamedas',
+      description: 'Procure uma Memória urbana ligada a este Território.',
+      cost: 1,
+      effect: 'searchUrbanMemory',
+    },
+
+    resonances: [
+      {
+        affinity: 'Memory',
+        effect: 'Cartas de Memória encontram apoio neste Território.',
+      },
+    ],
+
+    conjunctions: [
+      {
+        id: 'ressonancia_cortejo_maldito',
+        name: 'Cortejo Maldito',
+        requires: [
+          'legend_carruagem_ana_jansen',
+          'legend_mula_carruagem_ana_jansen',
+        ],
+        effect:
+          'O cortejo se forma: a passagem abre uma camada do Território que nenhuma escuta alcança.',
+      },
+    ],
+  },
 ];
 
 export function getTerritoryById(id: string): TerritoryCard | undefined {

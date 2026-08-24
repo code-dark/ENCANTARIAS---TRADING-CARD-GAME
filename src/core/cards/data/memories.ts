@@ -154,6 +154,27 @@ export const memories: MemoryCard[] = [
     flavor: 'A imagem viaja sozinha, e chega sem o que a cercava.',
     effect: 'Só pode ser alcançada por um registro que aponte para a Beira-Mar.',
   },
+
+  {
+    id: 'memory_cortejo_passagem',
+    type: 'Memory',
+    name: 'A Passagem Ouvida',
+    memoryState: 'Oral',
+    discovery: {
+      // Opened only by the whole gathering. No amount of listening reaches it.
+      via: ['resonance'],
+    },
+    affinities: ['City', 'Memory', 'Mystery'],
+    sources: ['ressonancia_cortejo_maldito'],
+    tags: ['aparicao', 'noite', 'memoria_urbana', 'cortejo'],
+    traversalBehavior: 'travels',
+    cost: 1,
+    // [PROVISIONAL — REQUER VALIDAÇÃO CULTURAL/HISTÓRICA]
+    description:
+      '[PROVISIONAL] O relato de quem diz ter ouvido a passagem — nunca de quem diz tê-la visto.',
+    flavor: 'Todo mundo conhece alguém que ouviu.',
+    effect: 'Só se abre quando o cortejo se forma por inteiro.',
+  },
 ];
 
 export function getMemoryById(id: string): MemoryCard | undefined {

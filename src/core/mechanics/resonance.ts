@@ -3,8 +3,54 @@
  * Core differentiator: territory + legend = special manifestations
  */
 
-import { AnyCard, LegendCard, TerritoryCard, Affinity } from '../cards/types';
+import { AnyCard, CardInstance, LegendCard, TerritoryCard, Affinity } from '../cards/types';
 import { hasAffinityMatch, getSharedAffinities } from './affinity';
+import { getCard } from '../cards/cardRegistry';
+
+export interface ConjunctionMatch {
+  id: string;
+  name: string;
+  effect: string;
+  /** Instances that make up the gathering. */
+  participants: CardInstance[];
+}
+
+/**
+ * Ressonâncias that need a gathering rather than a single card.
+ *
+ * A Lenda in the right place is one relation; several arriving together is
+ * another, and some layers of a place open only to the whole set. Everything
+ * required must be manifested in this Território — a card kept in an object or
+ * left behind elsewhere is not present.
+ */
+export function detectConjunctions(
+  inPlayHere: CardInstance[],
+  territory: TerritoryCard
+): ConjunctionMatch[] {
+  if (!territory.conjunctions?.length) return [];
+
+  return territory.conjunctions.flatMap((conjunction) => {
+    const participants: CardInstance[] = [];
+
+    for (const required of conjunction.requires) {
+      const present = inPlayHere.find((c) => c.cardId === required);
+      if (!present) return []; // the gathering is incomplete
+      participants.push(present);
+    }
+
+    return [{
+      id: conjunction.id,
+      name: conjunction.name,
+      effect: conjunction.effect,
+      participants,
+    }];
+  });
+}
+
+/** Human-readable list of what forms a gathering, for the log. */
+export function participantNames(match: ConjunctionMatch): string[] {
+  return match.participants.map((p) => getCard(p.cardId).name);
+}
 
 export interface ResonanceMatch {
   cardId: string;
