@@ -15,6 +15,9 @@ export default function GameScreen() {
   const drawAction = { type: 'DrawCard' as const, playerId: player.id };
   const drawVerdict = check(drawAction);
 
+  const exploreAction = { type: 'Explore' as const, playerId: player.id };
+  const exploreVerdict = check(exploreAction);
+
   return (
     <div className="game-screen">
       <header className="game-header">
@@ -43,6 +46,11 @@ export default function GameScreen() {
             </div>
           </div>
 
+          <div className="world-pool" title="Memórias que ainda aguardam no mundo, sem dono">
+            <span>Memórias no mundo</span>
+            <strong>{gameState.memoryPool.length}</strong>
+          </div>
+
           {gameState.phase === 'Memory' && (
             <button
               className="primary"
@@ -50,7 +58,22 @@ export default function GameScreen() {
               title={drawVerdict.reason}
               onClick={() => dispatch(drawAction)}
             >
-              Recuperar Memória
+              Comprar carta
+            </button>
+          )}
+
+          {gameState.phase === 'Action' && (
+            <button
+              className="primary"
+              disabled={!exploreVerdict.valid}
+              title={
+                exploreVerdict.valid
+                  ? 'Um Personagem escuta o Território e recupera uma Memória'
+                  : exploreVerdict.reason
+              }
+              onClick={() => dispatch(exploreAction)}
+            >
+              Escutar o Território
             </button>
           )}
 

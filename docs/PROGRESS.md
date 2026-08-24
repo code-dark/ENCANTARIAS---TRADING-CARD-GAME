@@ -119,6 +119,46 @@ Escadaria) twice over for every crossing Player 2 makes at half price. This is
 a design decision for the author, not something to patch by editing the
 affinities of a real place: those are [PROVISIONAL] research-dependent content.
 
+### Memories are discovered, not drawn
+
+Memories no longer sit in a deck. They wait in a world pool owned by no player
+(`GameState.memoryPool`) and are reached by interacting with the world, so that
+memory is a relation and a discovery before it is a resource.
+
+Each Memory carries a `discovery` descriptor: which interactions can surface it
+(`explore` / `resonance` / `event` / `artifact`), which affinities the Território
+must carry, and — for listening — how much Escuta it takes to hear. Escuta scales
+inversely with how public the narrative already is: the Media memory asks 1, an
+Oral account asks 3, and the rooted layer of the spring cannot be heard at all.
+
+**Exploração de Território.** In the Action phase a Personagem manifested in the
+active Território listens. What surfaces depends on their Escuta and on what that
+place has to give. It costs the Personagem their turn (exhaustion), and a dead
+end is refused *before* it costs anything, naming who heard nothing where.
+
+**Ressonância opens layers listening cannot reach.** When a Lenda resonates with
+a compatible Território it uncovers Memories keyed to that pairing. `Roots: The
+Eternal Spring` exists nowhere else in the game: only the Serpent manifesting at
+Fonte do Ribeirão opens it, and the highest Escuta in the game still cannot hear
+it. The same holds for the Cathedral records and the Lady of Bells.
+
+A discovered Memory enters play rooted in the Território that gave it up, which
+is what makes the Roots / Shared distinction concrete at the moment of Travessia.
+
+Decks now hold only what a player brings to a place — Lendas, Personagens,
+Acontecimentos. The Memory phase draws from that deck and yields the Memória
+that pays for manifestations; it no longer hands out Memory cards.
+
+Tests: 12 new (43 total) covering the pool, listening, rooting, exhaustion cost,
+the Escuta threshold, the affinity requirement, dead ends charging nothing, phase
+gating, resonance revealing, and the fact that a resonance-gated Memory is
+unreachable by listening.
+
+**Not yet wired.** Two of the four discovery sources exist in the data shape and
+the pool query but have no execution path: `event` needs the Acontecimento effect
+system, and `artifact` has no cards at all — the GDD warns against inventing
+culturally sensitive objects, so those wait on research rather than on code.
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,

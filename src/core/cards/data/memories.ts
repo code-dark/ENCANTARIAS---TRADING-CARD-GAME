@@ -10,6 +10,11 @@ export const memories: MemoryCard[] = [
     type: 'Memory',
     name: 'Oral Account of the Serpent',
     memoryState: 'Oral',
+    discovery: {
+      // A spoken account: you have to actually listen for it.
+      via: ['explore'],
+      escuta: 3,
+    },
     affinities: ['Water', 'Memory', 'Enchantment'],
     linkedTo: 'legend_serpent_enchanted',
     traversalBehavior: 'travels',
@@ -24,6 +29,10 @@ export const memories: MemoryCard[] = [
     type: 'Memory',
     name: 'Territorial Memory of Bells',
     memoryState: 'Territorial',
+    discovery: {
+      via: ['explore'],
+      escuta: 3,
+    },
     affinities: ['Faith', 'Institution', 'History'],
     linkedTo: 'legend_lady_of_bells',
     traversalBehavior: 'stays',
@@ -38,6 +47,12 @@ export const memories: MemoryCard[] = [
     type: 'Memory',
     name: 'Roots: The Eternal Spring',
     memoryState: 'Roots',
+    discovery: {
+      // Not something anyone can be told. Only the Serpent manifesting here
+      // opens this layer of the place.
+      via: ['resonance'],
+      byLegend: 'legend_serpent_enchanted',
+    },
     affinities: ['Water', 'Underground'],
     linkedTo: 'legend_serpent_enchanted',
     traversalBehavior: 'stays',
@@ -52,6 +67,10 @@ export const memories: MemoryCard[] = [
     type: 'Memory',
     name: 'Shared: The Crossed Paths',
     memoryState: 'Shared',
+    discovery: {
+      via: ['explore'],
+      escuta: 2,
+    },
     affinities: ['Passage', 'Movement', 'Circulation'],
     linkedTo: 'legend_keeper_of_paths',
     traversalBehavior: 'travels',
@@ -66,6 +85,10 @@ export const memories: MemoryCard[] = [
     type: 'Memory',
     name: 'Corporate Memory: Cathedral Records',
     memoryState: 'Corporate',
+    discovery: {
+      via: ['resonance'],
+      byLegend: 'legend_lady_of_bells',
+    },
     affinities: ['Institution', 'Faith', 'History'],
     linkedTo: 'legend_lady_of_bells',
     traversalBehavior: 'stays',
@@ -80,6 +103,11 @@ export const memories: MemoryCard[] = [
     type: 'Memory',
     name: 'Media: The Viral Legend',
     memoryState: 'Media',
+    discovery: {
+      // Everyone has already heard this one; almost no listening required.
+      via: ['explore', 'event'],
+      escuta: 1,
+    },
     affinities: ['Circulation', 'City', 'Commerce'],
     linkedTo: undefined,
     traversalBehavior: 'travels',

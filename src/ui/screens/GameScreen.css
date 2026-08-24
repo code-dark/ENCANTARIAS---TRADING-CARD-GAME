@@ -280,3 +280,28 @@ button.primary:hover:not(:disabled) {
     grid-column: 1 / -1;
   }
 }
+
+/* Memories still out in the world — they belong to no one until found. */
+.world-pool {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  margin-bottom: 14px;
+  border: 1px dashed rgba(217, 160, 91, 0.5);
+  border-radius: 4px;
+  background-color: rgba(217, 160, 91, 0.08);
+}
+
+.world-pool span {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #d9a05b;
+}
+
+.world-pool strong {
+  font-size: 1.1rem;
+  color: #f0d0a0;
+}

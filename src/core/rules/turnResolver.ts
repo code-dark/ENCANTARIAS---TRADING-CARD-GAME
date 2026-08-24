@@ -18,9 +18,10 @@ import {
   appendLog,
 } from '../game/gameState';
 import { getCard } from '../cards/cardRegistry';
-import { TerritoryCard } from '../cards/types';
+import { CardInstance, TerritoryCard } from '../cards/types';
 import { evaluateMemoryPersistence, traversalCost } from '../mechanics/traversal';
 import { detectResonances } from '../mechanics/resonance';
+import { bestListener, escutaOf, findByExploring, findByResonance } from '../mechanics/memory';
 
 export interface ApplyResult {
   state: GameState;
@@ -43,6 +44,8 @@ export function applyAction(state: GameState, action: GameAction): ApplyResult {
       return { state: resolveTraverse(state, action.playerId, action.territoryInstanceId) };
     case 'ActivateResonance':
       return { state: resolveResonance(state, action.playerId, action.instanceId) };
+    case 'Explore':
+      return { state: resolveExplore(state, action.playerId) };
     case 'PassPhase':
       return { state: advancePhase(state) };
   }
@@ -214,6 +217,66 @@ function resolveTraverse(
 }
 
 /**
+ * Moves a Memory out of the world and into play, rooted in the Território
+ * where it was found. A discovered Memory belongs to the place that gave it up.
+ */
+function claimMemory(
+  state: GameState,
+  playerId: string,
+  memory: CardInstance,
+  territoryInstanceId: string
+): GameState {
+  const withoutIt = state.memoryPool.filter(
+    (m) => m.instanceId !== memory.instanceId
+  );
+
+  return updatePlayer(
+    { ...state, memoryPool: withoutIt },
+    playerId,
+    (p) => ({
+      ...p,
+      inPlay: [
+        ...p.inPlay,
+        { ...memory, ownerId: playerId, linkedTo: territoryInstanceId },
+      ],
+    })
+  );
+}
+
+/**
+ * Exploração. A Personagem listens in the active Território; what they can
+ * hear depends on their Escuta and on what that place has to give.
+ * The listening costs the Personagem their turn.
+ */
+function resolveExplore(state: GameState, playerId: string): GameState {
+  const player = state.players.find((p) => p.id === playerId)!;
+  const territory = activeTerritoryOf(player)!;
+  const territoryDef = getCard(territory.cardId) as TerritoryCard;
+
+  const listener = bestListener(player.inPlay, territory.instanceId)!;
+  const found = findByExploring(state.memoryPool, {
+    territory: territoryDef,
+    escuta: escutaOf(listener),
+  })[0];
+
+  const exhausted = updatePlayer(state, playerId, (p) => ({
+    ...p,
+    inPlay: p.inPlay.map((c) =>
+      c.instanceId === listener.instanceId ? { ...c, exhausted: true } : c
+    ),
+  }));
+
+  const claimed = claimMemory(exhausted, playerId, found, territory.instanceId);
+
+  return appendLog(
+    claimed,
+    playerId,
+    `${getCard(listener.cardId).name} listens in ${territoryDef.name} and recovers ` +
+      `${getCard(found.cardId).name}.`
+  );
+}
+
+/**
  * Ressonância. Detects what the active Território unlocks for this card and
  * exhausts it. The unlocked effects themselves are Phase C; for now the match
  * records which manifestation fired and grants the Vínculo it represents.
@@ -235,7 +298,7 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     );
   }
 
-  const next = updatePlayer(state, playerId, (p) => ({
+  let next = updatePlayer(state, playerId, (p) => ({
     ...p,
     inPlay: p.inPlay.map((c) =>
       c.instanceId === instanceId ? { ...c, exhausted: true } : c
@@ -243,11 +306,25 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     resources: { ...p.resources, vinculo: p.resources.vinculo + matches.length },
   }));
 
-  return appendLog(
+  next = appendLog(
     next,
     playerId,
     `${def.name} resonates with ${territoryDef.name}: ${matches.map((m) => m.effect).join(' ')}`
   );
+
+  // The manifestation opens layers of the place that listening alone cannot
+  // reach. These Memories exist nowhere else in the game.
+  const revealed = findByResonance(next.memoryPool, def.id, territoryDef);
+  for (const memory of revealed) {
+    next = claimMemory(next, playerId, memory, territory.instanceId);
+    next = appendLog(
+      next,
+      playerId,
+      `The manifestation uncovers ${getCard(memory.cardId).name} in ${territoryDef.name}.`
+    );
+  }
+
+  return next;
 }
 
 /** Convenience for tests and setup: a player with empty zones. */

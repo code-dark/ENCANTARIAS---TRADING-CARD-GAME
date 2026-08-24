@@ -31,7 +31,7 @@ export const PHASE_ACTIONS: Record<GamePhase, string[]> = {
   Memory: ['DrawCard'],
   Movement: ['Traverse'],
   Manifestation: ['PlayCard'],
-  Action: ['ActivateResonance', 'ActivatePlaceAction'],
+  Action: ['ActivateResonance', 'Explore'],
   Consequence: [],
 };
 
@@ -71,6 +71,14 @@ export interface GameState {
   turn: number;
   currentPlayerIndex: number;
   players: Player[];
+
+  /**
+   * Memories still waiting in the world. They belong to no deck and no player:
+   * they are reached by exploring, by a Lenda resonating, by an Acontecimento
+   * or by an object that carries a record.
+   */
+  memoryPool: CardInstance[];
+
   log: LogEntry[];
   /** Once-per-turn allowances, cleared when the turn passes. */
   turnFlags: TurnFlags;
@@ -97,13 +105,18 @@ export interface LogEntry {
   message: string;
 }
 
-export function createGameState(players: Player[], maxTurns = 20): GameState {
+export function createGameState(
+  players: Player[],
+  memoryPool: CardInstance[] = [],
+  maxTurns = 20
+): GameState {
   return {
     id: `game_${Date.now()}`,
     phase: 'Awaken',
     turn: 1,
     currentPlayerIndex: 0,
     players,
+    memoryPool,
     log: [],
     turnFlags: { ...FRESH_TURN_FLAGS },
     isEnded: false,

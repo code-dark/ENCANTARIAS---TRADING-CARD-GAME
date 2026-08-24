@@ -16,6 +16,7 @@ import {
 import { getCard } from '../cards/cardRegistry';
 import { TerritoryCard } from '../cards/types';
 import { traversalCost } from '../mechanics/traversal';
+import { bestListener, escutaOf, findByExploring } from '../mechanics/memory';
 
 export function validateAction(state: GameState, action: GameAction): ValidationResult {
   if (state.isEnded) {
@@ -103,6 +104,36 @@ export function validateAction(state: GameState, action: GameAction): Validation
       return VALID;
     }
 
+    case 'Explore': {
+      const territory = activeTerritoryOf(current);
+      if (!territory) {
+        return invalid('You need an active Território to explore.');
+      }
+      const territoryDef = getCard(territory.cardId) as TerritoryCard;
+
+      // Someone has to be doing the listening.
+      const listener = bestListener(current.inPlay, territory.instanceId);
+      if (!listener) {
+        return invalid(
+          `You need a Personagem manifested in ${territoryDef.name} to listen.`
+        );
+      }
+
+      // Refuse a dead end before it costs anything, rather than spending the
+      // Personagem on nothing.
+      const found = findByExploring(state.memoryPool, {
+        territory: territoryDef,
+        escuta: escutaOf(listener),
+      });
+      if (found.length === 0) {
+        return invalid(
+          `${getCard(listener.cardId).name} hears nothing further in ${territoryDef.name}.`
+        );
+      }
+
+      return VALID;
+    }
+
     case 'ActivateResonance': {
       const card = current.inPlay.find((c) => c.instanceId === action.instanceId);
       if (!card) {
@@ -129,6 +160,8 @@ function labelFor(type: GameAction['type']): string {
       return 'Manifesting a card';
     case 'Traverse':
       return 'Travessia';
+    case 'Explore':
+      return 'Exploring the Território';
     case 'ActivateResonance':
       return 'Ressonância';
     default:

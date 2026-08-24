@@ -10,22 +10,37 @@ import './App.css';
 /**
  * Two provisional decks for the vertical slice. They lean on different
  * affinities so the two ways of playing are visible from turn one:
- * water/underground memory versus institution/circulation.
+ * water/underground listening versus institution/circulation.
+ *
+ * Note what is absent: no Memórias. A deck holds what you bring to a place —
+ * Lendas, Personagens, Acontecimentos. Memories are not brought, they are
+ * found, so they live in the world pool below.
  */
 const DECK_WATER = [
   'legend_serpent_enchanted',
   'character_listener',
-  'memory_oral_serpent',
-  'memory_enraizada_fountain',
-  'memory_transmitida_paths',
+  'character_wanderer',
   'event_festival',
+  'event_forgetting',
 ];
 
 const DECK_INSTITUTION = [
   'legend_lady_of_bells',
   'legend_keeper_of_paths',
   'character_mediator',
+  'event_institutional_embrace',
+  'event_transformation_wave',
+];
+
+/**
+ * The Memories waiting in São Luís. They belong to no player until someone
+ * listens for them, or a Lenda manifests and opens that layer of the place.
+ */
+const WORLD_MEMORIES = [
+  'memory_oral_serpent',
   'memory_territorial_bells',
+  'memory_enraizada_fountain',
+  'memory_transmitida_paths',
   'memory_institutional_bells',
   'memory_midiatic_circulating',
 ];
@@ -44,6 +59,8 @@ function buildPlayer(
   const cards = createInstances(deckList, id);
   player.hand = cards.slice(0, 3);
   player.deck = cards.slice(3);
+  // Manifesting on turn one needs something to spend.
+  player.resources.memoria = 2;
 
   const journey = getRandomJourney();
   player.journeyProgress = {
@@ -68,7 +85,10 @@ function App() {
       'territorio_ceprama',
     ]);
 
-    setGame(createGameState([p1, p2]));
+    // Owned by the world, not by a player, until discovered.
+    const pool = createInstances(WORLD_MEMORIES, 'world');
+
+    setGame(createGameState([p1, p2], pool));
   }, [setGame]);
 
   if (!gameState) {

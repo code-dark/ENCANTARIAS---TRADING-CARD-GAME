@@ -120,10 +120,40 @@ export interface CharacterCard extends Card {
   exhaustedEffect?: string;
 }
 
+/**
+ * How a Memory can be reached. Memories are not drawn from a deck: they are
+ * earned by interacting with the world, because a memory is a relation and a
+ * discovery before it is a resource.
+ */
+export type MemorySource = 'explore' | 'resonance' | 'event' | 'artifact';
+
+export interface MemoryDiscovery {
+  /** Which kinds of interaction can surface this Memory. */
+  via: MemorySource[];
+
+  /**
+   * It surfaces only in a Território carrying one of these affinities.
+   * Defaults to the Memory's own affinities — a memory belongs where it belongs.
+   */
+  inAffinities?: Affinity[];
+
+  /**
+   * Minimum Escuta a Personagem needs to hear it, for 'explore'.
+   * Public, circulating memories ask for little; deep or quiet ones ask more.
+   */
+  escuta?: number;
+
+  /** For 'resonance': only this Lenda manifesting can open this layer. */
+  byLegend?: string;
+}
+
 export interface MemoryCard extends Card {
   type: 'Memory';
   memoryState: MemoryState;
   linkedTo?: string; // Legend or Territory it's linked to
+
+  /** How this Memory is found. Absent means it cannot be discovered yet. */
+  discovery?: MemoryDiscovery;
 
   // Traversal behavior
   traversalBehavior?: 'stays' | 'travels' | 'transforms';
