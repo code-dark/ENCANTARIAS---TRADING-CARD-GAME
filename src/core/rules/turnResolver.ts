@@ -81,7 +81,7 @@ export function endTurn(state: GameState): GameState {
     ...state,
     currentPlayerIndex: nextIndex,
     turn,
-    phase: 'Awaken',
+    phase: 'Despertar',
     turnFlags: { ...FRESH_TURN_FLAGS },
     isEnded: ended,
   };
@@ -90,11 +90,11 @@ export function endTurn(state: GameState): GameState {
     return appendLog(rotated, state.players[state.currentPlayerIndex].id, 'The match reached its turn limit.');
   }
 
-  // Awaken resolves immediately for the incoming player.
+  // Despertar resolves immediately for the incoming player.
   return runAwaken(rotated);
 }
 
-/** Awaken: clear exhaustion so the incoming player's cards are usable again. */
+/** Despertar: clear exhaustion so the incoming player's cards are usable again. */
 export function runAwaken(state: GameState): GameState {
   const player = getCurrentPlayer(state);
 

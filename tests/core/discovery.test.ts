@@ -67,7 +67,7 @@ describe('Memories are not drawn from the deck', () => {
 describe('Exploração de Território', () => {
   it('a Personagem listening recovers a Memory that belongs to this place', () => {
     let s = withCharacter(setup([ORAL]), LISTENER); // Escuta 4 >= 3
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
 
@@ -79,7 +79,7 @@ describe('Exploração de Território', () => {
 
   it('roots the discovered Memory in the Território that gave it up', () => {
     let s = withCharacter(setup([ORAL]), LISTENER);
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
     s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
 
     expect(s.players[0].inPlay[1].linkedTo).toBe(s.players[0].activeTerritoryId);
@@ -88,14 +88,14 @@ describe('Exploração de Território', () => {
 
   it('costs the Personagem their turn', () => {
     let s = withCharacter(setup([ORAL]), LISTENER);
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
     s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
 
     expect(s.players[0].inPlay[0].exhausted).toBe(true);
   });
 
   it('refuses when nobody is here to listen, naming what is missing', () => {
-    const s = advanceTo(setup([ORAL]), 'Action');
+    const s = advanceTo(setup([ORAL]), 'Acao');
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
     expect(r.error).toBe('You need a Personagem manifested in Fonte do Ribeirão to listen.');
   });
@@ -103,7 +103,7 @@ describe('Exploração de Território', () => {
   it('will not surface a Memory beyond the listener’s Escuta', () => {
     // The Wanderer hears at 2; this account asks for 3.
     let s = withCharacter(setup([ORAL]), WANDERER);
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
     expect(r.error).toBe('The Wanderer hears nothing further in Fonte do Ribeirão.');
@@ -113,7 +113,7 @@ describe('Exploração de Território', () => {
   it('will not surface a Memory that does not belong to this place', () => {
     // Media memory is Circulation/City/Commerce; Fonte carries none of those.
     let s = withCharacter(setup([MEDIA]), LISTENER);
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
     expect(r.error).toContain('hears nothing further');
@@ -121,7 +121,7 @@ describe('Exploração de Território', () => {
 
   it('refuses a dead end before it costs anything', () => {
     let s = withCharacter(setup([]), LISTENER);
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
     expect(r.error).toContain('hears nothing further');
@@ -130,9 +130,9 @@ describe('Exploração de Território', () => {
 
   it('is unavailable outside the Action phase', () => {
     let s = withCharacter(setup([ORAL]), LISTENER);
-    s = advanceTo(s, 'Movement');
+    s = advanceTo(s, 'Travessia');
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toBe('Exploring the Território is not available during Movement.');
+    expect(r.error).toBe('Exploring the Território is not available during Travessia.');
   });
 });
 
@@ -141,7 +141,7 @@ describe('Ressonância reveals what listening cannot', () => {
     let s = setup([ROOTS]);
     const serpent = { ...createInstance(SERPENT, 'p1'), linkedTo: s.players[0].activeTerritoryId };
     s.players[0].inPlay = [serpent];
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
@@ -156,7 +156,7 @@ describe('Ressonância reveals what listening cannot', () => {
     // The Listener has the highest Escuta in the game and still cannot hear it:
     // it is opened by manifestation, not by attention.
     let s = withCharacter(setup([ROOTS]), LISTENER);
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
     expect(r.error).toContain('hears nothing further');
@@ -171,7 +171,7 @@ describe('Ressonância reveals what listening cannot', () => {
       linkedTo: s.players[0].activeTerritoryId,
     };
     s.players[0].inPlay = [keeper];
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
 
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: keeper.instanceId })

@@ -37,7 +37,20 @@ export interface Card {
   id: string;
   type: CardType;
   name: string;
+
+  /**
+   * Typed, closed vocabulary used by Ressonância and Travessia pricing.
+   * Kept small on purpose: these are the relations the rules reason about.
+   */
   affinities: Affinity[];
+
+  /**
+   * Open vocabulary. Cards query these instead of checking names, so
+   * "is there a Território tagged subterraneo?" keeps working when new
+   * places are added. Adding a tag never requires touching the engine.
+   */
+  tags?: string[];
+
   cost?: number;
 
   // Card state
@@ -80,6 +93,12 @@ export interface TerritoryCard extends Card {
   }>;
 
   possibleEvents?: string[]; // Event card IDs
+
+  /**
+   * Origins investigating this place consults. Usually its own id, but a
+   * Território can open onto more than one body of memory.
+   */
+  memorySources?: string[];
 }
 
 export interface LegendCard extends Card {
@@ -151,6 +170,14 @@ export interface MemoryCard extends Card {
   type: 'Memory';
   memoryState: MemoryState;
   linkedTo?: string; // Legend or Territory it's linked to
+
+  /**
+   * Addressable origins this Memory can be reached from — a Território, a
+   * Ressonância, an Acontecimento, a place a document points at. Anything
+   * that can name a source can hand this Memory over without the engine
+   * knowing what that source is.
+   */
+  sources?: string[];
 
   /** How this Memory is found. Absent means it cannot be discovered yet. */
   discovery?: MemoryDiscovery;

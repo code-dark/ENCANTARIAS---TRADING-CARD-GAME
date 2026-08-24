@@ -9,6 +9,51 @@
 
 import { CardInstance, MemoryCard, MemorySource, TerritoryCard } from '../cards/types';
 import { getCard } from '../cards/cardRegistry';
+import { hasAllTags, hasAnyTag } from './tags';
+
+/** Origins a Território opens onto. Defaults to the place itself. */
+export function sourcesOf(territory: TerritoryCard): string[] {
+  return territory.memorySources ?? [territory.id];
+}
+
+/**
+ * Memories reachable from a named origin.
+ *
+ * The origin is an opaque string — a Território id, a Ressonância id, an
+ * Acontecimento id, a place a photograph points at. The engine never needs to
+ * know what any of them mean, which is what lets new cards name new origins
+ * without a code change.
+ */
+export function findBySourceId(pool: CardInstance[], sourceId: string): CardInstance[] {
+  return pool.filter((instance) => {
+    const memory = getCard(instance.cardId) as MemoryCard;
+    return (memory.sources ?? []).includes(sourceId);
+  });
+}
+
+/** Memories reachable from any of these origins. */
+export function findByAnySourceId(
+  pool: CardInstance[],
+  sourceIds: string[]
+): CardInstance[] {
+  return pool.filter((instance) => {
+    const memory = getCard(instance.cardId) as MemoryCard;
+    const sources = memory.sources ?? [];
+    return sourceIds.some((id) => sources.includes(id));
+  });
+}
+
+/** Memories carrying these tags. */
+export function findByTags(
+  pool: CardInstance[],
+  tags: string[],
+  mode: 'all' | 'any' = 'all'
+): CardInstance[] {
+  return pool.filter((instance) => {
+    const card = getCard(instance.cardId);
+    return mode === 'all' ? hasAllTags(card, tags) : hasAnyTag(card, tags);
+  });
+}
 
 /** Where a Memory can surface: its own affinities unless it says otherwise. */
 export function discoveryAffinities(memory: MemoryCard) {
@@ -35,12 +80,19 @@ export function findByExploring(
   pool: CardInstance[],
   ctx: ExploreContext
 ): CardInstance[] {
+  const origins = sourcesOf(ctx.territory);
+
   return pool.filter((instance) => {
     const memory = getCard(instance.cardId) as MemoryCard;
     const discovery = memory.discovery;
     if (!discovery?.via.includes('explore')) return false;
-    if (!belongsHere(memory, ctx.territory)) return false;
-    return (discovery.escuta ?? 0) <= ctx.escuta;
+    if ((discovery.escuta ?? 0) > ctx.escuta) return false;
+
+    // A Memory naming this place as an origin is reachable here. Falling back
+    // to affinity keeps Memories that name no origin still findable where they
+    // belong.
+    const named = (memory.sources ?? []).some((s) => origins.includes(s));
+    return named || belongsHere(memory, ctx.territory);
   });
 }
 

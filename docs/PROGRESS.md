@@ -159,6 +159,38 @@ the pool query but have no execution path: `event` needs the Acontecimento effec
 system, and `artifact` has no cards at all — the GDD warns against inventing
 culturally sensitive objects, so those wait on research rather than on code.
 
+### Tags, addressable sources, and the seven-phase turn
+
+Three changes from the consolidated design spec, all of them foundations that
+later content depends on.
+
+**Open tags alongside typed affinities.** `affinities` stays a closed union of
+15 values, because those are the relations the rules themselves reason about
+(Ressonância, Travessia pricing). `tags: string[]` is open: cards ask "is there
+a Território tagged `subterraneo`?" instead of naming a place, so adding a
+Território never requires touching a card that wants to react to it.
+`mechanics/tags.ts` holds the queries.
+
+**Sources are addressable, not categorical.** `MemoryDiscovery.via` still says
+what *kind* of interaction reaches a Memory. Alongside it, `sources: string[]`
+names *which origin* hands it over — `territorio_fonte_ribeirao`,
+`ressonancia_serpente_ribeirao`, and eventually `evento_reurbanizacao` or a
+place a photograph points at. `findBySourceId` treats the origin as an opaque
+string, so a new card can name a new origin without a code change. Exploring a
+Território consults its `memorySources`, falling back to affinity for Memories
+that name no origin.
+
+**Seven phases**, named as the spec names them: Despertar, Memória, Travessia,
+Manifestação, Ação, Acontecimento, Encerramento. Consequência was split because
+those are two different moments — Acontecimento changes the world, Encerramento
+reads what the change produced (Ressonâncias, Transformações, end conditions).
+Phase identifiers and UI copy are now Portuguese throughout.
+
+Tests: 13 new (56 total) covering tag matching, untagged cards, instance
+filtering, default and explicit territory origins, resonance-as-origin, unknown
+origins returning empty rather than failing, multi-origin Memories, and two data
+integrity checks (every Memory names an origin; every Território carries tags).
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,

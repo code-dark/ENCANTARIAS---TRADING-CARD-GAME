@@ -51,7 +51,7 @@ export default function GameScreen() {
             <strong>{gameState.memoryPool.length}</strong>
           </div>
 
-          {gameState.phase === 'Memory' && (
+          {gameState.phase === 'Memoria' && (
             <button
               className="primary"
               disabled={!drawVerdict.valid}
@@ -62,7 +62,7 @@ export default function GameScreen() {
             </button>
           )}
 
-          {gameState.phase === 'Action' && (
+          {gameState.phase === 'Acao' && (
             <button
               className="primary"
               disabled={!exploreVerdict.valid}

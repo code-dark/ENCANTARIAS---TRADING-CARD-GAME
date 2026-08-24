@@ -52,30 +52,31 @@ function expectOk(result: { state: GameState; error?: string }): GameState {
 beforeEach(() => resetInstanceIds());
 
 describe('phase clock', () => {
-  it('runs the six GDD phases in order and then passes the turn', () => {
+  it('runs the seven phases in order and then passes the turn', () => {
     let s = setup();
-    expect(s.phase).toBe('Awaken');
+    expect(s.phase).toBe('Despertar');
     expect(getCurrentPlayer(s).id).toBe('p1');
 
     const seen: string[] = [s.phase];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       s = expectOk(applyAction(s, { type: 'PassPhase', playerId: 'p1' }));
       seen.push(s.phase);
     }
     expect(seen).toEqual([
-      'Awaken', 'Memory', 'Movement', 'Manifestation', 'Action', 'Consequence',
+      'Despertar', 'Memoria', 'Travessia', 'Manifestacao', 'Acao',
+      'Acontecimento', 'Encerramento',
     ]);
 
     // Passing out of the last phase hands play to the other player.
     s = expectOk(applyAction(s, { type: 'PassPhase', playerId: 'p1' }));
     expect(getCurrentPlayer(s).id).toBe('p2');
-    expect(s.phase).toBe('Awaken');
+    expect(s.phase).toBe('Despertar');
     expect(s.turn).toBe(1); // turn advances only after everyone has played
   });
 
   it('increments the turn once play wraps back to the first player', () => {
     let s = setup();
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 14; i++) {
       s = expectOk(applyAction(s, { type: 'PassPhase', playerId: getCurrentPlayer(s).id }));
     }
     expect(s.turn).toBe(2);
@@ -96,7 +97,7 @@ describe('Memory phase', () => {
   it('draws one card and yields the Memória that pays for manifestations', () => {
     let s = setup();
     s.players[0].deck = [createInstance(SERPENT, 'p1')];
-    s = advanceTo(s, 'Memory');
+    s = advanceTo(s, 'Memoria');
 
     s = expectOk(applyAction(s, { type: 'DrawCard', playerId: 'p1' }));
 
@@ -108,7 +109,7 @@ describe('Memory phase', () => {
   it('allows only one recovery per turn', () => {
     let s = setup();
     s.players[0].deck = [createInstance(SERPENT, 'p1'), createInstance(ROOTS, 'p1')];
-    s = advanceTo(s, 'Memory');
+    s = advanceTo(s, 'Memoria');
     s = expectOk(applyAction(s, { type: 'DrawCard', playerId: 'p1' }));
 
     const second = applyAction(s, { type: 'DrawCard', playerId: 'p1' });
@@ -116,15 +117,15 @@ describe('Memory phase', () => {
   });
 
   it('explains an empty deck rather than failing silently', () => {
-    let s = advanceTo(setup(), 'Memory');
+    let s = advanceTo(setup(), 'Memoria');
     const r = applyAction(s, { type: 'DrawCard', playerId: 'p1' });
     expect(r.error).toBe('Your deck is empty.');
   });
 
   it('rejects drawing outside the Memory phase', () => {
-    const s = advanceTo(setup(), 'Manifestation');
+    const s = advanceTo(setup(), 'Manifestacao');
     const r = applyAction(s, { type: 'DrawCard', playerId: 'p1' });
-    expect(r.error).toBe('Recovering a Memory is not available during Manifestation.');
+    expect(r.error).toBe('Recovering a Memory is not available during Manifestacao.');
   });
 });
 
@@ -134,7 +135,7 @@ describe('Manifestation phase', () => {
     const card = createInstance(SHARED, 'p1'); // cost 1
     s.players[0].hand = [card];
     s.players[0].resources.memoria = 3;
-    s = advanceTo(s, 'Manifestation');
+    s = advanceTo(s, 'Manifestacao');
 
     s = expectOk(applyAction(s, { type: 'PlayCard', playerId: 'p1', instanceId: card.instanceId }));
 
@@ -149,7 +150,7 @@ describe('Manifestation phase', () => {
     const card = createInstance(SERPENT, 'p1'); // cost 3
     s.players[0].hand = [card];
     s.players[0].resources.memoria = 1;
-    s = advanceTo(s, 'Manifestation');
+    s = advanceTo(s, 'Manifestacao');
 
     const r = applyAction(s, { type: 'PlayCard', playerId: 'p1', instanceId: card.instanceId });
     expect(r.error).toBe('Serpent Encantada costs 3 Memória; you have 1.');
@@ -159,7 +160,7 @@ describe('Manifestation phase', () => {
     let s = setup();
     const card = createInstance(IGREJA, 'p1');
     s.players[0].hand = [card];
-    s = advanceTo(s, 'Manifestation');
+    s = advanceTo(s, 'Manifestacao');
 
     s = expectOk(applyAction(s, { type: 'PlayCard', playerId: 'p1', instanceId: card.instanceId }));
 

@@ -8,31 +8,40 @@
 
 import { CardInstance } from '../cards/types';
 
+/**
+ * The turn, named as the design document names it. Consequência is split into
+ * Acontecimento (events resolve) and Encerramento (Ressonâncias, Transformações
+ * and end conditions are checked), because those are different moments: one
+ * changes the world, the other reads what the change produced.
+ */
 export type GamePhase =
-  | 'Awaken'
-  | 'Memory'
-  | 'Movement'
-  | 'Manifestation'
-  | 'Action'
-  | 'Consequence';
+  | 'Despertar'
+  | 'Memoria'
+  | 'Travessia'
+  | 'Manifestacao'
+  | 'Acao'
+  | 'Acontecimento'
+  | 'Encerramento';
 
 export const PHASE_ORDER: GamePhase[] = [
-  'Awaken',
-  'Memory',
-  'Movement',
-  'Manifestation',
-  'Action',
-  'Consequence',
+  'Despertar',
+  'Memoria',
+  'Travessia',
+  'Manifestacao',
+  'Acao',
+  'Acontecimento',
+  'Encerramento',
 ];
 
 /** What each phase lets a player do, beyond always being able to pass. */
 export const PHASE_ACTIONS: Record<GamePhase, string[]> = {
-  Awaken: [],
-  Memory: ['DrawCard'],
-  Movement: ['Traverse'],
-  Manifestation: ['PlayCard'],
-  Action: ['ActivateResonance', 'Explore'],
-  Consequence: [],
+  Despertar: [],
+  Memoria: ['DrawCard'],
+  Travessia: ['Traverse'],
+  Manifestacao: ['PlayCard'],
+  Acao: ['ActivateResonance', 'Explore'],
+  Acontecimento: [],
+  Encerramento: [],
 };
 
 export interface PlayerResources {
@@ -112,7 +121,7 @@ export function createGameState(
 ): GameState {
   return {
     id: `game_${Date.now()}`,
-    phase: 'Awaken',
+    phase: 'Despertar',
     turn: 1,
     currentPlayerIndex: 0,
     players,

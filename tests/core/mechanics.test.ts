@@ -71,7 +71,7 @@ describe('Travessia', () => {
     const shared = { ...createInstance(SHARED, 'p1'), linkedTo: fonteId };
     s.players[0].inPlay = [roots, shared];
 
-    s = advanceTo(s, 'Movement');
+    s = advanceTo(s, 'Travessia');
     s = expectOk(
       applyAction(s, {
         type: 'Traverse',
@@ -99,7 +99,7 @@ describe('Travessia', () => {
       { ...createInstance(SHARED, 'p1'), linkedTo: fonteId },
     ];
 
-    s = advanceTo(s, 'Movement');
+    s = advanceTo(s, 'Travessia');
     s = expectOk(
       applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
     );
@@ -110,7 +110,7 @@ describe('Travessia', () => {
   });
 
   it('allows only one Travessia per turn', () => {
-    let s = advanceTo(setup(), 'Movement');
+    let s = advanceTo(setup(), 'Travessia');
     s = expectOk(
       applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
     );
@@ -121,7 +121,7 @@ describe('Travessia', () => {
   });
 
   it('refuses crossing to where you already are', () => {
-    const s = advanceTo(setup(), 'Movement');
+    const s = advanceTo(setup(), 'Travessia');
     const r = applyAction(s, {
       type: 'Traverse',
       playerId: 'p1',
@@ -131,7 +131,7 @@ describe('Travessia', () => {
   });
 
   it("refuses crossing to another player's Território", () => {
-    const s = advanceTo(setup(), 'Movement');
+    const s = advanceTo(setup(), 'Travessia');
     const foreign = s.players[1].territories[0].instanceId;
     const r = applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: foreign });
     expect(r.error).toBe('That Território is not one of yours.');
@@ -204,7 +204,7 @@ describe('Travessia cost', () => {
   it('deducts the cost from Memória when crossing', () => {
     let s = setup();
     s.players[0].resources.memoria = 4;
-    s = advanceTo(s, 'Movement');
+    s = advanceTo(s, 'Travessia');
 
     s = expectOk(
       applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
@@ -217,7 +217,7 @@ describe('Travessia cost', () => {
   it('refuses a crossing the player cannot pay, naming the price', () => {
     let s = setup();
     s.players[0].resources.memoria = 0;
-    s = advanceTo(s, 'Movement');
+    s = advanceTo(s, 'Travessia');
 
     const r = applyAction(s, {
       type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId,
@@ -227,7 +227,7 @@ describe('Travessia cost', () => {
   });
 
   it('records the price paid in the log', () => {
-    let s = advanceTo(setup(), 'Movement');
+    let s = advanceTo(setup(), 'Travessia');
     s = expectOk(
       applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
     );
@@ -241,7 +241,7 @@ describe('Ressonância', () => {
     const serpent = { ...createInstance(SERPENT, 'p1'), linkedTo: s.players[0].activeTerritoryId };
     s.players[0].inPlay = [serpent];
 
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
     );
@@ -257,7 +257,7 @@ describe('Ressonância', () => {
     const serpent = { ...createInstance(SERPENT, 'p1'), linkedTo: s.players[0].activeTerritoryId };
     s.players[0].inPlay = [serpent];
 
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
     );
@@ -271,7 +271,7 @@ describe('Ressonância', () => {
     const serpent = { ...createInstance(SERPENT, 'p1'), linkedTo: s.players[0].activeTerritoryId };
     s.players[0].inPlay = [serpent];
 
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
     );
@@ -289,7 +289,7 @@ describe('Despertar', () => {
     const serpent = { ...createInstance(SERPENT, 'p1'), linkedTo: s.players[0].activeTerritoryId };
     s.players[0].inPlay = [serpent];
 
-    s = advanceTo(s, 'Action');
+    s = advanceTo(s, 'Acao');
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
     );
@@ -297,7 +297,7 @@ describe('Despertar', () => {
 
     // Play round-trip: p1 finishes, p2 plays a full turn, back to p1.
     let guard = 0;
-    while (!(getCurrentPlayer(s).id === 'p1' && s.phase === 'Awaken')) {
+    while (!(getCurrentPlayer(s).id === 'p1' && s.phase === 'Despertar')) {
       s = applyAction(s, { type: 'PassPhase', playerId: getCurrentPlayer(s).id }).state;
       if (++guard > 40) throw new Error('never returned to p1');
     }
