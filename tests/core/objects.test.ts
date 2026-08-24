@@ -111,7 +111,7 @@ describe('storage: preservation costs circulation', () => {
     expect(remainingSpace(s.players[0].inPlay, box)).toBe(0);
 
     const third = applyAction(s, store(c.instanceId));
-    expect(third.error).toBe('Caixa de Recordações is full (2).');
+    expect(third.error).toBe('Caixa de Recordações está cheia (2).');
   });
 
   it('refuses to keep something that is not a Memória', () => {
@@ -124,7 +124,7 @@ describe('storage: preservation costs circulation', () => {
       type: 'StoreMemory', playerId: 'p1',
       memoryInstanceId: legend.instanceId, containerInstanceId: box.instanceId,
     });
-    expect(r.error).toBe('Only a Memória can be kept in an object.');
+    expect(r.error).toBe('Só uma Memória pode ser guardada em um objeto.');
   });
 
   it('refuses a container that does not keep anything', () => {
@@ -137,7 +137,7 @@ describe('storage: preservation costs circulation', () => {
       type: 'StoreMemory', playerId: 'p1',
       memoryInstanceId: memory.instanceId, containerInstanceId: clipping.instanceId,
     });
-    expect(r.error).toBe('Recorte de Jornal does not keep Memórias.');
+    expect(r.error).toBe('Recorte de Jornal não guarda Memórias.');
   });
 
   it('brings a kept Memória back into circulation', () => {
@@ -167,7 +167,7 @@ describe('storage: preservation costs circulation', () => {
     const r = applyAction(s, {
       type: 'RetrieveMemory', playerId: 'p1', memoryInstanceId: memory.instanceId,
     });
-    expect(r.error).toBe('That Memória is not being kept in an object.');
+    expect(r.error).toBe('Essa Memória não está guardada em nenhum objeto.');
   });
 });
 
@@ -184,7 +184,7 @@ describe('records give access, they do not create', () => {
 
     expect(s.memoryPool).toHaveLength(0);
     expect(named(s, 'Imagem Recorrente da Beira-Mar')).toBeDefined();
-    expect(s.log.some((e) => e.message.includes('reaches Imagem Recorrente'))).toBe(true);
+    expect(s.log.some((e) => e.message.includes('alcança Imagem Recorrente'))).toBe(true);
   });
 
   it('reaches a place the player is not standing in', () => {
@@ -207,7 +207,7 @@ describe('records give access, they do not create', () => {
 
     // The object is on the table; no Memory was invented to satisfy it.
     expect(s.players[0].inPlay.filter((c) => getCard(c.cardId).type === 'Memory')).toHaveLength(0);
-    expect(s.log[s.log.length - 1].message).toContain('points at nothing still unfound');
+    expect(s.log[s.log.length - 1].message).toContain('aponta para algo que já não está por descobrir');
   });
 
   it('a clipping reaches a media Memory of the place the player is in', () => {
@@ -221,7 +221,7 @@ describe('records give access, they do not create', () => {
     }));
 
     // It reaches the media memory rooted at Escadaria, not the Beira-Mar one.
-    expect(named(s, 'Media: The Viral Legend')).toBeDefined();
+    expect(named(s, 'Media: A Lenda Viral')).toBeDefined();
     expect(s.memoryPool).toHaveLength(1);
     expect(getCard(s.memoryPool[0].cardId).name).toBe('Imagem Recorrente da Beira-Mar');
   });

@@ -79,7 +79,7 @@ describe('Exploração de Território', () => {
     // Found, but not yet yours: it waits to be read.
     expect(s.pendingDiscovery).toBeDefined();
     expect(s.memoryPool).toHaveLength(1);
-    expect(s.log[s.log.length - 1].message).toContain('listens in Fonte do Ribeirão');
+    expect(s.log[s.log.length - 1].message).toContain('escuta em Fonte do Ribeirão');
 
     s = expectOk(applyAction(s, {
       type: 'TransmitMemory', playerId: 'p1',
@@ -89,7 +89,7 @@ describe('Exploração de Território', () => {
     expect(s.pendingDiscovery).toBeUndefined();
     expect(s.memoryPool).toHaveLength(0);
     expect(s.players[0].inPlay).toHaveLength(2); // the listener plus the memory
-    expect(nameOf(s, 1)).toBe('Oral Account of the Serpent');
+    expect(nameOf(s, 1)).toBe('Relato Oral da Serpente');
   });
 
   it('roots the discovered Memory in the Território that gave it up', () => {
@@ -116,7 +116,7 @@ describe('Exploração de Território', () => {
   it('refuses when nobody is here to listen, naming what is missing', () => {
     const s = advanceTo(setup([ORAL]), 'Acao');
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toBe('You need a Personagem manifested in Fonte do Ribeirão to listen.');
+    expect(r.error).toBe('Você precisa de um Personagem manifestado em Fonte do Ribeirão para escutar.');
   });
 
   it('will not surface a Memory beyond the listener’s Escuta', () => {
@@ -125,7 +125,7 @@ describe('Exploração de Território', () => {
     s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toBe('The Wanderer hears nothing further in Fonte do Ribeirão.');
+    expect(r.error).toBe('O Caminhante não ouve mais nada em Fonte do Ribeirão.');
     expect(r.state.memoryPool).toHaveLength(1); // still out there
   });
 
@@ -135,7 +135,7 @@ describe('Exploração de Território', () => {
     s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toContain('hears nothing further');
+    expect(r.error).toContain('não ouve mais nada');
   });
 
   it('refuses a dead end before it costs anything', () => {
@@ -143,7 +143,7 @@ describe('Exploração de Território', () => {
     s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toContain('hears nothing further');
+    expect(r.error).toContain('não ouve mais nada');
     expect(r.state.players[0].inPlay[0].exhausted).toBe(false); // not spent
   });
 
@@ -151,7 +151,7 @@ describe('Exploração de Território', () => {
     let s = withCharacter(setup([ORAL]), LISTENER);
     s = advanceTo(s, 'Travessia');
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toBe('Exploring the Território is not available during Travessia.');
+    expect(r.error).toBe('Escutar o Território não está disponível na fase de Travessia.');
   });
 });
 
@@ -167,8 +167,8 @@ describe('Ressonância reveals what listening cannot', () => {
     );
 
     expect(s.memoryPool).toHaveLength(0);
-    expect(nameOf(s, 1)).toBe('Roots: The Eternal Spring');
-    expect(s.log[s.log.length - 1].message).toContain('uncovers Roots: The Eternal Spring');
+    expect(nameOf(s, 1)).toBe('Roots: A Fonte Perene');
+    expect(s.log[s.log.length - 1].message).toContain('revela Roots: A Fonte Perene');
   });
 
   it('that Memory cannot be reached by listening, however good the ear', () => {
@@ -178,7 +178,7 @@ describe('Ressonância reveals what listening cannot', () => {
     s = advanceTo(s, 'Acao');
 
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toContain('hears nothing further');
+    expect(r.error).toContain('não ouve mais nada');
     expect(r.state.memoryPool).toHaveLength(1);
   });
 

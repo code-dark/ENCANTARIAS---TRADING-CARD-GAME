@@ -317,6 +317,19 @@ code problem, and it is the clearest argument for expanding the Memory set next.
 
 Tests: 17 new (95 total).
 
+### The game speaks Portuguese
+
+Every string the player reads is Portuguese: refusals, the turn log, card names
+and texts, and the UI. Identifiers stay English because they are code — renaming
+a union member ripples through every file that reasons about it, and the
+compiler's checks on affinities depend on that union. Display labels live in
+`core/i18n/labels.ts`.
+
+**One exception, left for the author.** The Memory states `Roots`, `Shared`,
+`Corporate` and `Media` keep the English names chosen for them earlier. Putting
+them back to Enraizada / Transmitida / Institucional / Midiática would undo an
+explicit decision, so they stand as they are. Say the word and they change.
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,

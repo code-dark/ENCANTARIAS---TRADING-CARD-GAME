@@ -1,4 +1,5 @@
 import { AnyCard, CardInstance } from '../../../core/cards/types';
+import { AFFINITY_LABEL, CARD_TYPE_LABEL, MEMORY_STATE_LABEL } from '../../../core/i18n/labels';
 import './CardVisual.css';
 
 interface CardVisualProps {
@@ -12,15 +13,6 @@ interface CardVisualProps {
   disabledReason?: string;
   onClick?: () => void;
 }
-
-const TYPE_LABEL: Record<string, string> = {
-  Territory: 'Território',
-  Legend: 'Lenda',
-  Character: 'Personagem',
-  Memory: 'Memória',
-  Event: 'Acontecimento',
-  Artifact: 'Objeto',
-};
 
 export default function CardVisual({
   definition,
@@ -57,7 +49,7 @@ export default function CardVisual({
       }}
     >
       <div className="card-header">
-        <span className="card-type">{TYPE_LABEL[definition.type] ?? definition.type}</span>
+        <span className="card-type">{CARD_TYPE_LABEL[definition.type]}</span>
         {definition.cost !== undefined && <span className="card-cost">{definition.cost}</span>}
       </div>
 
@@ -66,12 +58,12 @@ export default function CardVisual({
       {definition.affinities?.length > 0 && (
         <div className="card-affinities">
           {definition.affinities.map((aff) => (
-            <span key={aff} className="affinity-badge">{aff}</span>
+            <span key={aff} className="affinity-badge">{AFFINITY_LABEL[aff]}</span>
           ))}
         </div>
       )}
 
-      {state && <div className="card-state">{state}</div>}
+      {state && <div className="card-state">{MEMORY_STATE_LABEL[state]}</div>}
 
       {definition.description && (
         <p className="description">{definition.description}</p>

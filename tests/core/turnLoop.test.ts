@@ -88,7 +88,7 @@ describe('turn ownership', () => {
   it('refuses actions from the player who is not active, with a reason', () => {
     const s = setup();
     const r = applyAction(s, { type: 'PassPhase', playerId: 'p2' });
-    expect(r.error).toBe("It is Player One's turn.");
+    expect(r.error).toBe('É a vez de Player One.');
     expect(r.state).toBe(s); // state untouched on rejection
   });
 });
@@ -113,19 +113,19 @@ describe('Memory phase', () => {
     s = expectOk(applyAction(s, { type: 'DrawCard', playerId: 'p1' }));
 
     const second = applyAction(s, { type: 'DrawCard', playerId: 'p1' });
-    expect(second.error).toBe('You have already recovered a Memory this turn.');
+    expect(second.error).toBe('Você já comprou uma carta neste turno.');
   });
 
   it('explains an empty deck rather than failing silently', () => {
     let s = advanceTo(setup(), 'Memoria');
     const r = applyAction(s, { type: 'DrawCard', playerId: 'p1' });
-    expect(r.error).toBe('Your deck is empty.');
+    expect(r.error).toBe('Seu deck está vazio.');
   });
 
   it('rejects drawing outside the Memory phase', () => {
     const s = advanceTo(setup(), 'Manifestacao');
     const r = applyAction(s, { type: 'DrawCard', playerId: 'p1' });
-    expect(r.error).toBe('Recovering a Memory is not available during Manifestacao.');
+    expect(r.error).toBe('Comprar carta não está disponível na fase de Manifestação.');
   });
 });
 
@@ -153,7 +153,7 @@ describe('Manifestation phase', () => {
     s = advanceTo(s, 'Manifestacao');
 
     const r = applyAction(s, { type: 'PlayCard', playerId: 'p1', instanceId: card.instanceId });
-    expect(r.error).toBe('Serpent Encantada costs 3 Memória; you have 1.');
+    expect(r.error).toBe('Serpente Encantada custa 3 de Memória; você tem 1.');
   });
 
   it('sends a Território to the pool instead of the table', () => {

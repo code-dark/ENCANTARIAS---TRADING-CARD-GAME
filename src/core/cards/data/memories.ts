@@ -8,7 +8,7 @@ export const memories: MemoryCard[] = [
   {
     id: 'memory_oral_serpent',
     type: 'Memory',
-    name: 'Oral Account of the Serpent',
+    name: 'Relato Oral da Serpente',
     memoryState: 'Oral',
     discovery: {
       // A spoken account: you have to actually listen for it.
@@ -21,15 +21,15 @@ export const memories: MemoryCard[] = [
     linkedTo: 'legend_serpent_enchanted',
     traversalBehavior: 'travels',
     cost: 1,
-    description: 'A spoken story passed from mouth to mouth. Carries the weight of voice.',
-    flavor: 'The oldest stories are the ones whispered.',
-    effect: 'When played: Search deck for a Legend with Water affinity.',
+    description: '[PROVISIONAL] Uma história falada, passada de boca em boca. Carrega o peso da voz.',
+    flavor: 'As histórias mais antigas são as sussurradas.',
+    effect: 'Ao ser jogada: procure no deck uma Lenda com afinidade Água.',
   },
 
   {
     id: 'memory_territorial_bells',
     type: 'Memory',
-    name: 'Territorial Memory of Bells',
+    name: 'Memória Territorial dos Sinos',
     memoryState: 'Territorial',
     discovery: {
       via: ['explore'],
@@ -41,15 +41,15 @@ export const memories: MemoryCard[] = [
     linkedTo: 'legend_lady_of_bells',
     traversalBehavior: 'stays',
     cost: 1,
-    description: 'Deeply rooted in a specific place. The bells ring only here.',
-    flavor: 'Some songs only play in one place.',
-    effect: 'Linked to Igreja da Sé. Cannot traverse.',
+    description: '[PROVISIONAL] Presa a um lugar específico. Os sinos tocam só aqui.',
+    flavor: 'Algumas músicas só tocam num lugar.',
+    effect: 'Vinculada à Igreja da Sé. Não faz Travessia.',
   },
 
   {
     id: 'memory_enraizada_fountain',
     type: 'Memory',
-    name: 'Roots: The Eternal Spring',
+    name: 'Roots: A Fonte Perene',
     memoryState: 'Roots',
     discovery: {
       // Not something anyone can be told. Only the Serpent manifesting here
@@ -63,15 +63,15 @@ export const memories: MemoryCard[] = [
     linkedTo: 'legend_serpent_enchanted',
     traversalBehavior: 'stays',
     cost: 2,
-    description: 'Rooted so deep that it has become the territory itself. Immovable.',
-    flavor: 'Some things do not move because they are everything.',
-    effect: 'Gives +2 Presence to active territory. Cannot leave.',
+    description: '[PROVISIONAL] Enraizada tão fundo que virou o próprio Território. Não se move.',
+    flavor: 'Algumas coisas não se movem porque são tudo.',
+    effect: 'Reforça o Território ativo. Não sai daqui.',
   },
 
   {
     id: 'memory_transmitida_paths',
     type: 'Memory',
-    name: 'Shared: The Crossed Paths',
+    name: 'Shared: Os Caminhos Cruzados',
     memoryState: 'Shared',
     discovery: {
       via: ['explore'],
@@ -83,15 +83,15 @@ export const memories: MemoryCard[] = [
     linkedTo: 'legend_keeper_of_paths',
     traversalBehavior: 'travels',
     cost: 1,
-    description: 'A story that travels, transforms as it moves. Always relevant.',
-    flavor: 'The story changes with each telling but remains true.',
-    effect: 'Traversal cost reduced by 1 when carrying this memory.',
+    description: '[PROVISIONAL] Uma história que viaja e se transforma ao se mover.',
+    flavor: 'A história muda a cada vez que é contada, e segue verdadeira.',
+    effect: 'A Travessia custa 1 a menos enquanto você carrega esta Memória.',
   },
 
   {
     id: 'memory_institutional_bells',
     type: 'Memory',
-    name: 'Corporate Memory: Cathedral Records',
+    name: 'Corporate: Registros da Sé',
     memoryState: 'Corporate',
     discovery: {
       via: ['resonance'],
@@ -103,15 +103,15 @@ export const memories: MemoryCard[] = [
     linkedTo: 'legend_lady_of_bells',
     traversalBehavior: 'stays',
     cost: 1,
-    description: 'Official records and institutional knowledge. Organized and protected.',
-    flavor: 'Written down, it becomes law.',
-    effect: 'Gain +1 Power for each Corporate card in play.',
+    description: '[PROVISIONAL] Registros oficiais e saber institucional. Organizados e protegidos.',
+    flavor: 'Posto no papel, vira lei.',
+    effect: 'Ganha força para cada carta Corporate em jogo.',
   },
 
   {
     id: 'memory_midiatic_circulating',
     type: 'Memory',
-    name: 'Media: The Viral Legend',
+    name: 'Media: A Lenda Viral',
     memoryState: 'Media',
     discovery: {
       // Everyone has already heard this one; almost no listening required.
@@ -128,11 +128,11 @@ export const memories: MemoryCard[] = [
     linkedTo: undefined,
     traversalBehavior: 'travels',
     cost: 0,
-    description: 'Circulating through media and commerce. Visible everywhere, understood nowhere.',
-    flavor: 'Everyone knows it. No one remembers why.',
+    description: '[PROVISIONAL] Circula pela mídia e pelo comércio. Visível em toda parte, compreendida em lugar nenhum.',
+    flavor: 'Todo mundo conhece. Ninguém lembra por quê.',
     circulationThreshold: 2,
     transformationOn: 'Decontextualized',
-    effect: 'Gain resources for each Circulation marker. Loses Vínculo.',
+    effect: 'Ganha recursos por marcador de Circulação. Perde Vínculo.',
   },
 
   {

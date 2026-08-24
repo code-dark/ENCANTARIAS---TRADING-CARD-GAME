@@ -8,7 +8,7 @@ export const legends: LegendCard[] = [
   {
     id: 'legend_serpent_enchanted',
     type: 'Legend',
-    name: 'Serpent Encantada',
+    name: 'Serpente Encantada',
     affinities: ['Water', 'Underground', 'Mystery', 'Enchantment'],
     tags: ['serpente', 'agua', 'subterraneo', 'encantado'],
     cost: 3,
@@ -16,17 +16,17 @@ export const legends: LegendCard[] = [
     vinculo: 2,
     presence: 3,
     mystery: 4,
-    description: 'A legendary serpent guardian of waters and underground realms.',
-    flavor: 'Some say she dreams the city into being. Others say the city dreams her.',
+    description: '[PROVISIONAL] Uma serpente guardiã das águas e do subterrâneo.',
+    flavor: 'Dizem que ela sonha a cidade. Dizem também que a cidade a sonha.',
 
     resonanceManifestations: {
       'territorio_fonte_ribeirao': {
-        name: 'Guardian of the Source',
-        ability: 'When you play a Memory, gain 1 Vínculo. When you draw from this territory, gain +1 Power.',
+        name: 'Guardiã da Fonte',
+        ability: 'Ao jogar uma Memória, ganhe 1 Vínculo.',
       },
       'territorio_escadaria_reviver': {
-        name: 'Wandering Spirit',
-        ability: 'Costs 1 less. Can Traverse freely once per turn.',
+        name: 'Espírito Errante',
+        ability: 'Custa 1 a menos. Pode fazer uma Travessia livre por turno.',
       },
     },
 
@@ -34,12 +34,12 @@ export const legends: LegendCard[] = [
       {
         trigger: 'Circulation > 2',
         toState: 'Popularized',
-        newAbility: 'Gain +1 Power. Becomes vulnerable to institutional control.',
+        newAbility: 'Ganha alcance, e fica exposta ao controle institucional.',
       },
       {
         trigger: 'Institutional',
         toState: 'Institutional',
-        newAbility: 'Gain protection. Becomes bound to place.',
+        newAbility: 'Ganha proteção, e fica presa ao lugar.',
       },
     ],
   },
@@ -47,7 +47,7 @@ export const legends: LegendCard[] = [
   {
     id: 'legend_lady_of_bells',
     type: 'Legend',
-    name: 'Lady of Bells',
+    name: 'Senhora dos Sinos',
     affinities: ['Faith', 'Institution', 'History', 'Memory'],
     tags: ['sino', 'fe', 'instituicao', 'aparicao'],
     cost: 2,
@@ -55,17 +55,17 @@ export const legends: LegendCard[] = [
     vinculo: 3,
     presence: 2,
     mystery: 2,
-    description: 'A spirit associated with the bells of the Cathedral, ringing out historical moments.',
-    flavor: 'Each bell is a heartbeat of the city\'s memory.',
+    description: '[PROVISIONAL] Uma presença associada aos sinos da Sé.',
+    flavor: 'Cada sino é uma batida da memória da cidade.',
 
     resonanceManifestations: {
       'territorio_igreja_se': {
-        name: 'Guardian of Sacred Bells',
-        ability: 'Gain +2 Power. When a Corporate Memory is played, draw a card.',
+        name: 'Guardiã dos Sinos',
+        ability: 'Ao jogar uma Memória Corporate, compre uma carta.',
       },
       'territorio_ceprama': {
-        name: 'Commercialized Saint',
-        ability: 'Gain resources. Lose Mystery.',
+        name: 'Devoção Comercializada',
+        ability: 'Ganha recursos. Perde Mistério.',
       },
     },
 
@@ -73,7 +73,7 @@ export const legends: LegendCard[] = [
       {
         trigger: 'Circulation > 3',
         toState: 'Commercial',
-        newAbility: 'Gain +2 Power but lose Vínculo. Becomes commodity.',
+        newAbility: 'Ganha alcance e perde Vínculo: torna-se mercadoria.',
       },
     ],
   },
@@ -81,7 +81,7 @@ export const legends: LegendCard[] = [
   {
     id: 'legend_keeper_of_paths',
     type: 'Legend',
-    name: 'Keeper of Paths',
+    name: 'Guardião dos Caminhos',
     affinities: ['Passage', 'Movement', 'Circulation', 'City'],
     tags: ['passagem', 'deslocamento', 'urbano'],
     cost: 2,
@@ -89,17 +89,17 @@ export const legends: LegendCard[] = [
     vinculo: 2,
     presence: 2,
     mystery: 3,
-    description: 'A guardian of transitions and crossings. Appears where stories meet.',
-    flavor: 'Follow the path and the path will show you.',
+    description: '[PROVISIONAL] Um guardião das passagens. Aparece onde as histórias se cruzam.',
+    flavor: 'Siga o caminho e o caminho te mostra.',
 
     resonanceManifestations: {
       'territorio_escadaria_reviver': {
-        name: 'Crossing Guardian',
-        ability: 'Gain +1 Power. Enables free Traversal to any territory.',
+        name: 'Guardião da Passagem',
+        ability: 'Permite uma Travessia livre para qualquer Território.',
       },
       'territorio_ceprama': {
-        name: 'The Wandering Merchant',
-        ability: 'Gain resources. Can be traded for other cards.',
+        name: 'O Mascate',
+        ability: 'Ganha recursos. Pode ser trocado por outras cartas.',
       },
     },
 
@@ -107,7 +107,7 @@ export const legends: LegendCard[] = [
       {
         trigger: 'Circulation > 2',
         toState: 'Transmitted',
-        newAbility: 'Can exist in multiple territories simultaneously.',
+        newAbility: 'Passa a existir em mais de um Território ao mesmo tempo.',
       },
     ],
   },

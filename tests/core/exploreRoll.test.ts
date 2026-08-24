@@ -125,7 +125,7 @@ describe('Exploração with the die', () => {
     expect(s.pendingDiscovery).toBeUndefined();
     expect(s.memoryPool).toHaveLength(1); // still out there
     expect(s.players[0].inPlay[0].exhausted).toBe(true);
-    expect(s.log[s.log.length - 1].message).toContain('Nothing comes through');
+    expect(s.log[s.log.length - 1].message).toContain('Nada vem à tona');
   });
 
   it('on a 5, one account waits to be read', () => {
@@ -143,7 +143,7 @@ describe('Exploração with the die', () => {
     s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
 
     expect(s.pendingDiscovery!.roll).toBe(6);
-    expect(s.log[s.log.length - 1].message).toContain('more than one account');
+    expect(s.log[s.log.length - 1].message).toContain('mais de um relato');
   });
 
   it('a found Memory is not yours until it has been read aloud', () => {
@@ -152,7 +152,7 @@ describe('Exploração with the die', () => {
 
     // Everything else is held until the fact is read.
     const blocked = applyAction(s, { type: 'PassPhase', playerId: 'p1' });
-    expect(blocked.error).toBe('Read the Memória you found before doing anything else.');
+    expect(blocked.error).toBe('Leia a Memória que você encontrou antes de fazer qualquer outra coisa.');
 
     s = expectOk(applyAction(s, {
       type: 'TransmitMemory', playerId: 'p1',
@@ -161,7 +161,7 @@ describe('Exploração with the die', () => {
 
     expect(s.memoryPool).toHaveLength(0);
     expect(s.players[0].inPlay.some((c) => c.cardId === ORAL)).toBe(true);
-    expect(s.log[s.log.length - 1].message).toContain('reads Oral Account of the Serpent aloud');
+    expect(s.log[s.log.length - 1].message).toContain('lê Relato Oral da Serpente em voz alta');
   });
 
   it('refuses to transmit something that was not found', () => {
@@ -172,7 +172,7 @@ describe('Exploração with the die', () => {
     const r = applyAction(s, {
       type: 'TransmitMemory', playerId: 'p1', memoryInstanceId: stranger.instanceId,
     });
-    expect(r.error).toBe('That Memória is not among the ones you found.');
+    expect(r.error).toBe('Essa Memória não está entre as que você encontrou.');
   });
 
   it('refuses to transmit when nothing is waiting', () => {
@@ -180,7 +180,7 @@ describe('Exploração with the die', () => {
     const r = applyAction(s, {
       type: 'TransmitMemory', playerId: 'p1', memoryInstanceId: 'whatever',
     });
-    expect(r.error).toBe('There is no Memória waiting to be read.');
+    expect(r.error).toBe('Não há Memória aguardando leitura.');
   });
 
   it('the option not taken stays in the world', () => {
@@ -204,7 +204,7 @@ describe('a Memória names where it comes from', () => {
     // the Institution affinity, which is not the same as belonging there.
     let s = toAcao(setup(['memory_territorial_bells'], SEED.five, 'territorio_ceprama'));
     const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
-    expect(r.error).toContain('hears nothing further');
+    expect(r.error).toContain('não ouve mais nada');
   });
 
   it('is found in the place it does name', () => {

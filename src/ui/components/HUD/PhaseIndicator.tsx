@@ -1,4 +1,5 @@
 import { GamePhase, PHASE_ORDER } from '../../../core/game/gameState';
+import { PHASE_LABEL } from '../../../core/i18n/labels';
 import './PhaseIndicator.css';
 
 interface PhaseIndicatorProps {
@@ -13,16 +14,6 @@ const PHASE_ICONS: Record<GamePhase, string> = {
   Acao: '⚡',
   Acontecimento: '⌁',
   Encerramento: '✧',
-};
-
-const PHASE_NAMES: Record<GamePhase, string> = {
-  Despertar: 'Despertar',
-  Memoria: 'Memória',
-  Travessia: 'Travessia',
-  Manifestacao: 'Manifestação',
-  Acao: 'Ação',
-  Acontecimento: 'Acontecimento',
-  Encerramento: 'Encerramento',
 };
 
 const PHASE_DESCRIPTIONS: Record<GamePhase, string> = {
@@ -43,7 +34,7 @@ export default function PhaseIndicator({ phase }: PhaseIndicatorProps) {
       <div className="phase-display">
         <span className="phase-icon">{PHASE_ICONS[phase]}</span>
         <div className="phase-text">
-          <div className="phase-name">{PHASE_NAMES[phase]}</div>
+          <div className="phase-name">{PHASE_LABEL[phase]}</div>
           <div className="phase-description">{PHASE_DESCRIPTIONS[phase]}</div>
         </div>
       </div>

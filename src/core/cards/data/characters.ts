@@ -8,8 +8,8 @@ export const characters: CharacterCard[] = [
   {
     id: 'character_listener',
     type: 'Character',
-    name: 'The Listener',
-    role: 'Guardian of Memory',
+    name: 'A Ouvinte',
+    role: 'Guardiã da Memória',
     affinities: ['Memory', 'Culture', 'History'],
     cost: 2,
 
@@ -19,18 +19,18 @@ export const characters: CharacterCard[] = [
     vinculo: 3,
     astutia: 1,
 
-    description: 'One who hears the stories. Gathers memories from all territories.',
-    flavor: 'To listen is to understand. To understand is to preserve.',
+    description: 'Quem escuta as histórias. Reúne memórias de todos os Territórios.',
+    flavor: 'Escutar é compreender. Compreender é preservar.',
 
-    ability: 'Escuta 4: When you play a Memory, gain +1 Vínculo. Draw a card.',
-    exhaustedEffect: 'While exhausted, reduce Escuta to 0.',
+    ability: 'Escuta 4: ao jogar uma Memória, ganhe +1 Vínculo. Compre uma carta.',
+    exhaustedEffect: 'Enquanto exausta, sua Escuta é 0.',
   },
 
   {
     id: 'character_wanderer',
     type: 'Character',
-    name: 'The Wanderer',
-    role: 'Traveler Between Worlds',
+    name: 'O Caminhante',
+    role: 'Viajante Entre Mundos',
     affinities: ['Passage', 'Movement', 'City'],
     cost: 2,
 
@@ -40,18 +40,18 @@ export const characters: CharacterCard[] = [
     vinculo: 2,
     astutia: 3,
 
-    description: 'Moves freely between territories. Carries stories in transit.',
-    flavor: 'Every place is home. No place can hold me.',
+    description: 'Move-se livremente entre Territórios. Carrega histórias em trânsito.',
+    flavor: 'Todo lugar é casa. Nenhum lugar me segura.',
 
-    ability: 'Presença 3: Traversal costs 1 less. Can move territories multiple times.',
-    exhaustedEffect: 'While exhausted, cannot Traverse.',
+    ability: 'Presença 3: a Travessia custa 1 a menos.',
+    exhaustedEffect: 'Enquanto exausto, não pode fazer Travessia.',
   },
 
   {
     id: 'character_mediator',
     type: 'Character',
-    name: 'The Mediator',
-    role: 'Bridge Between Worlds',
+    name: 'O Mediador',
+    role: 'Ponte Entre Mundos',
     affinities: ['Institution', 'Circulation', 'Commerce'],
     cost: 2,
 
@@ -61,11 +61,11 @@ export const characters: CharacterCard[] = [
     vinculo: 2,
     astutia: 3,
 
-    description: 'Connects narratives to institutions. Negotiates transformation.',
-    flavor: 'The story must survive. Sometimes that means changing shape.',
+    description: 'Conecta narrativas a instituições. Negocia transformações.',
+    flavor: 'A história precisa sobreviver. Às vezes isso significa mudar de forma.',
 
-    ability: 'Astúcia 3: When playing Memory, you may transform it to Corporate.',
-    exhaustedEffect: 'While exhausted, cannot activate Corporate abilities.',
+    ability: 'Astúcia 3: ao jogar uma Memória, você pode transformá-la em Corporate.',
+    exhaustedEffect: 'Enquanto exausto, não ativa habilidades Corporate.',
   },
 ];
 

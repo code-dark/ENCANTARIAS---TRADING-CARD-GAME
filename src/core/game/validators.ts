@@ -14,6 +14,7 @@ import {
   activeTerritoryOf,
 } from './gameState';
 import { getCard } from '../cards/cardRegistry';
+import { PHASE_LABEL } from '../i18n/labels';
 import { TerritoryCard } from '../cards/types';
 import { traversalCost } from '../mechanics/traversal';
 import { bestListener, escutaOf, findByExploring } from '../mechanics/memory';
@@ -21,18 +22,18 @@ import { isStorage, remainingSpace, storedIn } from '../mechanics/objects';
 
 export function validateAction(state: GameState, action: GameAction): ValidationResult {
   if (state.isEnded) {
-    return invalid('The match is over.');
+    return invalid('A partida terminou.');
   }
 
   const current = getCurrentPlayer(state);
   if (action.playerId !== current.id) {
-    return invalid(`It is ${current.name}'s turn.`);
+    return invalid(`É a vez de ${current.name}.`);
   }
 
   // A Memory found but not yet read holds everything else: it is not yours
   // until it has been transmitted.
   if (state.pendingDiscovery && action.type !== 'TransmitMemory') {
-    return invalid('Read the Memória you found before doing anything else.');
+    return invalid('Leia a Memória que você encontrou antes de fazer qualquer outra coisa.');
   }
 
   // Passing is always available on your own turn.
@@ -42,17 +43,17 @@ export function validateAction(state: GameState, action: GameAction): Validation
 
   if (!PHASE_ACTIONS[state.phase].includes(action.type)) {
     return invalid(
-      `${labelFor(action.type)} is not available during ${state.phase}.`
+      `${labelFor(action.type)} não está disponível na fase de ${PHASE_LABEL[state.phase]}.`
     );
   }
 
   switch (action.type) {
     case 'DrawCard': {
       if (state.turnFlags.hasDrawn) {
-        return invalid('You have already recovered a Memory this turn.');
+        return invalid('Você já comprou uma carta neste turno.');
       }
       if (current.deck.length === 0) {
-        return invalid('Your deck is empty.');
+        return invalid('Seu deck está vazio.');
       }
       return VALID;
     }
@@ -60,21 +61,21 @@ export function validateAction(state: GameState, action: GameAction): Validation
     case 'PlayCard': {
       const card = current.hand.find((c) => c.instanceId === action.instanceId);
       if (!card) {
-        return invalid('That card is not in your hand.');
+        return invalid('Essa carta não está na sua mão.');
       }
 
       const def = getCard(card.cardId);
       const cost = def.cost ?? 0;
       if (cost > current.resources.memoria) {
         return invalid(
-          `${def.name} costs ${cost} Memória; you have ${current.resources.memoria}.`
+          `${def.name} custa ${cost} de Memória; você tem ${current.resources.memoria}.`
         );
       }
 
       // Territories are not manifested onto the table — they join the
       // player's territory pool and become reachable by Travessia.
       if (def.type !== 'Territory' && !activeTerritoryOf(current)) {
-        return invalid('You need an active Território before manifesting cards.');
+        return invalid('Você precisa de um Território ativo para manifestar cartas.');
       }
 
       return VALID;
@@ -82,17 +83,17 @@ export function validateAction(state: GameState, action: GameAction): Validation
 
     case 'Traverse': {
       if (state.turnFlags.hasTraversed) {
-        return invalid('You have already made a Travessia this turn.');
+        return invalid('Você já fez uma Travessia neste turno.');
       }
 
       const target = current.territories.find(
         (t) => t.instanceId === action.territoryInstanceId
       );
       if (!target) {
-        return invalid('That Território is not one of yours.');
+        return invalid('Esse Território não é seu.');
       }
       if (target.instanceId === current.activeTerritoryId) {
-        return invalid('You are already in that Território.');
+        return invalid('Você já está nesse Território.');
       }
 
       // Travessia is never free.
@@ -103,8 +104,8 @@ export function validateAction(state: GameState, action: GameAction): Validation
       );
       if (cost > current.resources.memoria) {
         return invalid(
-          `Travessia to ${getCard(target.cardId).name} costs ${cost} Memória; ` +
-            `you have ${current.resources.memoria}.`
+          `Travessia para ${getCard(target.cardId).name} custa ${cost} de Memória; ` +
+            `você tem ${current.resources.memoria}.`
         );
       }
 
@@ -114,7 +115,7 @@ export function validateAction(state: GameState, action: GameAction): Validation
     case 'Explore': {
       const territory = activeTerritoryOf(current);
       if (!territory) {
-        return invalid('You need an active Território to explore.');
+        return invalid('Você precisa de um Território ativo para explorar.');
       }
       const territoryDef = getCard(territory.cardId) as TerritoryCard;
 
@@ -122,7 +123,7 @@ export function validateAction(state: GameState, action: GameAction): Validation
       const listener = bestListener(current.inPlay, territory.instanceId);
       if (!listener) {
         return invalid(
-          `You need a Personagem manifested in ${territoryDef.name} to listen.`
+          `Você precisa de um Personagem manifestado em ${territoryDef.name} para escutar.`
         );
       }
 
@@ -134,7 +135,7 @@ export function validateAction(state: GameState, action: GameAction): Validation
       });
       if (found.length === 0) {
         return invalid(
-          `${getCard(listener.cardId).name} hears nothing further in ${territoryDef.name}.`
+          `${getCard(listener.cardId).name} não ouve mais nada em ${territoryDef.name}.`
         );
       }
 
@@ -144,28 +145,28 @@ export function validateAction(state: GameState, action: GameAction): Validation
     case 'StoreMemory': {
       const memory = current.inPlay.find((c) => c.instanceId === action.memoryInstanceId);
       if (!memory) {
-        return invalid('That Memória is not on your table.');
+        return invalid('Essa Memória não está na sua mesa.');
       }
       if (getCard(memory.cardId).type !== 'Memory') {
-        return invalid('Only a Memória can be kept in an object.');
+        return invalid('Só uma Memória pode ser guardada em um objeto.');
       }
 
       const container = current.inPlay.find(
         (c) => c.instanceId === action.containerInstanceId
       );
       if (!container) {
-        return invalid('That object is not on your table.');
+        return invalid('Esse objeto não está na sua mesa.');
       }
       if (!isStorage(container)) {
-        return invalid(`${getCard(container.cardId).name} does not keep Memórias.`);
+        return invalid(`${getCard(container.cardId).name} não guarda Memórias.`);
       }
       if (memory.linkedTo === container.instanceId) {
-        return invalid('That Memória is already kept there.');
+        return invalid('Essa Memória já está guardada aí.');
       }
       if (remainingSpace(current.inPlay, container) <= 0) {
         const def = getCard(container.cardId);
         return invalid(
-          `${def.name} is full (${storedIn(current.inPlay, container.instanceId).length}).`
+          `${def.name} está cheia (${storedIn(current.inPlay, container.instanceId).length}).`
         );
       }
 
@@ -175,18 +176,18 @@ export function validateAction(state: GameState, action: GameAction): Validation
     case 'RetrieveMemory': {
       const memory = current.inPlay.find((c) => c.instanceId === action.memoryInstanceId);
       if (!memory) {
-        return invalid('That Memória is not on your table.');
+        return invalid('Essa Memória não está na sua mesa.');
       }
 
       const container = memory.linkedTo
         ? current.inPlay.find((c) => c.instanceId === memory.linkedTo)
         : undefined;
       if (!container || !isStorage(container)) {
-        return invalid('That Memória is not being kept in an object.');
+        return invalid('Essa Memória não está guardada em nenhum objeto.');
       }
 
       if (!activeTerritoryOf(current)) {
-        return invalid('You need an active Território to bring it back out.');
+        return invalid('Você precisa de um Território ativo para trazê-la de volta.');
       }
 
       return VALID;
@@ -195,10 +196,10 @@ export function validateAction(state: GameState, action: GameAction): Validation
     case 'TransmitMemory': {
       const pending = state.pendingDiscovery;
       if (!pending) {
-        return invalid('There is no Memória waiting to be read.');
+        return invalid('Não há Memória aguardando leitura.');
       }
       if (!pending.options.some((o) => o.instanceId === action.memoryInstanceId)) {
-        return invalid('That Memória is not among the ones you found.');
+        return invalid('Essa Memória não está entre as que você encontrou.');
       }
       return VALID;
     }
@@ -206,15 +207,15 @@ export function validateAction(state: GameState, action: GameAction): Validation
     case 'ActivateResonance': {
       const card = current.inPlay.find((c) => c.instanceId === action.instanceId);
       if (!card) {
-        return invalid('That card is not on the table.');
+        return invalid('Essa carta não está na mesa.');
       }
       if (card.exhausted) {
-        return invalid(`${getCard(card.cardId).name} is exhausted this turn.`);
+        return invalid(`${getCard(card.cardId).name} está exausta neste turno.`);
       }
 
       const territory = activeTerritoryOf(current);
       if (!territory) {
-        return invalid('Ressonância needs an active Território.');
+        return invalid('A Ressonância precisa de um Território ativo.');
       }
       return VALID;
     }
@@ -224,19 +225,19 @@ export function validateAction(state: GameState, action: GameAction): Validation
 function labelFor(type: GameAction['type']): string {
   switch (type) {
     case 'DrawCard':
-      return 'Recovering a Memory';
+      return 'Comprar carta';
     case 'PlayCard':
-      return 'Manifesting a card';
+      return 'Manifestar carta';
     case 'Traverse':
       return 'Travessia';
     case 'Explore':
-      return 'Exploring the Território';
+      return 'Escutar o Território';
     case 'StoreMemory':
-      return 'Keeping a Memória';
+      return 'Guardar uma Memória';
     case 'RetrieveMemory':
-      return 'Bringing a Memória back out';
+      return 'Retirar uma Memória';
     case 'TransmitMemory':
-      return 'Transmitting a Memória';
+      return 'Transmitir uma Memória';
     case 'ActivateResonance':
       return 'Ressonância';
     default:

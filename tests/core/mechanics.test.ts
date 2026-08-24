@@ -105,8 +105,8 @@ describe('Travessia', () => {
     );
 
     const last = s.log[s.log.length - 1].message;
-    expect(last).toContain('carrying Shared: The Crossed Paths');
-    expect(last).toContain('leaving Roots: The Eternal Spring behind');
+    expect(last).toContain('levando Shared: Os Caminhos Cruzados');
+    expect(last).toContain('deixando Roots: A Fonte Perene para trás');
   });
 
   it('allows only one Travessia per turn', () => {
@@ -117,7 +117,7 @@ describe('Travessia', () => {
 
     const fonteId = s.players[0].territories.find((t) => t.cardId === FONTE)!.instanceId;
     const again = applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: fonteId });
-    expect(again.error).toBe('You have already made a Travessia this turn.');
+    expect(again.error).toBe('Você já fez uma Travessia neste turno.');
   });
 
   it('refuses crossing to where you already are', () => {
@@ -127,14 +127,14 @@ describe('Travessia', () => {
       playerId: 'p1',
       territoryInstanceId: s.players[0].activeTerritoryId,
     });
-    expect(r.error).toBe('You are already in that Território.');
+    expect(r.error).toBe('Você já está nesse Território.');
   });
 
   it("refuses crossing to another player's Território", () => {
     const s = advanceTo(setup(), 'Travessia');
     const foreign = s.players[1].territories[0].instanceId;
     const r = applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: foreign });
-    expect(r.error).toBe('That Território is not one of yours.');
+    expect(r.error).toBe('Esse Território não é seu.');
   });
 });
 
@@ -222,7 +222,7 @@ describe('Travessia cost', () => {
     const r = applyAction(s, {
       type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId,
     });
-    expect(r.error).toBe('Travessia to Igreja da Sé costs 2 Memória; you have 0.');
+    expect(r.error).toBe('Travessia para Igreja da Sé custa 2 de Memória; você tem 0.');
     expect(r.state).toBe(s); // nothing moved, nothing spent
   });
 
@@ -231,7 +231,7 @@ describe('Travessia cost', () => {
     s = expectOk(
       applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
     );
-    expect(s.log[s.log.length - 1].message).toContain('for 2 Memória');
+    expect(s.log[s.log.length - 1].message).toContain('por 2 de Memória');
   });
 });
 
@@ -247,7 +247,7 @@ describe('Ressonância', () => {
     );
 
     expect(s.players[0].resources.vinculo).toBeGreaterThan(0);
-    expect(s.log[s.log.length - 1].message).toContain('resonates with Fonte do Ribeirão');
+    expect(s.log[s.log.length - 1].message).toContain('ressoa com Fonte do Ribeirão');
   });
 
   it('reports no Ressonância in an unrelated Território', () => {
@@ -263,7 +263,7 @@ describe('Ressonância', () => {
     );
 
     expect(s.players[0].resources.vinculo).toBe(0);
-    expect(s.log[s.log.length - 1].message).toContain('finds no Ressonância');
+    expect(s.log[s.log.length - 1].message).toContain('não encontra Ressonância');
   });
 
   it('exhausts the card so it cannot resonate twice in one turn', () => {
@@ -279,7 +279,7 @@ describe('Ressonância', () => {
     const again = applyAction(s, {
       type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId,
     });
-    expect(again.error).toBe('Serpent Encantada is exhausted this turn.');
+    expect(again.error).toBe('Serpente Encantada está exausta neste turno.');
   });
 });
 

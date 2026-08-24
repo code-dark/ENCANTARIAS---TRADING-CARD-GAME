@@ -45,7 +45,7 @@ describe('tags', () => {
     const instances = pool([ORAL, SHARED]);
     const serpentine = filterInstancesByTags(instances, ['serpente']);
     expect(serpentine).toHaveLength(1);
-    expect(getCard(serpentine[0].cardId).name).toBe('Oral Account of the Serpent');
+    expect(getCard(serpentine[0].cardId).name).toBe('Relato Oral da Serpente');
   });
 });
 
@@ -58,13 +58,13 @@ describe('addressable sources', () => {
   it('finds the Memories a named origin can hand over', () => {
     const found = findBySourceId(pool([ORAL, ROOTS, SHARED]), FONTE);
     expect(found).toHaveLength(1);
-    expect(getCard(found[0].cardId).name).toBe('Oral Account of the Serpent');
+    expect(getCard(found[0].cardId).name).toBe('Relato Oral da Serpente');
   });
 
   it('addresses a Ressonância as an origin of its own', () => {
     const found = findBySourceId(pool([ORAL, ROOTS]), 'ressonancia_serpente_ribeirao');
     expect(found).toHaveLength(1);
-    expect(getCard(found[0].cardId).name).toBe('Roots: The Eternal Spring');
+    expect(getCard(found[0].cardId).name).toBe('Roots: A Fonte Perene');
   });
 
   it('returns nothing for an origin no Memory names', () => {

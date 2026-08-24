@@ -3,6 +3,7 @@ import { getCard } from '../../../core/cards/cardRegistry';
 import { TerritoryCard } from '../../../core/cards/types';
 import { traversalCost } from '../../../core/mechanics/traversal';
 import { isStorage, storedIn, capacityOf, openContainers } from '../../../core/mechanics/objects';
+import { AFFINITY_LABEL } from '../../../core/i18n/labels';
 import { useGameStore } from '../../../store/gameStore';
 import CardVisual from '../Card/CardVisual';
 import './Board.css';
@@ -47,7 +48,7 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
 
         <div className="affinity-list">
           {territory.affinities.map((aff) => (
-            <span key={aff} className="affinity-tag">{aff}</span>
+            <span key={aff} className="affinity-tag">{AFFINITY_LABEL[aff]}</span>
           ))}
         </div>
 

@@ -126,7 +126,7 @@ export function runEncerramento(state: GameState): GameState {
 
     next = appendLog(
       next, player.id,
-      `${match.name} forms in ${territoryDef.name} — ` +
+      `${match.name} se forma em ${territoryDef.name} — ` +
         `${participantNames(match).join(' + ')}. ${match.effect}`
     );
 
@@ -135,7 +135,7 @@ export function runEncerramento(state: GameState): GameState {
       next = claimMemory(next, player.id, memory, territory.instanceId);
       next = appendLog(
         next, player.id,
-        `${match.name} uncovers ${getCard(memory.cardId).name}.`
+        `${match.name} revela ${getCard(memory.cardId).name}.`
       );
     }
   }
@@ -160,7 +160,7 @@ export function endTurn(state: GameState): GameState {
   };
 
   if (ended) {
-    return appendLog(rotated, state.players[state.currentPlayerIndex].id, 'The match reached its turn limit.');
+    return appendLog(rotated, state.players[state.currentPlayerIndex].id, 'A partida atingiu o limite de turnos.');
   }
 
   // Despertar resolves immediately for the incoming player.
@@ -177,7 +177,7 @@ export function runAwaken(state: GameState): GameState {
     territories: p.territories.map((c) => (c.exhausted ? { ...c, exhausted: false } : c)),
   }));
 
-  return appendLog(refreshed, player.id, `${player.name} awakens.`);
+  return appendLog(refreshed, player.id, `${player.name} desperta.`);
 }
 
 /* ------------------------------------------------------------------ *
@@ -199,7 +199,7 @@ function resolveDraw(state: GameState, playerId: string): GameState {
   return appendLog(
     { ...next, turnFlags: { ...next.turnFlags, hasDrawn: true } },
     playerId,
-    `${player.name} recovers ${getCard(drawn.cardId).name}.`
+    `${player.name} compra ${getCard(drawn.cardId).name}.`
   );
 }
 
@@ -228,10 +228,10 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
 
   const where =
     def.type === 'Territory'
-      ? 'adds it to their Territórios'
-      : 'manifests it';
+      ? 'e o acrescenta aos seus Territórios'
+      : 'e a manifesta';
 
-  let out = appendLog(next, playerId, `${player.name} plays ${def.name} and ${where}.`);
+  let out = appendLog(next, playerId, `${player.name} joga ${def.name} ${where}.`);
 
   // A document or a record reaches a Memory that already exists in the world.
   // It never creates one: if nothing answers, nothing is added.
@@ -248,10 +248,10 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
         out = claimMemory(out, playerId, reached, territory.instanceId);
         out = appendLog(
           out, playerId,
-          `${def.name} reaches ${getCard(reached.cardId).name}.`
+          `${def.name} alcança ${getCard(reached.cardId).name}.`
         );
       } else if (def.accessSources?.length || def.accessTags?.length) {
-        out = appendLog(out, playerId, `${def.name} points at nothing still unfound.`);
+        out = appendLog(out, playerId, `${def.name} aponta para algo que já não está por descobrir.`);
       }
     }
   }
@@ -303,9 +303,9 @@ function resolveTraverse(
     }),
   }));
 
-  const parts = [`${player.name} crosses to ${toDef.name} for ${cost} Memória`];
-  if (travelled.length) parts.push(`carrying ${travelled.join(', ')}`);
-  if (stayed.length) parts.push(`leaving ${stayed.join(', ')} behind`);
+  const parts = [`${player.name} atravessa para ${toDef.name} por ${cost} de Memória`];
+  if (travelled.length) parts.push(`levando ${travelled.join(', ')}`);
+  if (stayed.length) parts.push(`deixando ${stayed.join(', ')} para trás`);
 
   return appendLog(
     { ...next, turnFlags: { ...next.turnFlags, hasTraversed: true } },
@@ -378,8 +378,8 @@ function resolveExplore(state: GameState, playerId: string): GameState {
   if (outcome === 'nothing') {
     return appendLog(
       next, playerId,
-      `${listenerName} listens in ${territoryDef.name} — rolls ${roll}. ` +
-        `Nothing comes through this time.`
+      `${listenerName} escuta em ${territoryDef.name} — rola ${roll}. ` +
+        `Nada vem à tona desta vez.`
     );
   }
 
@@ -388,10 +388,10 @@ function resolveExplore(state: GameState, playerId: string): GameState {
   next = appendLog(
     next, playerId,
     outcome === 'choice'
-      ? `${listenerName} listens in ${territoryDef.name} — rolls ${roll}. ` +
-          `The place offers more than one account.`
-      : `${listenerName} listens in ${territoryDef.name} — rolls ${roll} ` +
-          `(${EXPLORE_SUCCESS}+). Something comes through.`
+      ? `${listenerName} escuta em ${territoryDef.name} — rola ${roll}. ` +
+          `O lugar oferece mais de um relato.`
+      : `${listenerName} escuta em ${territoryDef.name} — rola ${roll} ` +
+          `(${EXPLORE_SUCCESS}+). Algo vem à tona.`
   );
 
   return {
@@ -430,8 +430,8 @@ function resolveTransmit(
   const player = state.players.find((p) => p.id === playerId)!;
   return appendLog(
     claimed, playerId,
-    `${player.name} reads ${getCard(chosen.cardId).name} aloud. ` +
-      `It is remembered.`
+    `${player.name} lê ${getCard(chosen.cardId).name} em voz alta. ` +
+      `A Memória é lembrada.`
   );
 }
 
@@ -459,8 +459,8 @@ function resolveStore(
 
   return appendLog(
     next, playerId,
-    `${getCard(memory.cardId).name} is kept in ${getCard(container.cardId).name}, ` +
-      `protected and out of circulation.`
+    `${getCard(memory.cardId).name} é guardada em ${getCard(container.cardId).name}, ` +
+      `protegida e fora de circulação.`
   );
 }
 
@@ -483,7 +483,7 @@ function resolveRetrieve(
 
   return appendLog(
     next, playerId,
-    `${getCard(memory.cardId).name} returns to circulation in ` +
+    `${getCard(memory.cardId).name} volta à circulação em ` +
       `${getCard(territory.cardId).name}.`
   );
 }
@@ -506,7 +506,7 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     return appendLog(
       state,
       playerId,
-      `${def.name} finds no Ressonância in ${territoryDef.name}.`
+      `${def.name} não encontra Ressonância em ${territoryDef.name}.`
     );
   }
 
@@ -521,7 +521,7 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
   next = appendLog(
     next,
     playerId,
-    `${def.name} resonates with ${territoryDef.name}: ${matches.map((m) => m.effect).join(' ')}`
+    `${def.name} ressoa com ${territoryDef.name}: ${matches.map((m) => m.effect).join(' ')}`
   );
 
   // The manifestation opens layers of the place that listening alone cannot
@@ -532,7 +532,7 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     next = appendLog(
       next,
       playerId,
-      `The manifestation uncovers ${getCard(memory.cardId).name} in ${territoryDef.name}.`
+      `A manifestação revela ${getCard(memory.cardId).name} em ${territoryDef.name}.`
     );
   }
 

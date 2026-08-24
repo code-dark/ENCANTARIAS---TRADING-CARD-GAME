@@ -68,7 +68,7 @@ describe('Cortejo Maldito: a Ressonância that needs a gathering', () => {
     place(s, MULA);
     s = advanceTo(s, 'Encerramento');
 
-    expect(logged(s, 'Cortejo Maldito forms in Cemitério do Gavião')).toBe(true);
+    expect(logged(s, 'Cortejo Maldito se forma em Cemitério do Gavião')).toBe(true);
     expect(s.players[0].resources.vinculo).toBe(1);
   });
 
@@ -82,7 +82,7 @@ describe('Cortejo Maldito: a Ressonância that needs a gathering', () => {
     const found = s.players[0].inPlay.find((c) => c.cardId === PASSAGEM);
     expect(found).toBeDefined();
     expect(found!.linkedTo).toBe(s.players[0].activeTerritoryId);
-    expect(logged(s, 'uncovers A Passagem Ouvida')).toBe(true);
+    expect(logged(s, 'revela A Passagem Ouvida')).toBe(true);
   });
 
   it('fires once, so standing there does not reopen it every turn', () => {
@@ -91,7 +91,7 @@ describe('Cortejo Maldito: a Ressonância that needs a gathering', () => {
     place(s, MULA);
     s = advanceTo(s, 'Encerramento');
 
-    const firstCount = s.log.filter((e) => e.message.includes('Cortejo Maldito forms')).length;
+    const firstCount = s.log.filter((e) => e.message.includes('Cortejo Maldito se forma')).length;
     expect(firstCount).toBe(1);
 
     // Full round trip back to this player's Encerramento with the same table.
@@ -101,7 +101,7 @@ describe('Cortejo Maldito: a Ressonância that needs a gathering', () => {
       if (++guard > 60) throw new Error('never came back around');
     } while (!(getCurrentPlayer(s).id === 'p1' && s.phase === 'Encerramento'));
 
-    const afterCount = s.log.filter((e) => e.message.includes('Cortejo Maldito forms')).length;
+    const afterCount = s.log.filter((e) => e.message.includes('Cortejo Maldito se forma')).length;
     expect(afterCount).toBe(1);
     expect(s.players[0].resources.vinculo).toBe(1); // no repeated payout
   });

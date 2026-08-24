@@ -16,22 +16,22 @@ export interface Journey {
 export const journeys: Journey[] = [
   {
     id: 'journey_keeper_of_memories',
-    name: 'Keeper of Memories',
-    description: 'Establish a chain of Memory transmission across three territories.',
+    name: 'Guardiã da Memória',
+    description: 'Estabeleça uma cadeia de transmissão de Memória por três Territórios.',
     objectives: [
       {
         id: 'obj_1_collect_3_memories',
-        description: 'Collect 3 different Memory cards',
+        description: 'Reúna 3 Memórias diferentes',
         completed: false,
       },
       {
         id: 'obj_2_transmit_2_memories',
-        description: 'Transmit 2 Memories to new territories',
+        description: 'Transmita 2 Memórias para novos Territórios',
         completed: false,
       },
       {
         id: 'obj_3_maintain_vínculo',
-        description: 'Maintain Vínculo of 5+ for 2 turns',
+        description: 'Mantenha Vínculo 5 ou mais',
         completed: false,
       },
     ],
@@ -39,22 +39,22 @@ export const journeys: Journey[] = [
 
   {
     id: 'journey_wanderer_of_cities',
-    name: 'Wanderer of Cities',
-    description: 'Visit all territories and establish local presence.',
+    name: 'Caminhante da Cidade',
+    description: 'Percorra a cidade e estabeleça presença em cada lugar.',
     objectives: [
       {
         id: 'obj_1_visit_2_territories',
-        description: 'Traverse to at least 2 different territories',
+        description: 'Faça Travessia para ao menos 2 Territórios diferentes',
         completed: false,
       },
       {
         id: 'obj_2_activate_resonance_3',
-        description: 'Activate 3 different Resonances',
+        description: 'Ative 3 Ressonâncias diferentes',
         completed: false,
       },
       {
         id: 'obj_3_control_passage',
-        description: 'Control at least one Passage-aligned Legend',
+        description: 'Tenha ao menos uma Lenda de afinidade Passagem',
         completed: false,
       },
     ],
@@ -62,22 +62,22 @@ export const journeys: Journey[] = [
 
   {
     id: 'journey_bridge_of_worlds',
-    name: 'Bridge of Worlds',
-    description: 'Transform narratives and bridge institutional and oral traditions.',
+    name: 'Ponte Entre Mundos',
+    description: 'Transforme narrativas e ligue o registro institucional à tradição oral.',
     objectives: [
       {
         id: 'obj_1_create_transformation',
-        description: 'Successfully transform 1 Legend',
+        description: 'Transforme 1 Lenda',
         completed: false,
       },
       {
         id: 'obj_2_oral_and_institutional',
-        description: 'Have both Oral and Corporate Memories in play',
+        description: 'Tenha em jogo Memórias Oral e Corporate',
         completed: false,
       },
       {
         id: 'obj_3_mediate_circulation',
-        description: 'Achieve Circulation threshold on at least 2 cards',
+        description: 'Atinja o limiar de Circulação em ao menos 2 cartas',
         completed: false,
       },
     ],
