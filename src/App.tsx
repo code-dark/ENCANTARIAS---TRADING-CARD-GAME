@@ -3,6 +3,7 @@ import { useGameStore } from './store/gameStore';
 import { createGameState, Player } from './core/game/gameState';
 import { emptyPlayer } from './core/rules/turnResolver';
 import { createInstance, createInstances } from './core/cards/cardRegistry';
+import { memories } from './core/cards/data/memories';
 import { getRandomJourney } from './core/cards/data/journeys';
 import GameScreen from './ui/screens/GameScreen';
 import './App.css';
@@ -37,19 +38,11 @@ const DECK_INSTITUTION = [
 ];
 
 /**
- * The Memories waiting in São Luís. They belong to no player until someone
- * listens for them, or a Lenda manifests and opens that layer of the place.
+ * Every Memory in the game waits in São Luís until someone reaches it. They
+ * belong to no player until listened for, uncovered by a Lenda, or reached
+ * through a record.
  */
-const WORLD_MEMORIES = [
-  'memory_oral_serpent',
-  'memory_territorial_bells',
-  'memory_enraizada_fountain',
-  'memory_transmitida_paths',
-  'memory_institutional_bells',
-  'memory_midiatic_circulating',
-  'memory_beira_mar_imagem',
-  'memory_cortejo_passagem',
-];
+const WORLD_MEMORIES = memories.map((m) => m.id);
 
 function buildPlayer(
   id: string,
