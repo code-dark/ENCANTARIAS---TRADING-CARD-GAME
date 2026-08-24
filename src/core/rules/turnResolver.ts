@@ -19,7 +19,7 @@ import {
 } from '../game/gameState';
 import { getCard } from '../cards/cardRegistry';
 import { TerritoryCard } from '../cards/types';
-import { evaluateMemoryPersistence } from '../mechanics/traversal';
+import { evaluateMemoryPersistence, traversalCost } from '../mechanics/traversal';
 import { detectResonances } from '../mechanics/resonance';
 
 export interface ApplyResult {
@@ -174,6 +174,7 @@ function resolveTraverse(
 
   const fromDef = from ? (getCard(from.cardId) as TerritoryCard) : undefined;
   const toDef = getCard(to.cardId) as TerritoryCard;
+  const cost = traversalCost(fromDef, toDef);
 
   const stayed: string[] = [];
   const travelled: string[] = [];
@@ -181,6 +182,7 @@ function resolveTraverse(
   const next = updatePlayer(state, playerId, (p) => ({
     ...p,
     activeTerritoryId: territoryInstanceId,
+    resources: { ...p.resources, memoria: p.resources.memoria - cost },
     inPlay: p.inPlay.map((c) => {
       // Only cards rooted in the territory being left are re-evaluated.
       if (!from || c.linkedTo !== from.instanceId) return c;
@@ -200,7 +202,7 @@ function resolveTraverse(
     }),
   }));
 
-  const parts = [`${player.name} crosses to ${toDef.name}`];
+  const parts = [`${player.name} crosses to ${toDef.name} for ${cost} Memória`];
   if (travelled.length) parts.push(`carrying ${travelled.join(', ')}`);
   if (stayed.length) parts.push(`leaving ${stayed.join(', ')} behind`);
 

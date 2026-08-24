@@ -1,6 +1,7 @@
 import { Player, activeTerritoryOf } from '../../../core/game/gameState';
 import { getCard } from '../../../core/cards/cardRegistry';
 import { TerritoryCard } from '../../../core/cards/types';
+import { traversalCost } from '../../../core/mechanics/traversal';
 import { useGameStore } from '../../../store/gameStore';
 import CardVisual from '../Card/CardVisual';
 import './Board.css';
@@ -54,16 +55,24 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
                 territoryInstanceId: t.instanceId,
               };
               const verdict = isActivePlayer ? check(action) : { valid: false, reason: undefined };
+              const cost = isActive
+                ? 0
+                : traversalCost(territory, def as TerritoryCard);
 
               return (
                 <button
                   key={t.instanceId}
                   className={isActive ? 'territory-option active' : 'territory-option'}
                   disabled={!verdict.valid}
-                  title={verdict.valid ? `Travessia para ${def.name}` : verdict.reason}
+                  title={
+                    verdict.valid
+                      ? `Travessia para ${def.name} — custa ${cost} Memória`
+                      : verdict.reason
+                  }
                   onClick={() => dispatch(action)}
                 >
                   {def.name}
+                  {!isActive && <span className="travessia-cost">{cost}</span>}
                 </button>
               );
             })}

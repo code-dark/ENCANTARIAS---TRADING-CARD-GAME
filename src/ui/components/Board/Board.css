@@ -228,3 +228,24 @@
   font-style: italic;
   margin: 0 0 8px;
 }
+
+/* Travessia price, shown on the button so the cost is never a surprise. */
+.travessia-cost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 8px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background-color: rgba(122, 163, 213, 0.28);
+  border: 1px solid rgba(155, 196, 226, 0.5);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #cfe2f3;
+}
+
+.territory-option:disabled .travessia-cost {
+  opacity: 0.55;
+}

@@ -98,6 +98,27 @@ Awaken → draw → Travessia → manifest, no console errors. Two layout defect
 found and fixed that the build could not have caught — the phase indicator
 overlapping the header, and small cards too narrow to hold a title.
 
+### Travessia cost
+
+Travessia is no longer free. It is paid in Memória — the same resource that
+manifests cards — so crossing is an opportunity cost rather than a free reskin
+of the table, as the GDD requires.
+
+The price follows the map instead of being a flat toll: crossing between
+Territórios that share an affinity costs `TRAVESSIA_BASE_COST` (1); jumping to
+an unrelated context adds `TRAVESSIA_UNRELATED_SURCHARGE` (1). Both are
+constants in `mechanics/traversal.ts` and are balance dials for playtest.
+The price is shown on each Território button and named in the refusal when it
+cannot be paid.
+
+**Open balance finding.** Across the four shipped Territórios, Fonte do
+Ribeirão shares no affinity with any other, so every crossing to or from it
+costs the maximum 2, while Igreja / Escadaria / CEPRAMA form a fully connected
+triangle at 1. With the current starting decks that taxes Player 1 (Fonte +
+Escadaria) twice over for every crossing Player 2 makes at half price. This is
+a design decision for the author, not something to patch by editing the
+affinities of a real place: those are [PROVISIONAL] research-dependent content.
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,

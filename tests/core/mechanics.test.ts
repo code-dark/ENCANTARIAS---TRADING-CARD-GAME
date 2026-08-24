@@ -7,7 +7,12 @@ import {
 } from '../../src/core/game/gameState';
 import { applyAction, emptyPlayer } from '../../src/core/rules/turnResolver';
 import { createInstance, resetInstanceIds, getCard } from '../../src/core/cards/cardRegistry';
-import { evaluateMemoryPersistence } from '../../src/core/mechanics/traversal';
+import {
+  evaluateMemoryPersistence,
+  traversalCost,
+  TRAVESSIA_BASE_COST,
+  TRAVESSIA_UNRELATED_SURCHARGE,
+} from '../../src/core/mechanics/traversal';
 import { MemoryCard, TerritoryCard } from '../../src/core/cards/types';
 
 const FONTE = 'territorio_fonte_ribeirao';
@@ -29,6 +34,10 @@ function setup(): GameState {
   const t2 = createInstance(FONTE, 'p2');
   p2.territories = [t2];
   p2.activeTerritoryId = t2.instanceId;
+
+  // Travessia costs Memória; these tests are about what crossing does, not
+  // about affording it, so fund the crossing player.
+  p1.resources.memoria = 5;
 
   return createGameState([p1, p2]);
 }
@@ -163,6 +172,66 @@ describe('memory persistence rules', () => {
   it('honours the state of the copy in play over the definition', () => {
     // A definition that starts Shared, transformed into Roots on the table.
     expect(evaluateMemoryPersistence(memory('Shared'), from, to, 'Roots')).toBe('stays');
+  });
+});
+
+describe('Travessia cost', () => {
+  const territory = (affinities: string[]) =>
+    ({ id: 't', type: 'Territory', name: 'T', category: 'x', affinities } as unknown as TerritoryCard);
+
+  it('charges less when the two Territórios share an affinity', () => {
+    const from = territory(['Water', 'Memory']);
+    const to = territory(['Memory', 'Faith']);
+    expect(traversalCost(from, to)).toBe(TRAVESSIA_BASE_COST);
+  });
+
+  it('charges a surcharge for jumping to an unrelated context', () => {
+    const from = territory(['Water']);
+    const to = territory(['Commerce']);
+    expect(traversalCost(from, to)).toBe(TRAVESSIA_BASE_COST + TRAVESSIA_UNRELATED_SURCHARGE);
+  });
+
+  it('costs nothing to take up a first Território', () => {
+    expect(traversalCost(undefined, territory(['Water']))).toBe(0);
+  });
+
+  it('is never free: every crossing charges at least the base cost', () => {
+    const from = territory(['Water', 'Memory', 'Faith']);
+    const to = territory(['Water', 'Memory', 'Faith']); // maximum overlap
+    expect(traversalCost(from, to)).toBeGreaterThan(0);
+  });
+
+  it('deducts the cost from Memória when crossing', () => {
+    let s = setup();
+    s.players[0].resources.memoria = 4;
+    s = advanceTo(s, 'Movement');
+
+    s = expectOk(
+      applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
+    );
+
+    // Fonte and Igreja share no affinity, so this is the surcharged price.
+    expect(s.players[0].resources.memoria).toBe(4 - (TRAVESSIA_BASE_COST + TRAVESSIA_UNRELATED_SURCHARGE));
+  });
+
+  it('refuses a crossing the player cannot pay, naming the price', () => {
+    let s = setup();
+    s.players[0].resources.memoria = 0;
+    s = advanceTo(s, 'Movement');
+
+    const r = applyAction(s, {
+      type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId,
+    });
+    expect(r.error).toBe('Travessia to Igreja da Sé costs 2 Memória; you have 0.');
+    expect(r.state).toBe(s); // nothing moved, nothing spent
+  });
+
+  it('records the price paid in the log', () => {
+    let s = advanceTo(setup(), 'Movement');
+    s = expectOk(
+      applyAction(s, { type: 'Traverse', playerId: 'p1', territoryInstanceId: igrejaOf(s).instanceId })
+    );
+    expect(s.log[s.log.length - 1].message).toContain('for 2 Memória');
   });
 });
 

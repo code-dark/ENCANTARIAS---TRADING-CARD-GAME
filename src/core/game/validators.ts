@@ -14,6 +14,8 @@ import {
   activeTerritoryOf,
 } from './gameState';
 import { getCard } from '../cards/cardRegistry';
+import { TerritoryCard } from '../cards/types';
+import { traversalCost } from '../mechanics/traversal';
 
 export function validateAction(state: GameState, action: GameAction): ValidationResult {
   if (state.isEnded) {
@@ -84,6 +86,20 @@ export function validateAction(state: GameState, action: GameAction): Validation
       if (target.instanceId === current.activeTerritoryId) {
         return invalid('You are already in that Território.');
       }
+
+      // Travessia is never free.
+      const origin = activeTerritoryOf(current);
+      const cost = traversalCost(
+        origin ? (getCard(origin.cardId) as TerritoryCard) : undefined,
+        getCard(target.cardId) as TerritoryCard
+      );
+      if (cost > current.resources.memoria) {
+        return invalid(
+          `Travessia to ${getCard(target.cardId).name} costs ${cost} Memória; ` +
+            `you have ${current.resources.memoria}.`
+        );
+      }
+
       return VALID;
     }
 

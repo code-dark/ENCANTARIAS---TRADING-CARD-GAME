@@ -4,6 +4,36 @@
  */
 
 import { AnyCard, MemoryCard, MemoryState, TerritoryCard } from '../cards/types';
+import { getSharedAffinities } from './affinity';
+
+/**
+ * Travessia is never free: the GDD requires it to charge an action, a
+ * resource, a card or a condition, so that changing Território is a decision
+ * rather than a free reskin of the table.
+ *
+ * The price is paid in Memória, the same resource that manifests cards, which
+ * is what makes crossing an opportunity cost: cross, or manifest, not both.
+ *
+ * Crossing between Territórios that share an affinity is cheaper than jumping
+ * to an unrelated context — the map, not a flat toll, sets the price. Both
+ * numbers are balance dials and want playtest, not argument.
+ */
+export const TRAVESSIA_BASE_COST = 1;
+export const TRAVESSIA_UNRELATED_SURCHARGE = 1;
+
+/**
+ * What it costs to cross from one Território to another.
+ * Taking up a first Território is not a crossing and costs nothing.
+ */
+export function traversalCost(
+  from: TerritoryCard | undefined,
+  to: TerritoryCard
+): number {
+  if (!from) return 0;
+
+  const continuous = getSharedAffinities(from, to).length > 0;
+  return TRAVESSIA_BASE_COST + (continuous ? 0 : TRAVESSIA_UNRELATED_SURCHARGE);
+}
 
 export type MemoryPersistence = 'stays' | 'travels' | 'transforms';
 
