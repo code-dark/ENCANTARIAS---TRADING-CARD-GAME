@@ -39,7 +39,9 @@ export const PHASE_ACTIONS: Record<GamePhase, string[]> = {
   Memoria: ['DrawCard'],
   Travessia: ['Traverse'],
   Manifestacao: ['PlayCard'],
-  Acao: ['ActivateResonance', 'Explore', 'StoreMemory', 'RetrieveMemory'],
+  Acao: [
+    'ActivateResonance', 'Explore', 'StoreMemory', 'RetrieveMemory', 'TransmitMemory',
+  ],
   Acontecimento: [],
   Encerramento: [],
 };
@@ -88,6 +90,16 @@ export interface GameState {
    */
   memoryPool: CardInstance[];
 
+  /**
+   * A Memory found but not yet transmitted. At the table the player reads the
+   * fact aloud before it counts; here it waits for the player to confirm they
+   * have read it. Until then it belongs to no one.
+   */
+  pendingDiscovery?: PendingDiscovery;
+
+  /** Deterministic roll state — see game/random.ts. */
+  rngSeed: number;
+
   log: LogEntry[];
   /** Once-per-turn allowances, cleared when the turn passes. */
   turnFlags: TurnFlags;
@@ -107,6 +119,16 @@ export interface TurnFlags {
 
 export const FRESH_TURN_FLAGS: TurnFlags = { hasDrawn: false, hasTraversed: false };
 
+export interface PendingDiscovery {
+  playerId: string;
+  /** One option normally; two when the roll opened a choice. */
+  options: CardInstance[];
+  /** Where it was found, and where it will be rooted. */
+  territoryInstanceId: string;
+  /** What the die said, so the UI can explain the moment. */
+  roll: number;
+}
+
 export interface LogEntry {
   turn: number;
   phase: GamePhase;
@@ -117,7 +139,9 @@ export interface LogEntry {
 export function createGameState(
   players: Player[],
   memoryPool: CardInstance[] = [],
-  maxTurns = 20
+  maxTurns = 20,
+  /** Pin this in tests; any number works for a real match. */
+  rngSeed = Date.now() >>> 0
 ): GameState {
   return {
     id: `game_${Date.now()}`,
@@ -126,6 +150,7 @@ export function createGameState(
     currentPlayerIndex: 0,
     players,
     memoryPool,
+    rngSeed,
     log: [],
     turnFlags: { ...FRESH_TURN_FLAGS },
     isEnded: false,

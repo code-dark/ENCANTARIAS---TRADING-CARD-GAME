@@ -29,6 +29,7 @@ import {
   bestListener, escutaOf, findByExploring, findByResonance, findBySourceId,
 } from '../mechanics/memory';
 import { findByObject } from '../mechanics/objects';
+import { rollD6, readExploreRoll, EXPLORE_SUCCESS } from '../game/random';
 import { ArtifactCard } from '../cards/types';
 
 export interface ApplyResult {
@@ -62,6 +63,8 @@ export function applyAction(state: GameState, action: GameAction): ApplyResult {
       };
     case 'RetrieveMemory':
       return { state: resolveRetrieve(state, action.playerId, action.memoryInstanceId) };
+    case 'TransmitMemory':
+      return { state: resolveTransmit(state, action.playerId, action.memoryInstanceId) };
     case 'PassPhase':
       return { state: advancePhase(state) };
   }
@@ -339,9 +342,14 @@ function claimMemory(
 }
 
 /**
- * Exploração. A Personagem listens in the active Território; what they can
- * hear depends on their Escuta and on what that place has to give.
- * The listening costs the Personagem their turn.
+ * Exploração. A Personagem listens in the active Território and rolls 1d6.
+ *
+ * 2+ finds something (83%); a 6 finds it and opens a choice between what the
+ * place has to offer; a 1 means the listening turned up nothing this time. The
+ * Personagem is spent either way — the attempt is what costs, not the result.
+ *
+ * Nothing is gained yet. What is found waits to be read: a Memory only counts
+ * once it has been transmitted.
  */
 function resolveExplore(state: GameState, playerId: string): GameState {
   const player = state.players.find((p) => p.id === playerId)!;
@@ -349,25 +357,81 @@ function resolveExplore(state: GameState, playerId: string): GameState {
   const territoryDef = getCard(territory.cardId) as TerritoryCard;
 
   const listener = bestListener(player.inPlay, territory.instanceId)!;
-  const found = findByExploring(state.memoryPool, {
+  const listenerName = getCard(listener.cardId).name;
+
+  const available = findByExploring(state.memoryPool, {
     territory: territoryDef,
     escuta: escutaOf(listener),
-  })[0];
+  });
 
-  const exhausted = updatePlayer(state, playerId, (p) => ({
+  const { value: roll, seed } = rollD6(state.rngSeed);
+  const outcome = readExploreRoll(roll, available.length);
+
+  // The listening costs the Personagem their turn whatever the die says.
+  let next = updatePlayer({ ...state, rngSeed: seed }, playerId, (p) => ({
     ...p,
     inPlay: p.inPlay.map((c) =>
       c.instanceId === listener.instanceId ? { ...c, exhausted: true } : c
     ),
   }));
 
-  const claimed = claimMemory(exhausted, playerId, found, territory.instanceId);
+  if (outcome === 'nothing') {
+    return appendLog(
+      next, playerId,
+      `${listenerName} listens in ${territoryDef.name} — rolls ${roll}. ` +
+        `Nothing comes through this time.`
+    );
+  }
 
-  return appendLog(
-    claimed,
+  const options = outcome === 'choice' ? available.slice(0, 2) : available.slice(0, 1);
+
+  next = appendLog(
+    next, playerId,
+    outcome === 'choice'
+      ? `${listenerName} listens in ${territoryDef.name} — rolls ${roll}. ` +
+          `The place offers more than one account.`
+      : `${listenerName} listens in ${territoryDef.name} — rolls ${roll} ` +
+          `(${EXPLORE_SUCCESS}+). Something comes through.`
+  );
+
+  return {
+    ...next,
+    pendingDiscovery: {
+      playerId,
+      options,
+      territoryInstanceId: territory.instanceId,
+      roll,
+    },
+  };
+}
+
+/**
+ * Transmitting what was found. At the table the fact is read aloud before the
+ * Memory counts; here the player confirms having read it. Only now does it
+ * leave the world and root itself in the Território.
+ *
+ * When the roll opened a choice, the options not taken stay in the world.
+ */
+function resolveTransmit(
+  state: GameState,
+  playerId: string,
+  memoryInstanceId: string
+): GameState {
+  const pending = state.pendingDiscovery!;
+  const chosen = pending.options.find((o) => o.instanceId === memoryInstanceId)!;
+
+  const claimed = claimMemory(
+    { ...state, pendingDiscovery: undefined },
     playerId,
-    `${getCard(listener.cardId).name} listens in ${territoryDef.name} and recovers ` +
-      `${getCard(found.cardId).name}.`
+    chosen,
+    pending.territoryInstanceId
+  );
+
+  const player = state.players.find((p) => p.id === playerId)!;
+  return appendLog(
+    claimed, playerId,
+    `${player.name} reads ${getCard(chosen.cardId).name} aloud. ` +
+      `It is remembered.`
   );
 }
 

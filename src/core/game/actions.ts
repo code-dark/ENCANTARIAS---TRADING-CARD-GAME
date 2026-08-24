@@ -11,6 +11,8 @@ export type GameAction =
   | { type: 'Explore'; playerId: string }
   | { type: 'StoreMemory'; playerId: string; memoryInstanceId: string; containerInstanceId: string }
   | { type: 'RetrieveMemory'; playerId: string; memoryInstanceId: string }
+  /** Read the fact and take the Memory. The chosen option, when the roll gave two. */
+  | { type: 'TransmitMemory'; playerId: string; memoryInstanceId: string }
   | { type: 'PassPhase'; playerId: string };
 
 export type ActionType = GameAction['type'];

@@ -119,7 +119,11 @@ export const memories: MemoryCard[] = [
       escuta: 1,
     },
     affinities: ['Circulation', 'City', 'Commerce'],
-    sources: ['territorio_escadaria_reviver', 'territorio_ceprama'],
+    sources: [
+      'territorio_escadaria_reviver',
+      'territorio_ceprama',
+      'territorio_cemiterio_gaviao',
+    ],
     tags: ['midia', 'circulacao', 'urbano'],
     linkedTo: undefined,
     traversalBehavior: 'travels',

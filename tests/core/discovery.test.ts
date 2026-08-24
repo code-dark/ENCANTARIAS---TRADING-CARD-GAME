@@ -14,7 +14,10 @@ const ROOTS = 'memory_enraizada_fountain'; // resonance only, by the Serpent
 const MEDIA = 'memory_midiatic_circulating'; // explore, Escuta 1, Circulation/City/Commerce
 
 /** p1 active in Fonte do Ribeirão, with the given Memories waiting in the world. */
-function setup(pool: string[] = []): GameState {
+/** Seeds chosen so each die face is reproducible — see game/random.ts. */
+const SEED = { one: 7, two: 3, five: 1, six: 2 };
+
+function setup(pool: string[] = [], seed = SEED.five): GameState {
   const p1 = emptyPlayer('p1', 'Player One');
   const p2 = emptyPlayer('p2', 'Player Two');
 
@@ -26,7 +29,9 @@ function setup(pool: string[] = []): GameState {
   p2.territories = [t2];
   p2.activeTerritoryId = t2.instanceId;
 
-  return createGameState([p1, p2], pool.map((id) => createInstance(id, 'world')));
+  return createGameState(
+    [p1, p2], pool.map((id) => createInstance(id, 'world')), 20, seed
+  );
 }
 
 function advanceTo(state: GameState, phase: string): GameState {
@@ -71,16 +76,30 @@ describe('Exploração de Território', () => {
 
     s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
 
+    // Found, but not yet yours: it waits to be read.
+    expect(s.pendingDiscovery).toBeDefined();
+    expect(s.memoryPool).toHaveLength(1);
+    expect(s.log[s.log.length - 1].message).toContain('listens in Fonte do Ribeirão');
+
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
+
+    expect(s.pendingDiscovery).toBeUndefined();
     expect(s.memoryPool).toHaveLength(0);
     expect(s.players[0].inPlay).toHaveLength(2); // the listener plus the memory
     expect(nameOf(s, 1)).toBe('Oral Account of the Serpent');
-    expect(s.log[s.log.length - 1].message).toContain('listens in Fonte do Ribeirão');
   });
 
   it('roots the discovered Memory in the Território that gave it up', () => {
     let s = withCharacter(setup([ORAL]), LISTENER);
     s = advanceTo(s, 'Acao');
     s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
 
     expect(s.players[0].inPlay[1].linkedTo).toBe(s.players[0].activeTerritoryId);
     expect(s.players[0].inPlay[1].ownerId).toBe('p1');

@@ -305,3 +305,90 @@ button.primary:hover:not(:disabled) {
   font-size: 1.1rem;
   color: #f0d0a0;
 }
+
+/* --- Transmission: a Memory found is not yet a Memory kept --- */
+
+.transmission {
+  padding: 16px 24px;
+  background-color: rgba(217, 160, 91, 0.1);
+  border-top: 1px solid rgba(217, 160, 91, 0.4);
+  border-bottom: 1px solid rgba(217, 160, 91, 0.4);
+}
+
+.transmission-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.transmission-head h3 {
+  margin: 0 0 3px;
+  font-size: 1rem;
+  color: #f0d0a0;
+}
+
+.transmission-head p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #c9b090;
+}
+
+/* The die face, shown so the moment is explained rather than just asserted. */
+.die {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 2px solid rgba(217, 160, 91, 0.7);
+  border-radius: 6px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f0d0a0;
+  background-color: rgba(217, 160, 91, 0.14);
+}
+
+.transmission-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.transmission-card {
+  flex: 1 1 280px;
+  max-width: 460px;
+  padding: 12px 14px;
+  border: 1px solid rgba(217, 160, 91, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 22, 41, 0.6);
+}
+
+.transmission-card h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  color: #f0d0a0;
+}
+
+.transmission-card .fact {
+  margin: 0 0 6px;
+  font-size: 0.87rem;
+  line-height: 1.45;
+  color: #dbe6f0;
+}
+
+.transmission-card .fact-flavor {
+  margin: 0 0 10px;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #9db3c8;
+}
+
+.transmission-card button.primary {
+  background-color: #8a6a35;
+}
+
+.transmission-card button.primary:hover:not(:disabled) {
+  background-color: #a5813f;
+}

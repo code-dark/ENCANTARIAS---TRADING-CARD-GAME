@@ -1,4 +1,5 @@
 import { getCurrentPlayer, PHASE_ORDER } from '../../core/game/gameState';
+import { getCard } from '../../core/cards/cardRegistry';
 import { useGameStore } from '../../store/gameStore';
 import PhaseIndicator from '../components/HUD/PhaseIndicator';
 import Board from '../components/Board/Board';
@@ -27,6 +28,50 @@ export default function GameScreen() {
         </div>
         <PhaseIndicator phase={gameState.phase} />
       </header>
+
+      {gameState.pendingDiscovery && (
+        <section className="transmission" role="dialog" aria-label="Memória encontrada">
+          <div className="transmission-head">
+            <span className="die">{gameState.pendingDiscovery.roll}</span>
+            <div>
+              <h3>
+                {gameState.pendingDiscovery.options.length > 1
+                  ? 'O lugar oferece mais de um relato'
+                  : 'Algo veio à tona'}
+              </h3>
+              <p>
+                Leia o relato em voz alta. A Memória só é computada depois de
+                transmitida.
+              </p>
+            </div>
+          </div>
+
+          <div className="transmission-options">
+            {gameState.pendingDiscovery.options.map((option) => {
+              const def = getCard(option.cardId);
+              return (
+                <article key={option.instanceId} className="transmission-card">
+                  <h4>{def.name}</h4>
+                  {def.description && <p className="fact">{def.description}</p>}
+                  {def.flavor && <p className="fact-flavor">{def.flavor}</p>}
+                  <button
+                    className="primary"
+                    onClick={() =>
+                      dispatch({
+                        type: 'TransmitMemory',
+                        playerId: gameState.pendingDiscovery!.playerId,
+                        memoryInstanceId: option.instanceId,
+                      })
+                    }
+                  >
+                    Li em voz alta — transmitir
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <main className="game-main">
         <div className="board-area">

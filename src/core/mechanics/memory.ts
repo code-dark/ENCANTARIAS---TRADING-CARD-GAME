@@ -88,11 +88,16 @@ export function findByExploring(
     if (!discovery?.via.includes('explore')) return false;
     if ((discovery.escuta ?? 0) > ctx.escuta) return false;
 
-    // A Memory naming this place as an origin is reachable here. Falling back
-    // to affinity keeps Memories that name no origin still findable where they
-    // belong.
-    const named = (memory.sources ?? []).some((s) => origins.includes(s));
-    return named || belongsHere(memory, ctx.territory);
+    // When a Memory names where it comes from, that is authoritative: it is
+    // reachable there and nowhere else. Sharing an affinity with another place
+    // is not the same as belonging to it — an account rooted in the cathedral
+    // should not be overheard at the market.
+    //
+    // Affinity is the fallback only for Memories that name no origin at all.
+    const sources = memory.sources ?? [];
+    return sources.length > 0
+      ? sources.some((s) => origins.includes(s))
+      : belongsHere(memory, ctx.territory);
   });
 }
 

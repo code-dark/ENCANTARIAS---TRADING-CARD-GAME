@@ -264,15 +264,58 @@ gated Memory, firing once across a full round trip, a Território with no
 conjunction declared, a participant kept in an object, order independence, and
 the new map connectivity.
 
-**Open cultural question — Ana Jansen.** Ana Jansen was a real historical
-figure, and the record of her life includes documented violence. The card here
-is deliberately about the apparition *as it circulates in the city* and asserts
-nothing biographical, with everything marked `[PROVISIONAL]`. But presenting her
-name as a collectible Lenda without that history is itself a choice, and it is
-the author's to make, not the implementation's. This is the same reasoning that
-kept the enslaved coachman out of the card set: representing a fantastic
-apparition is not the same act as turning a person subjected to historical
-violence into a collectible unit. Flagged here rather than silently resolved.
+**Ana Jansen — decided by the author.** Carruagem de Ana Jansen stands as a
+collectible Lenda. The author's position: she is a legend and an iconic figure
+of Maranhão's popular history, and that holds despite the questions behind the
+story. The card remains about the apparition as it circulates in the city rather
+than a biography, and the historical layer stays `[PROVISIONAL]` pending
+research. The separate decision about the enslaved coachman is unchanged: he
+stays as context of the Carruagem and does not become a card.
+
+### Exploração rolls 1d6
+
+Discovery is an active attempt, so it can fail. The threshold is 2+ on 1d6 —
+83% — chosen against 3+ or 4+, which would drop average generation to 0.67 or
+0.5 Memórias per turn against one attempt per turn and deepen the economic
+bottleneck rather than temper it.
+
+| Roll | Outcome |
+|---|---|
+| 1 | Nothing comes through this time |
+| 2–5 | One account surfaces |
+| 6 | The place offers a choice between two |
+
+The Personagem is spent whichever way the die lands: the attempt is what costs,
+not the result. This is distinct from the pre-existing refusal when a place has
+nothing to give at all — that is still checked before anything is spent, because
+a known-empty search is not a failed attempt.
+
+**The die is deterministic.** The engine is pure and a match replays from its
+log, so rolls come from a seed in the game state (`game/random.ts`, an LCG), not
+from `Math.random`. Tests pin a seed per face instead of hoping for one. A
+fairness test rolls 6000 times and checks the distribution and the 83%.
+
+**A found Memory is not yet a kept Memory.** At the table the player reads the
+fact aloud before it counts. Digitally that cannot be verified, so the intent is
+preserved instead: the Memory waits in `pendingDiscovery`, the UI shows the die
+face and the account's text, and nothing else can be done until the player
+confirms having read it. Only then does it leave the world and root itself. On a
+6, the option not taken stays in the world.
+
+**A correctness fix this surfaced.** Measuring reach per Território showed
+`Territorial Memory of Bells` — which names only Igreja da Sé as its origin —
+being found at CEPRAMA and Cemitério do Gavião, leaking in through the affinity
+fallback. A Memory that names where it comes from should be reachable there and
+nowhere else; sharing an affinity is not the same as belonging. Affinity is now
+the fallback only for Memories that name no origin at all.
+
+Explore reach per Território at Escuta 4 is now: Fonte 1, Igreja 1, Escadaria 2,
+CEPRAMA 2, Cemitério 1. **The 6-boon is therefore live only at Escadaria and
+CEPRAMA** — everywhere else a 6 is just an ordinary find, because those places
+hold a single account. That is content work (more Memórias per place), not a
+code problem, and it is the clearest argument for expanding the Memory set next.
+
+Tests: 17 new (95 total).
 
 ### Known gaps carried into Phase C
 

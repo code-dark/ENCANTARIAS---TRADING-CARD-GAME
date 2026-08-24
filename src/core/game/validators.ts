@@ -29,6 +29,12 @@ export function validateAction(state: GameState, action: GameAction): Validation
     return invalid(`It is ${current.name}'s turn.`);
   }
 
+  // A Memory found but not yet read holds everything else: it is not yours
+  // until it has been transmitted.
+  if (state.pendingDiscovery && action.type !== 'TransmitMemory') {
+    return invalid('Read the Memória you found before doing anything else.');
+  }
+
   // Passing is always available on your own turn.
   if (action.type === 'PassPhase') {
     return VALID;
@@ -186,6 +192,17 @@ export function validateAction(state: GameState, action: GameAction): Validation
       return VALID;
     }
 
+    case 'TransmitMemory': {
+      const pending = state.pendingDiscovery;
+      if (!pending) {
+        return invalid('There is no Memória waiting to be read.');
+      }
+      if (!pending.options.some((o) => o.instanceId === action.memoryInstanceId)) {
+        return invalid('That Memória is not among the ones you found.');
+      }
+      return VALID;
+    }
+
     case 'ActivateResonance': {
       const card = current.inPlay.find((c) => c.instanceId === action.instanceId);
       if (!card) {
@@ -218,6 +235,8 @@ function labelFor(type: GameAction['type']): string {
       return 'Keeping a Memória';
     case 'RetrieveMemory':
       return 'Bringing a Memória back out';
+    case 'TransmitMemory':
+      return 'Transmitting a Memória';
     case 'ActivateResonance':
       return 'Ressonância';
     default:
