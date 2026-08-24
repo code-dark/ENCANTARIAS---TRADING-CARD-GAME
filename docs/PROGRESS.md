@@ -330,6 +330,46 @@ compiler's checks on affinities depend on that union. Display labels live in
 them back to Enraizada / Transmitida / Institucional / Midiática would undo an
 explicit decision, so they stand as they are. Say the word and they change.
 
+### Jornadas are the only way to win
+
+A match ends when a player's Jornada is complete. There is no life total, no
+capture and nothing to remove from the table; the other player loses by having
+been slower, and the log says so in those words.
+
+**Verification is automatic and happens at Encerramento**, for the player whose
+turn is ending only. A Jornada is completed on your own turn, by what you did in
+it. When every requirement is met the match ends immediately: `isEnded` is set,
+`winnerId` names the player, and the validator refuses every further action.
+
+**Requirements are data.** `JourneyRequirement` is a closed union — Memórias in
+play (optionally filtered by state or tag), Territórios visited, Ressonâncias
+activated, gatherings formed, a resource threshold, a Lenda of a given affinity.
+A new Jornada is a new entry in `cards/data/journeys.ts`; the evaluator in
+`mechanics/journey.ts` already knows how to read it. That is what lets two
+players at the same table be playing for genuinely different reasons.
+
+**Evaluation is a snapshot, not a ledger.** What is verified is what is true at
+that moment. A Memória kept inside a Caixa still counts — preserving it is still
+holding it — and spending Vínculo can take an objective back off. The Jornada
+asks what you are sustaining, not what you once touched.
+
+**Two things the zones cannot remember** are tracked per player in
+`accomplishments`: places crossed and relations opened. Each is a list of
+identities rather than a count, so walking back and forth adds nothing and
+re-activating the same Lenda in the same place is one Ressonância, not two.
+
+**`transformacoes` is in the schema and used by no Jornada.** Nothing in the
+turn resolver transforms a card yet, so a Jornada requiring one would be
+unwinnable; a test fails if one is ever written before the trigger exists.
+
+**Jornadas are now assigned, not dealt.** `getRandomJourney` used `Math.random`,
+which the engine forbids. The vertical slice pairs each deck with the Jornada it
+is built for: Jogador 1 listens (Guardiã da Memória), Jogador 2 reassembles the
+passage (O Cortejo).
+
+Tests: 20 new (115 total). Verified in Chromium: a real turn — listen, transmit,
+Encerramento — moves the counter and announces the objective in the log.
+
 ### Known gaps carried into Phase C
 
 - Ressonância detects and logs the unlocked manifestation and grants Vínculo,
@@ -337,7 +377,6 @@ explicit decision, so they stand as they are. Say the word and they change.
 - Every shipped Memory declares an explicit `traversalBehavior`, which wins over
   its `memoryState`. The state-driven rules are proven by unit tests but are
   currently unreachable from card data — worth resolving as a design decision.
-- Journeys are dealt and displayed but progress is not evaluated.
 - Economy is provisional: one Memória per turn against costs of 1-3 makes the
   opening turns tight. Needs playtesting, not guessing.
 - The board's centre is largely empty; visual weight is Milestone 5.

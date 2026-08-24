@@ -4,6 +4,8 @@ import { useGameStore } from '../../store/gameStore';
 import PhaseIndicator from '../components/HUD/PhaseIndicator';
 import Board from '../components/Board/Board';
 import Hand from '../components/Hand/Hand';
+import { JourneyPanel, RivalJourneys } from '../components/HUD/JourneyPanel';
+import MatchEnd from '../components/HUD/MatchEnd';
 import './GameScreen.css';
 
 export default function GameScreen() {
@@ -21,6 +23,8 @@ export default function GameScreen() {
 
   return (
     <div className="game-screen">
+      {gameState.isEnded && <MatchEnd state={gameState} />}
+
       <header className="game-header">
         <h1>ENCANTARIAS</h1>
         <div className="turn-info">
@@ -121,6 +125,12 @@ export default function GameScreen() {
               Escutar o Território
             </button>
           )}
+
+          <h4>Jornada</h4>
+          <JourneyPanel player={player} />
+
+          <h4>Outras Jornadas</h4>
+          <RivalJourneys players={gameState.players} activeId={player.id} />
 
           <h4>Mão</h4>
           <Hand cards={player.hand} playerId={player.id} />

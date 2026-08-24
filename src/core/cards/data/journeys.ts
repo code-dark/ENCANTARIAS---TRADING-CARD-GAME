@@ -1,84 +1,140 @@
 /**
- * Journey Cards - Win conditions and strategic objectives
+ * Jornadas — each one is its own victory condition.
+ *
+ * Requirements are data, not code: a new Jornada is a new entry here, and the
+ * evaluator in mechanics/journey.ts already knows how to read it. That is what
+ * lets different Jornadas reward genuinely different play instead of all
+ * collapsing into "score more points".
  */
+
+import { Affinity, MemoryState } from '../types';
+
+export type JourneyRequirement =
+  /** Memories on the table, optionally of one state or carrying one tag. */
+  | { kind: 'memoriasEmJogo'; count: number; state?: MemoryState; tag?: string }
+  /** Distinct Territórios the player has been active in. */
+  | { kind: 'territoriosVisitados'; count: number }
+  /** Distinct Ressonâncias fired, counted once per card-and-place pair. */
+  | { kind: 'ressonanciasAtivadas'; count: number }
+  /** Gatherings formed — the conjunction Ressonâncias. */
+  | { kind: 'cortejosFormados'; count: number }
+  /**
+   * Cards whose state has been transformed. Reserved: nothing in the turn
+   * resolver transforms a card yet, so a Jornada asking for one would be
+   * unwinnable. A test guards against writing one before the trigger exists.
+   */
+  | { kind: 'transformacoes'; count: number }
+  /** A resource held at or above a threshold. */
+  | { kind: 'recurso'; recurso: 'vinculo' | 'memoria' | 'circulacao'; minimo: number }
+  /** A Lenda of this affinity manifested on the table. */
+  | { kind: 'lendaComAfinidade'; afinidade: Affinity };
+
+export interface JourneyObjective {
+  id: string;
+  description: string;
+  requirement: JourneyRequirement;
+}
 
 export interface Journey {
   id: string;
   name: string;
   description: string;
-  objectives: Array<{
-    id: string;
-    description: string;
-    completed: boolean;
-  }>;
+  objectives: JourneyObjective[];
 }
 
 export const journeys: Journey[] = [
   {
-    id: 'journey_keeper_of_memories',
+    id: 'journey_guardia_memoria',
     name: 'Guardiã da Memória',
-    description: 'Estabeleça uma cadeia de transmissão de Memória por três Territórios.',
+    description:
+      'Reunir e sustentar o que se conta, mantendo o vínculo com quem contou.',
     objectives: [
       {
-        id: 'obj_1_collect_3_memories',
-        description: 'Reúna 3 Memórias diferentes',
-        completed: false,
+        id: 'gm_1',
+        description: 'Tenha 3 Memórias em jogo',
+        requirement: { kind: 'memoriasEmJogo', count: 3 },
       },
       {
-        id: 'obj_2_transmit_2_memories',
-        description: 'Transmita 2 Memórias para novos Territórios',
-        completed: false,
+        id: 'gm_2',
+        description: 'Tenha 1 Memória Oral em jogo',
+        requirement: { kind: 'memoriasEmJogo', count: 1, state: 'Oral' },
       },
       {
-        id: 'obj_3_maintain_vínculo',
-        description: 'Mantenha Vínculo 5 ou mais',
-        completed: false,
+        id: 'gm_3',
+        description: 'Alcance 3 de Vínculo',
+        requirement: { kind: 'recurso', recurso: 'vinculo', minimo: 3 },
       },
     ],
   },
 
   {
-    id: 'journey_wanderer_of_cities',
+    id: 'journey_caminhante_cidade',
     name: 'Caminhante da Cidade',
-    description: 'Percorra a cidade e estabeleça presença em cada lugar.',
+    description:
+      'Atravessar a cidade e deixar que o deslocamento produza o que a permanência não produz.',
     objectives: [
       {
-        id: 'obj_1_visit_2_territories',
-        description: 'Faça Travessia para ao menos 2 Territórios diferentes',
-        completed: false,
+        id: 'cc_1',
+        description: 'Esteja ativo em 2 Territórios diferentes',
+        requirement: { kind: 'territoriosVisitados', count: 2 },
       },
       {
-        id: 'obj_2_activate_resonance_3',
-        description: 'Ative 3 Ressonâncias diferentes',
-        completed: false,
+        id: 'cc_2',
+        description: 'Ative 2 Ressonâncias',
+        requirement: { kind: 'ressonanciasAtivadas', count: 2 },
       },
       {
-        id: 'obj_3_control_passage',
-        description: 'Tenha ao menos uma Lenda de afinidade Passagem',
-        completed: false,
+        id: 'cc_3',
+        description: 'Tenha 2 Memórias em jogo',
+        requirement: { kind: 'memoriasEmJogo', count: 2 },
       },
     ],
   },
 
   {
-    id: 'journey_bridge_of_worlds',
+    id: 'journey_ponte_mundos',
     name: 'Ponte Entre Mundos',
-    description: 'Transforme narrativas e ligue o registro institucional à tradição oral.',
+    description:
+      'Ligar o que está arquivado ao que ainda é falado, sem que um apague o outro.',
     objectives: [
       {
-        id: 'obj_1_create_transformation',
-        description: 'Transforme 1 Lenda',
-        completed: false,
+        id: 'pm_1',
+        description: 'Tenha 1 Memória Corporate em jogo',
+        requirement: { kind: 'memoriasEmJogo', count: 1, state: 'Corporate' },
       },
       {
-        id: 'obj_2_oral_and_institutional',
-        description: 'Tenha em jogo Memórias Oral e Corporate',
-        completed: false,
+        id: 'pm_2',
+        description: 'Tenha 1 Memória Oral em jogo',
+        requirement: { kind: 'memoriasEmJogo', count: 1, state: 'Oral' },
       },
       {
-        id: 'obj_3_mediate_circulation',
-        description: 'Atinja o limiar de Circulação em ao menos 2 cartas',
-        completed: false,
+        id: 'pm_3',
+        description: 'Ative 1 Ressonância',
+        requirement: { kind: 'ressonanciasAtivadas', count: 1 },
+      },
+    ],
+  },
+
+  {
+    id: 'journey_cortejo',
+    name: 'O Cortejo',
+    description:
+      'Reunir a passagem inteira num só lugar e ouvir o que só ela abre.',
+    objectives: [
+      {
+        id: 'co_1',
+        description: 'Forme 1 Cortejo',
+        requirement: { kind: 'cortejosFormados', count: 1 },
+      },
+      {
+        id: 'co_2',
+        description: 'Tenha uma Lenda de afinidade Movimento em jogo',
+        requirement: { kind: 'lendaComAfinidade', afinidade: 'Movement' },
+      },
+      {
+        id: 'co_3',
+        description: 'Tenha 3 Memórias em jogo',
+        requirement: { kind: 'memoriasEmJogo', count: 3 },
       },
     ],
   },
@@ -86,8 +142,4 @@ export const journeys: Journey[] = [
 
 export function getJourneyById(id: string): Journey | undefined {
   return journeys.find((j) => j.id === id);
-}
-
-export function getRandomJourney(): Journey {
-  return journeys[Math.floor(Math.random() * journeys.length)];
 }

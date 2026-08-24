@@ -1,0 +1,160 @@
+.journey {
+  padding: 12px;
+  border: 1px solid #2a3f5f;
+  border-left: 3px solid #c9a227;
+  border-radius: 6px;
+  background-color: rgba(24, 34, 58, 0.7);
+}
+
+.journey-complete {
+  border-left-color: #6ddf9c;
+  background-color: rgba(28, 58, 44, 0.7);
+}
+
+.journey h5 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  color: #f0e0b0;
+}
+
+.journey-desc {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #8fa8c8;
+  font-style: italic;
+}
+
+.journey-objectives {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.journey-objectives li {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 0.76rem;
+  color: #b8c9e0;
+}
+
+.journey-objectives li.met {
+  color: #6ddf9c;
+}
+
+.journey-objectives .mark {
+  color: #c9a227;
+}
+
+.journey-objectives li.met .mark {
+  color: #6ddf9c;
+}
+
+.objective-count {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  color: #7aa3d5;
+}
+
+.journey-note {
+  margin: 10px 0 0;
+  font-size: 0.66rem;
+  color: #6f86a6;
+}
+
+.rival-journeys {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rival-journeys li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding: 6px 8px;
+  border: 1px solid #223350;
+  border-radius: 4px;
+  font-size: 0.74rem;
+  color: #8fa8c8;
+}
+
+.rival-name {
+  color: #b8c9e0;
+}
+
+.rival-journey {
+  grid-column: 1;
+  font-size: 0.7rem;
+  color: #7aa3d5;
+}
+
+.rival-journeys .objective-count {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+/* End of match ------------------------------------------------------- */
+
+.match-end {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(6, 10, 20, 0.82);
+}
+
+.match-end-card {
+  max-width: 460px;
+  padding: 28px 32px;
+  border: 1px solid #2a3f5f;
+  border-top: 3px solid #c9a227;
+  border-radius: 8px;
+  background-color: #101a2e;
+  text-align: center;
+}
+
+.match-end-card h2 {
+  margin: 0 0 6px;
+  font-size: 1.5rem;
+  color: #f0e0b0;
+}
+
+.match-end-card .winner {
+  margin: 0 0 16px;
+  color: #6ddf9c;
+  font-size: 1rem;
+}
+
+.match-end-card .match-end-objectives {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.match-end-card .match-end-objectives li {
+  font-size: 0.8rem;
+  color: #6ddf9c;
+}
+
+.match-end-card .defeat {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #8fa8c8;
+  line-height: 1.5;
+}

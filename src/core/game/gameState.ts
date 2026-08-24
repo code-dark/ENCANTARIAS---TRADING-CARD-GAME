@@ -52,10 +52,50 @@ export interface PlayerResources {
   circulacao: number;
 }
 
+/**
+ * The Jornada a player is playing for, and the last verification of it.
+ *
+ * The objectives themselves live in the Jornada data; what is kept here is the
+ * result of the check the system runs at the end of each turn, so the log and
+ * the end-of-match summary can say what was true when the match ended.
+ */
 export interface JourneyProgress {
   journeyId: string;
-  objectives: { id: string; description: string; completed: boolean }[];
+  /** Objectives met at the last end-of-turn verification. */
+  completedObjectiveIds: string[];
   completed: boolean;
+}
+
+/**
+ * What a player has done, as opposed to what they are holding.
+ *
+ * Some Jornadas ask about the table (Memórias in play, a Lenda manifested) and
+ * the table answers for itself. Others ask about the match — places crossed,
+ * Ressonâncias opened, gatherings formed — and nothing in the zones remembers
+ * those once the moment has passed. Each list holds identities rather than a
+ * number so an action that repeats itself does not count twice.
+ */
+export interface Accomplishments {
+  /** cardIds of the Territórios the player has been active in. */
+  territoriesVisited: string[];
+  /** `cardId@territoryCardId` — the same relation in the same place counts once. */
+  resonancesActivated: string[];
+  /** Conjunction ids, e.g. the Cortejo Maldito. */
+  conjunctionsFormed: string[];
+  /** instanceIds of cards whose state has changed. */
+  transformations: string[];
+}
+
+export const FRESH_ACCOMPLISHMENTS: Accomplishments = {
+  territoriesVisited: [],
+  resonancesActivated: [],
+  conjunctionsFormed: [],
+  transformations: [],
+};
+
+/** Add to an accomplishment list without repeating an entry. */
+export function record(list: string[], entry: string): string[] {
+  return list.includes(entry) ? list : [...list, entry];
 }
 
 export interface Player {
@@ -74,6 +114,7 @@ export interface Player {
 
   resources: PlayerResources;
   journeyProgress?: JourneyProgress;
+  accomplishments: Accomplishments;
 }
 
 export interface GameState {

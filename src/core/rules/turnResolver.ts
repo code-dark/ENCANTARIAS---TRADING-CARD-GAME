@@ -16,7 +16,10 @@ import {
   activeTerritoryOf,
   updatePlayer,
   appendLog,
+  record,
+  FRESH_ACCOMPLISHMENTS,
 } from '../game/gameState';
+import { evaluateJourney, completedObjectiveIds } from '../mechanics/journey';
 import { getCard } from '../cards/cardRegistry';
 import { CardInstance, TerritoryCard } from '../cards/types';
 import { evaluateMemoryPersistence, traversalCost } from '../mechanics/traversal';
@@ -122,6 +125,10 @@ export function runEncerramento(state: GameState): GameState {
           : t
       ),
       resources: { ...p.resources, vinculo: p.resources.vinculo + 1 },
+      accomplishments: {
+        ...p.accomplishments,
+        conjunctionsFormed: record(p.accomplishments.conjunctionsFormed, match.id),
+      },
     }));
 
     next = appendLog(
@@ -140,7 +147,53 @@ export function runEncerramento(state: GameState): GameState {
     }
   }
 
-  return next;
+  return verifyJourneys(next);
+}
+
+/**
+ * The end-of-turn verification. Nobody claims a victory: the system reads the
+ * Jornada against what is true now, and if every requirement is met the match
+ * is over at once — which is what makes the other player's defeat a matter of
+ * having been slower rather than of having been attacked.
+ *
+ * Only the player whose turn is ending is checked. A Jornada is completed on
+ * your own turn, by what you did in it.
+ */
+export function verifyJourneys(state: GameState): GameState {
+  const player = getCurrentPlayer(state);
+  const status = evaluateJourney(player);
+  if (!status) return state;
+
+  const met = completedObjectiveIds(status);
+  const already = player.journeyProgress?.completedObjectiveIds ?? [];
+
+  let next = updatePlayer(state, player.id, (p) => ({
+    ...p,
+    journeyProgress: {
+      journeyId: status.journey.id,
+      completedObjectiveIds: met,
+      completed: status.completed,
+    },
+  }));
+
+  // Say what was reached this turn, so progress is legible without a panel.
+  for (const objective of status.objectives) {
+    if (objective.met && !already.includes(objective.objective.id)) {
+      next = appendLog(
+        next, player.id,
+        `${status.journey.name}: ${objective.objective.description} — cumprido.`
+      );
+    }
+  }
+
+  if (!status.completed) return next;
+
+  next = appendLog(
+    next, player.id,
+    `${player.name} completa a Jornada ${status.journey.name}. A partida termina.`
+  );
+
+  return { ...next, isEnded: true, winnerId: player.id };
 }
 
 export function endTurn(state: GameState): GameState {
@@ -284,6 +337,10 @@ function resolveTraverse(
     ...p,
     activeTerritoryId: territoryInstanceId,
     resources: { ...p.resources, memoria: p.resources.memoria - cost },
+    accomplishments: {
+      ...p.accomplishments,
+      territoriesVisited: record(p.accomplishments.territoriesVisited, to.cardId),
+    },
     inPlay: p.inPlay.map((c) => {
       // Only cards rooted in the territory being left are re-evaluated.
       if (!from || c.linkedTo !== from.instanceId) return c;
@@ -516,6 +573,15 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
       c.instanceId === instanceId ? { ...c, exhausted: true } : c
     ),
     resources: { ...p.resources, vinculo: p.resources.vinculo + matches.length },
+    accomplishments: {
+      ...p.accomplishments,
+      // The same relation in the same place is one Ressonância, however many
+      // times it is activated: the Jornada counts relations, not activations.
+      resonancesActivated: record(
+        p.accomplishments.resonancesActivated,
+        `${def.id}@${territoryDef.id}`
+      ),
+    },
   }));
 
   next = appendLog(
@@ -551,5 +617,6 @@ export function emptyPlayer(id: string, name: string): Player {
     territories: [],
     activeTerritoryId: '',
     resources: { vinculo: 0, memoria: 0, circulacao: 0 },
+    accomplishments: { ...FRESH_ACCOMPLISHMENTS },
   };
 }
