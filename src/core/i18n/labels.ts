@@ -43,13 +43,22 @@ export const CARD_TYPE_LABEL: Record<CardType, string> = {
  * player reads is in Portuguese; these four were named deliberately and are
  * left as they were rather than silently reverted.
  */
+/**
+ * What the player reads. The identifiers stay English because they are code —
+ * a closed union the compiler checks — and the interface is Portuguese. The
+ * two vocabularies are separate on purpose.
+ *
+ * `Corporate` reads Corporativa rather than Institucional so it does not
+ * collide with the Institucionalizada transformation, which is a different
+ * thing happening to a different kind of card.
+ */
 export const MEMORY_STATE_LABEL: Record<MemoryState, string> = {
   Oral: 'Oral',
   Territorial: 'Territorial',
-  Roots: 'Roots',
-  Shared: 'Shared',
-  Corporate: 'Corporate',
-  Media: 'Media',
+  Roots: 'Enraizada',
+  Shared: 'Compartilhada',
+  Corporate: 'Corporativa',
+  Media: 'Midiática',
 };
 
 export const TRANSFORMATION_LABEL: Record<TransformationState, string> = {

@@ -69,38 +69,38 @@ export function evaluateMemoryPersistence(
   }
 
   const definition = memory as MemoryCard;
-  const memoryCard: MemoryCard = currentState
-    ? { ...definition, memoryState: currentState }
-    : definition;
+  const state = currentState ?? definition.memoryState;
 
-  // Explicit behavior
-  if (memoryCard.traversalBehavior) {
-    if (memoryCard.traversalBehavior === 'stays') return 'stays';
-    if (memoryCard.traversalBehavior === 'travels') return 'travels';
-    if (memoryCard.traversalBehavior === 'transforms') return 'transforms';
+  // An explicit declaration is an exception the card takes deliberately, and
+  // it wins. It is meant to be rare: a Memory that behaves like its state
+  // should not have to say so, or the states stop meaning anything.
+  if (definition.traversalBehavior) {
+    return definition.traversalBehavior;
   }
 
-  // Memory state rules
-  if (memoryCard.memoryState === 'Roots') {
-    return 'stays'; // Rooted in territory, stays by default
+  switch (state) {
+    // Rooted so deep it became the ground; held in an archive that does not
+    // move; a detail of the place itself. None of these leave.
+    case 'Roots':
+    case 'Corporate':
+    case 'Territorial':
+      return 'stays';
+
+    // Passed from hand to hand, or circulating far past where it started.
+    case 'Shared':
+    case 'Media':
+      return 'travels';
+
+    // Oral is the contextual one, and deliberately so: an account that lives
+    // only in speech carries over where the new place gives it something to
+    // hold on to, and loses its footing where it does not.
+    case 'Oral': {
+      const shared = (memory.affinities ?? []).filter((a) =>
+        (newTerritory.affinities ?? []).includes(a)
+      );
+      return shared.length > 0 ? 'travels' : 'stays';
+    }
   }
-
-  if (memoryCard.memoryState === 'Shared') {
-    return 'travels'; // Passed on, travels by default
-  }
-
-  if (memoryCard.memoryState === 'Corporate') {
-    return 'stays'; // Held by an institution, tied to place
-  }
-
-  // For others (Oral, Territorial, Media):
-  // Check if memory has affinity match with new territory
-  const newTerritoryAffs = newTerritory.affinities || [];
-  const memoryAffs = memory.affinities || [];
-
-  const matches = memoryAffs.filter((aff) => newTerritoryAffs.includes(aff));
-
-  return matches.length > 0 ? 'travels' : 'stays';
 }
 
 /**

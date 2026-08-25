@@ -182,9 +182,16 @@ describe('records give access, they do not create', () => {
       type: 'PlayCard', playerId: 'p1', instanceId: foto.instanceId,
     }));
 
+    // Access is not transmission: it waits to be read aloud, like any find.
+    expect(s.pendingDiscovery!.mode).toBe('leitura');
+    expect(s.log.some((e) => e.message.includes('alcança Imagem Recorrente'))).toBe(true);
+
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
     expect(s.memoryPool).toHaveLength(0);
     expect(named(s, 'Imagem Recorrente da Beira-Mar')).toBeDefined();
-    expect(s.log.some((e) => e.message.includes('alcança Imagem Recorrente'))).toBe(true);
   });
 
   it('reaches a place the player is not standing in', () => {
@@ -221,7 +228,11 @@ describe('records give access, they do not create', () => {
     }));
 
     // It reaches the media memory rooted at Escadaria, not the Beira-Mar one.
-    expect(named(s, 'Media: A Lenda Viral')).toBeDefined();
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
+    expect(named(s, 'A Lenda Viral')).toBeDefined();
     expect(s.memoryPool).toHaveLength(1);
     expect(getCard(s.memoryPool[0].cardId).name).toBe('Imagem Recorrente da Beira-Mar');
   });

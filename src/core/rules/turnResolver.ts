@@ -368,10 +368,21 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
       )[0];
 
       if (reached) {
-        out = claimMemory(out, playerId, reached, territory.instanceId);
+        // A record gives access; it does not transmit. The Memory waits to be
+        // read aloud like any other, because the rule is about the Memory.
         out = appendLog(
-          out, playerId,
-          `${def.name} alcança ${getCard(reached.cardId).name}.`
+          {
+            ...out,
+            pendingDiscovery: {
+              playerId,
+              options: [reached],
+              territoryInstanceId: territory.instanceId,
+              roll: 0,
+              mode: 'leitura',
+            },
+          },
+          playerId,
+          `${def.name} alcança ${getCard(reached.cardId).name}. Falta ler em voz alta.`
         );
       } else if (def.accessSources?.length || def.accessTags?.length) {
         out = appendLog(out, playerId, `${def.name} aponta para algo que já não está por descobrir.`);

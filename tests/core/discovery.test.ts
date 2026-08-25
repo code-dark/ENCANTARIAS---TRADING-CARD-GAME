@@ -167,8 +167,8 @@ describe('Ressonância reveals what listening cannot', () => {
     );
 
     expect(s.memoryPool).toHaveLength(0);
-    expect(nameOf(s, 1)).toBe('Roots: A Fonte Perene');
-    expect(s.log[s.log.length - 1].message).toContain('revela Roots: A Fonte Perene');
+    expect(nameOf(s, 1)).toBe('A Fonte Perene');
+    expect(s.log[s.log.length - 1].message).toContain('revela A Fonte Perene');
   });
 
   it('that Memory cannot be reached by listening, however good the ear', () => {

@@ -325,10 +325,9 @@ a union member ripples through every file that reasons about it, and the
 compiler's checks on affinities depend on that union. Display labels live in
 `core/i18n/labels.ts`.
 
-**One exception, left for the author.** The Memory states `Roots`, `Shared`,
-`Corporate` and `Media` keep the English names chosen for them earlier. Putting
-them back to Enraizada / Transmitida / Institucional / Midiática would undo an
-explicit decision, so they stand as they are. Say the word and they change.
+**Settled later:** the Memory states now read in Portuguese on the card face
+while keeping English identifiers — see "Two decisions closed before the
+simulator" below.
 
 ### Jornadas are the only way to win
 
@@ -487,6 +486,50 @@ both relations still firing.
 
 Tests: 3 new (148 total).
 
+### Two decisions closed before the simulator
+
+Both were blocking: a simulator is only worth building once it runs exactly the
+rules a real match runs.
+
+**The interface speaks Portuguese; the code keeps its enums.** Memory states
+read Enraizada / Compartilhada / Corporativa / Midiática on the card face, while
+`Roots` / `Shared` / `Corporate` / `Media` stay as identifiers — a closed union
+the compiler checks. `Corporate` reads *Corporativa* rather than Institucional
+so it does not collide with the *Institucionalizada* transformation, which is a
+different thing happening to a different kind of card. The English state prefix
+was also dropped from card names (`Roots: A Fonte Perene` → `A Fonte Perene`):
+the badge already shows the state, in Portuguese, and the name should be the
+account's name.
+
+**`memoryState` is the structural rule; `traversalBehavior` is an explicit
+exception.** The precedence is inverted and, more importantly, the data was
+cleaned so the inversion means something. Measuring first showed that *no card
+contradicted its state* — 12 declarations merely restated the rule and 18 sat on
+states whose rule was affinity-based and quietly bypassed it. So the state rules
+were completed to say what the states mean, and 29 of 30 declarations were
+removed:
+
+| Estado | Regra |
+| --- | --- |
+| Enraizada, Corporativa, Territorial | fica |
+| Compartilhada, Midiática | acompanha |
+| Oral | contextual: acompanha onde houver com que se ligar |
+
+Oral is the contextual one on purpose — an account that lives only in speech
+carries over where the new place gives it a foothold. Exactly one card now
+declares an exception, `O Que a Festa Não Contou`, whose whole text is about
+being left behind; a test fails if that list grows silently, because a state
+everything opts out of stops meaning anything.
+
+**An inconsistency this surfaced.** Objects still handed their Memory over in
+silence while listening and Acontecimentos required reading aloud. A record
+gives *access*, not transmission — it now queues for reading like everything
+else. The rule belongs to the Memory, not to the action that found it.
+
+Tests: 5 new (153 total). Verified in Chromium: the Recorte de Jornal at the Sé
+reaches A Reportagem do Centenário, waits to be read, and the card on the table
+reads **Midiática**.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
@@ -494,9 +537,6 @@ Tests: 3 new (148 total).
   this.
 - Vínculo income is now one per Ressonância per turn plus what cards earn.
   Whether that is too slow for the Jornadas that ask for it wants playtesting.
-- Every shipped Memory declares an explicit `traversalBehavior`, which wins over
-  its `memoryState`. The state-driven rules are proven by unit tests but are
-  currently unreachable from card data — worth resolving as a design decision.
 - Economy is provisional: one Memória per turn against costs of 1-3 makes the
   opening turns tight. Needs playtesting, not guessing.
 - The board's centre is largely empty; visual weight is Milestone 5.

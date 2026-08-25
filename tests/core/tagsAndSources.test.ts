@@ -64,7 +64,7 @@ describe('addressable sources', () => {
   it('addresses a Ressonância as an origin of its own', () => {
     const found = findBySourceId(pool([ORAL, ROOTS]), 'ressonancia_serpente_ribeirao');
     expect(found).toHaveLength(1);
-    expect(getCard(found[0].cardId).name).toBe('Roots: A Fonte Perene');
+    expect(getCard(found[0].cardId).name).toBe('A Fonte Perene');
   });
 
   it('returns nothing for an origin no Memory names', () => {

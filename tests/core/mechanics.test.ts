@@ -14,6 +14,7 @@ import {
   TRAVESSIA_UNRELATED_SURCHARGE,
 } from '../../src/core/mechanics/traversal';
 import { MemoryCard, TerritoryCard } from '../../src/core/cards/types';
+import { memories, getMemoryById } from '../../src/core/cards/data/memories';
 
 const FONTE = 'territorio_fonte_ribeirao';
 const IGREJA = 'territorio_igreja_se';
@@ -105,8 +106,8 @@ describe('Travessia', () => {
     );
 
     const last = s.log[s.log.length - 1].message;
-    expect(last).toContain('levando Shared: Os Caminhos Cruzados');
-    expect(last).toContain('deixando Roots: A Fonte Perene para trás');
+    expect(last).toContain('levando Os Caminhos Cruzados');
+    expect(last).toContain('deixando A Fonte Perene para trás');
   });
 
   it('allows only one Travessia per turn', () => {
@@ -167,6 +168,14 @@ describe('memory persistence rules', () => {
   it('lets an Oral memory follow only where it has an affinity', () => {
     expect(evaluateMemoryPersistence(memory('Oral', ['Faith']), from, to)).toBe('travels');
     expect(evaluateMemoryPersistence(memory('Oral', ['Water']), from, to)).toBe('stays');
+  });
+
+  it('keeps Territorial with the ground it is a detail of', () => {
+    expect(evaluateMemoryPersistence(memory('Territorial', ['Faith']), from, to)).toBe('stays');
+  });
+
+  it('lets Media circulate regardless of where it is going', () => {
+    expect(evaluateMemoryPersistence(memory('Media', ['Water']), from, to)).toBe('travels');
   });
 
   it('honours the state of the copy in play over the definition', () => {
@@ -304,5 +313,38 @@ describe('Despertar', () => {
     }
 
     expect(s.players[0].inPlay[0].exhausted).toBe(false);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * The state is the rule; a declaration is an exception
+ * ------------------------------------------------------------------ */
+
+describe('what decides whether a Memory crosses', () => {
+  it('reads the state when the card declares nothing', () => {
+    const enraizada = getMemoryById('memory_enraizada_fountain')!;
+    expect(enraizada.traversalBehavior).toBeUndefined();
+
+    const fonte = getCard('territorio_fonte_ribeirao') as TerritoryCard;
+    const se = getCard('territorio_igreja_se') as TerritoryCard;
+    expect(evaluateMemoryPersistence(enraizada, fonte, se)).toBe('stays');
+  });
+
+  it('lets a card that declares one override its state', () => {
+    const excecao = getMemoryById('memory_festa_o_que_ficou_de_fora')!;
+
+    // Oral, so contextual by rule — and it shares City with the Escadaria,
+    // which would carry it. It declares otherwise, and the declaration wins.
+    const fonte = getCard('territorio_fonte_ribeirao') as TerritoryCard;
+    const escadaria = getCard('territorio_escadaria_reviver') as TerritoryCard;
+    expect(excecao.affinities).toContain('City');
+    expect(evaluateMemoryPersistence(excecao, fonte, escadaria)).toBe('stays');
+  });
+
+  it('keeps exceptions rare, so the states keep meaning something', () => {
+    const declared = memories.filter((m: MemoryCard) => m.traversalBehavior);
+    expect(declared.map((m: MemoryCard) => m.id)).toEqual([
+      'memory_festa_o_que_ficou_de_fora',
+    ]);
   });
 });
