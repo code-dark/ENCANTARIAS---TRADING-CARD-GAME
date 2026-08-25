@@ -198,3 +198,45 @@ describe('Ressonância reveals what listening cannot', () => {
     expect(s.memoryPool).toHaveLength(1);
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * A declared origin is authoritative
+ * ------------------------------------------------------------------ */
+
+describe('a Memory that names where it comes from', () => {
+  it('is not reachable by a Ressonância that does not name it', () => {
+    // A Passagem Ouvida is opened only by the Cortejo gathering. The Fonte
+    // shares the Memory affinity with it, and the Serpent resonates there —
+    // affinity alone must not be enough.
+    let s = setup(['memory_cortejo_passagem']);
+    const serpent = {
+      ...createInstance(SERPENT, 'p1'),
+      linkedTo: s.players[0].activeTerritoryId,
+    };
+    s.players[0].inPlay = [serpent];
+    s = advanceTo(s, 'Acao');
+
+    s = expectOk(
+      applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
+    );
+    expect(s.memoryPool).toHaveLength(1);
+    expect(s.players[0].inPlay.filter((c) => getCard(c.cardId).type === 'Memory')).toHaveLength(0);
+  });
+
+  it('is reachable by the relation it does name', () => {
+    // A Fonte Perene names ressonancia_serpente_ribeirao, which is exactly the
+    // relation the Serpent has with this place.
+    let s = setup([ROOTS]);
+    const serpent = {
+      ...createInstance(SERPENT, 'p1'),
+      linkedTo: s.players[0].activeTerritoryId,
+    };
+    s.players[0].inPlay = [serpent];
+    s = advanceTo(s, 'Acao');
+
+    s = expectOk(
+      applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
+    );
+    expect(s.memoryPool).toHaveLength(0);
+  });
+});

@@ -247,7 +247,8 @@ describe('Ressonância', () => {
     );
 
     expect(s.players[0].resources.vinculo).toBeGreaterThan(0);
-    expect(s.log[s.log.length - 1].message).toContain('ressoa com Fonte do Ribeirão');
+    // The relation is announced, and what it opens is logged after it.
+    expect(s.log.some((e) => e.message.includes('ressoa com Fonte do Ribeirão'))).toBe(true);
   });
 
   it('reports no Ressonância in an unrelated Território', () => {

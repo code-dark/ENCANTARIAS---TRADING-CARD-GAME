@@ -370,10 +370,54 @@ passage (O Cortejo).
 Tests: 20 new (115 total). Verified in Chromium: a real turn — listen, transmit,
 Encerramento — moves the counter and announces the objective in the log.
 
+### Cards do what they say
+
+Until now every effect in the game was prose: the log printed the sentence and
+the match went on unchanged. `core/effects/` closes that. `GameEffect` is a
+closed union of things the engine can really do — gain a resource, draw, reveal
+what the world holds under an origin, open a free Travessia, wake the
+Personagens standing here, transform a card — and one executor runs them for
+Ressonâncias, Acontecimentos and gatherings alike. No card carries code.
+
+**Prose and effect must agree.** Several cards promised rules the engine does
+not have ("cartas de afinidade Água ganham força" — there are no stats). Rather
+than fake them, the text was rewritten to say what actually happens. Where that
+was impossible, the card keeps its text and gets no effects, marked in place:
+`Esquecimento` describes a rule that fires by itself over turns, and the engine
+has no temporal triggers yet.
+
+**Acontecimentos are a live way of reaching memory.** `revelarMemoria` hands
+over what the world already holds under an opaque origin string — it never
+creates one. Two Memórias now name `acontecimento_tempo_de_festa` as their
+origin, so `Tempo de Festa` reaches something no amount of listening reaches.
+That was the last discovery source that existed in the schema and nowhere else.
+
+**`transformacoes` is no longer inert.** Transforming records the card in the
+player's accomplishments, so a Jornada can now ask for one. The card says what
+it has become, on its face, because a transformation nobody can see is a rule
+nobody can learn.
+
+**A correctness fix this surfaced**, and it is the same class as the Sé leak
+from Phase B. `A Passagem Ouvida` — opened only by the Cortejo gathering — was
+turning up at the Fonte do Ribeirão under the Serpente, because
+`findByResonance` fell back to affinity whenever the Memory named no specific
+Lenda. Sharing an affinity with a place is not belonging to it. Ressonâncias can
+now name themselves (`id`), a Memory's declared `sources` are authoritative, and
+affinity is the fallback only for Memories that name no origin at all. Two
+regression tests hold the line.
+
+Tests: 23 new (138 total). Verified in Chromium: manifesting the Serpente at the
+Fonte grants the Vínculo and the Memória its text promises, wakes nobody when
+nobody is spent, and reveals exactly one Memória — the one that names that
+relation.
+
 ### Known gaps carried into Phase C
 
-- Ressonância detects and logs the unlocked manifestation and grants Vínculo,
-  but the unlocked *effects* are not executed yet.
+- No temporal or conditional triggers: an Acontecimento that should fire "when
+  a Memória goes two turns unused" has nowhere to hook. `Esquecimento` waits on
+  this.
+- A Ressonância grants Vínculo per relation matched *and* runs its effects, so
+  a two-relation place pays 3 Vínculo at once. Wants playtesting, not argument.
 - Every shipped Memory declares an explicit `traversalBehavior`, which wins over
   its `memoryState`. The state-driven rules are proven by unit tests but are
   currently unreachable from card data — worth resolving as a design decision.

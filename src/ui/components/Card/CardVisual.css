@@ -218,3 +218,17 @@
 .card-small .card-state {
   display: none;
 }
+
+/* A card that has become something else says so. */
+.card-transformed {
+  margin-top: 4px;
+  padding: 2px 6px;
+  border: 1px solid #8a6bbf;
+  border-radius: 3px;
+  align-self: flex-start;
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #c7aef0;
+  background-color: rgba(70, 45, 110, 0.35);
+}

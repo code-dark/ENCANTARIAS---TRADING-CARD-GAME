@@ -109,13 +109,25 @@ export function findByExploring(
 export function findByResonance(
   pool: CardInstance[],
   legendCardId: string,
-  territory: TerritoryCard
+  territory: TerritoryCard,
+  /** Names of the relations that actually fired here. */
+  resonanceIds: string[] = []
 ): CardInstance[] {
   return pool.filter((instance) => {
     const memory = getCard(instance.cardId) as MemoryCard;
     const discovery = memory.discovery;
     if (!discovery?.via.includes('resonance')) return false;
     if (discovery.byLegend && discovery.byLegend !== legendCardId) return false;
+
+    // A Memory that names where it comes from is reachable there and nowhere
+    // else. Sharing an affinity with a place is not the same as belonging to
+    // it — that is how a Memory opened only by a gathering was turning up
+    // under any Lenda that happened to resonate somewhere similar.
+    const sources = memory.sources ?? [];
+    if (sources.length > 0) {
+      return sources.some((source) => resonanceIds.includes(source));
+    }
+
     return belongsHere(memory, territory);
   });
 }

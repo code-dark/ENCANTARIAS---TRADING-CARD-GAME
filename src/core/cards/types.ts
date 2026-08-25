@@ -3,6 +3,8 @@
  * Data-driven card system with no hardcoded card logic
  */
 
+import type { GameEffect } from '../effects/types';
+
 export type CardType = 'Territory' | 'Legend' | 'Character' | 'Memory' | 'Event' | 'Artifact';
 
 export type MemoryState = 'Oral' | 'Territorial' | 'Roots' | 'Shared' | 'Corporate' | 'Media';
@@ -87,9 +89,17 @@ export interface TerritoryCard extends Card {
   };
 
   resonances?: Array<{
+    /**
+     * A name for this relation, so a Memory can declare it as its origin.
+     * Without one the relation opens nothing that names a source.
+     */
+    id?: string;
     cardId?: string;
     affinity?: Affinity;
+    /** What the player reads. */
     effect: string;
+    /** What actually happens. Absent means the relation is recognised only. */
+    effects?: GameEffect[];
   }>;
 
   /**
@@ -103,6 +113,7 @@ export interface TerritoryCard extends Card {
     /** Every one of these card ids must be manifested here. */
     requires: string[];
     effect: string;
+    effects?: GameEffect[];
   }>;
 
   possibleEvents?: string[]; // Event card IDs
@@ -211,6 +222,13 @@ export interface EventCard extends Card {
   condition?: string; // What conditions must be met?
   consequence?: string; // What happens?
   duration?: 'instant' | 'persistent' | 'until_traversal';
+
+  /**
+   * What happens when it is played. An Acontecimento with no effects is a
+   * card that describes a rule the engine does not have yet — it stays in the
+   * set, marked, rather than pretending.
+   */
+  effects?: GameEffect[];
 }
 
 /**

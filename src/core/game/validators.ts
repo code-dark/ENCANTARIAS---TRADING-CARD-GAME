@@ -16,7 +16,7 @@ import {
 import { getCard } from '../cards/cardRegistry';
 import { PHASE_LABEL } from '../i18n/labels';
 import { TerritoryCard } from '../cards/types';
-import { traversalCost } from '../mechanics/traversal';
+import { effectiveTraversalCost } from '../mechanics/traversal';
 import { bestListener, escutaOf, findByExploring } from '../mechanics/memory';
 import { isStorage, remainingSpace, storedIn } from '../mechanics/objects';
 
@@ -98,9 +98,10 @@ export function validateAction(state: GameState, action: GameAction): Validation
 
       // Travessia is never free.
       const origin = activeTerritoryOf(current);
-      const cost = traversalCost(
+      const cost = effectiveTraversalCost(
         origin ? (getCard(origin.cardId) as TerritoryCard) : undefined,
-        getCard(target.cardId) as TerritoryCard
+        getCard(target.cardId) as TerritoryCard,
+        state.turnFlags
       );
       if (cost > current.resources.memoria) {
         return invalid(

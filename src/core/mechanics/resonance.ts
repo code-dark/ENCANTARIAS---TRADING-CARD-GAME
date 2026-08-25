@@ -4,6 +4,7 @@
  */
 
 import { AnyCard, CardInstance, LegendCard, TerritoryCard, Affinity } from '../cards/types';
+import { GameEffect } from '../effects/types';
 import { hasAffinityMatch, getSharedAffinities } from './affinity';
 import { getCard } from '../cards/cardRegistry';
 
@@ -11,6 +12,8 @@ export interface ConjunctionMatch {
   id: string;
   name: string;
   effect: string;
+  /** What the gathering does, for the executor. */
+  effects?: GameEffect[];
   /** Instances that make up the gathering. */
   participants: CardInstance[];
 }
@@ -42,6 +45,7 @@ export function detectConjunctions(
       id: conjunction.id,
       name: conjunction.name,
       effect: conjunction.effect,
+      effects: conjunction.effects,
       participants,
     }];
   });
@@ -53,10 +57,14 @@ export function participantNames(match: ConjunctionMatch): string[] {
 }
 
 export interface ResonanceMatch {
+  /** The relation's own name, when it has one. */
+  id?: string;
   cardId: string;
   territoryId: string;
   affinities: Affinity[];
   effect: string;
+  /** What the relation does, for the executor. */
+  effects?: GameEffect[];
 }
 
 /**
@@ -80,19 +88,23 @@ export function detectResonances(
       // Direct card ID match
       if (resonance.cardId === card.id) {
         matches.push({
+          id: resonance.id,
           cardId: card.id,
           territoryId: territory.id,
           affinities: sharedAffinities,
           effect: resonance.effect,
+          effects: resonance.effects,
         });
       }
       // Affinity-based match
       else if (resonance.affinity && sharedAffinities.includes(resonance.affinity)) {
         matches.push({
+          id: resonance.id,
           cardId: card.id,
           territoryId: territory.id,
           affinities: [resonance.affinity],
           effect: resonance.effect,
+          effects: resonance.effects,
         });
       }
     }

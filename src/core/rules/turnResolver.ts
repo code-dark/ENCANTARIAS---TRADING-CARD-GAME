@@ -21,8 +21,10 @@ import {
 } from '../game/gameState';
 import { evaluateJourney, completedObjectiveIds } from '../mechanics/journey';
 import { getCard } from '../cards/cardRegistry';
-import { CardInstance, TerritoryCard } from '../cards/types';
-import { evaluateMemoryPersistence, traversalCost } from '../mechanics/traversal';
+import { TerritoryCard } from '../cards/types';
+import { evaluateMemoryPersistence, effectiveTraversalCost } from '../mechanics/traversal';
+import { executeEffects } from '../effects/executor';
+import { claimMemory } from './claimMemory';
 import {
   detectResonances,
   detectConjunctions,
@@ -33,7 +35,7 @@ import {
 } from '../mechanics/memory';
 import { findByObject } from '../mechanics/objects';
 import { rollD6, readExploreRoll, EXPLORE_SUCCESS } from '../game/random';
-import { ArtifactCard } from '../cards/types';
+import { ArtifactCard, EventCard } from '../cards/types';
 
 export interface ApplyResult {
   state: GameState;
@@ -136,6 +138,12 @@ export function runEncerramento(state: GameState): GameState {
       `${match.name} se forma em ${territoryDef.name} — ` +
         `${participantNames(match).join(' + ')}. ${match.effect}`
     );
+
+    next = executeEffects(next, match.effects, {
+      playerId: player.id,
+      sourceName: match.name,
+      territoryInstanceId: territory.instanceId,
+    });
 
     // The gathering opens a layer nothing else reaches.
     for (const memory of findBySourceId(next.memoryPool, match.id)) {
@@ -286,6 +294,16 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
 
   let out = appendLog(next, playerId, `${player.name} joga ${def.name} ${where}.`);
 
+  // An Acontecimento happens where the player is standing.
+  if (def.type === 'Event') {
+    const territory = activeTerritoryOf(out.players.find((p) => p.id === playerId)!);
+    out = executeEffects(out, (def as EventCard).effects, {
+      playerId,
+      sourceName: def.name,
+      territoryInstanceId: territory?.instanceId,
+    });
+  }
+
   // A document or a record reaches a Memory that already exists in the world.
   // It never creates one: if nothing answers, nothing is added.
   if (def.type === 'Artifact') {
@@ -328,7 +346,7 @@ function resolveTraverse(
 
   const fromDef = from ? (getCard(from.cardId) as TerritoryCard) : undefined;
   const toDef = getCard(to.cardId) as TerritoryCard;
-  const cost = traversalCost(fromDef, toDef);
+  const cost = effectiveTraversalCost(fromDef, toDef, state.turnFlags);
 
   const stayed: string[] = [];
   const travelled: string[] = [];
@@ -360,41 +378,22 @@ function resolveTraverse(
     }),
   }));
 
-  const parts = [`${player.name} atravessa para ${toDef.name} por ${cost} de Memória`];
+  const parts = [
+    cost === 0
+      ? `${player.name} atravessa para ${toDef.name} sem custo`
+      : `${player.name} atravessa para ${toDef.name} por ${cost} de Memória`,
+  ];
   if (travelled.length) parts.push(`levando ${travelled.join(', ')}`);
   if (stayed.length) parts.push(`deixando ${stayed.join(', ')} para trás`);
 
   return appendLog(
-    { ...next, turnFlags: { ...next.turnFlags, hasTraversed: true } },
+    {
+      ...next,
+      // A free crossing is spent by crossing, not by the turn ending.
+      turnFlags: { ...next.turnFlags, hasTraversed: true, travessiaLivre: false },
+    },
     playerId,
     `${parts.join('; ')}.`
-  );
-}
-
-/**
- * Moves a Memory out of the world and into play, rooted in the Território
- * where it was found. A discovered Memory belongs to the place that gave it up.
- */
-function claimMemory(
-  state: GameState,
-  playerId: string,
-  memory: CardInstance,
-  territoryInstanceId: string
-): GameState {
-  const withoutIt = state.memoryPool.filter(
-    (m) => m.instanceId !== memory.instanceId
-  );
-
-  return updatePlayer(
-    { ...state, memoryPool: withoutIt },
-    playerId,
-    (p) => ({
-      ...p,
-      inPlay: [
-        ...p.inPlay,
-        { ...memory, ownerId: playerId, linkedTo: territoryInstanceId },
-      ],
-    })
   );
 }
 
@@ -590,9 +589,24 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     `${def.name} ressoa com ${territoryDef.name}: ${matches.map((m) => m.effect).join(' ')}`
   );
 
+  // What the relation opens, if this place has anything to open. A Ressonância
+  // with no effects is still a Ressonância: the recognition and its Vínculo.
+  for (const match of matches) {
+    next = executeEffects(next, match.effects, {
+      playerId,
+      sourceName: `${def.name} em ${territoryDef.name}`,
+      territoryInstanceId: territory.instanceId,
+    });
+  }
+
   // The manifestation opens layers of the place that listening alone cannot
   // reach. These Memories exist nowhere else in the game.
-  const revealed = findByResonance(next.memoryPool, def.id, territoryDef);
+  const revealed = findByResonance(
+    next.memoryPool,
+    def.id,
+    territoryDef,
+    matches.flatMap((m) => (m.id ? [m.id] : []))
+  );
   for (const memory of revealed) {
     next = claimMemory(next, playerId, memory, territory.instanceId);
     next = appendLog(

@@ -519,8 +519,52 @@ export const memories: MemoryCard[] = [
     flavor: 'Nunca é quem está contando.',
     effect: 'Acompanha você na Travessia.',
   },
-];
 
+  /* ------------------------------------------------------------------ *
+   * Reached through an Acontecimento
+   *
+   * These belong to no place — they belong to something happening. No amount
+   * of listening at a Território surfaces them, because what makes them
+   * available is the occasion and not the ground.
+   * ------------------------------------------------------------------ */
+
+  {
+    id: 'memory_festa_versao_de_rua',
+    type: 'Memory',
+    name: 'Shared: A Versão Que Correu na Festa',
+    memoryState: 'Shared',
+    discovery: { via: ['event'] },
+    affinities: ['Circulation', 'City', 'Culture'],
+    sources: ['acontecimento_tempo_de_festa'],
+    tags: ['festa', 'circulacao', 'oralidade', 'transmissao'],
+    traversalBehavior: 'travels',
+    cost: 0,
+    description:
+      '[PROVISIONAL] Um relato que só aparece quando há muita gente junta: ' +
+      'alguém conta, outro corrige, e a versão que segue adiante é a terceira.',
+    flavor: 'Ninguém lembra quem contou primeiro. Todo mundo lembra a história.',
+    effect: 'Acompanha você na Travessia.',
+  },
+
+  {
+    id: 'memory_festa_o_que_ficou_de_fora',
+    type: 'Memory',
+    name: 'Oral: O Que a Festa Não Contou',
+    memoryState: 'Oral',
+    discovery: { via: ['event'] },
+    affinities: ['Memory', 'Culture', 'City'],
+    sources: ['acontecimento_tempo_de_festa'],
+    tags: ['festa', 'oralidade', 'ausencia', 'transmissao'],
+    traversalBehavior: 'stays',
+    cost: 0,
+    description:
+      '[PROVISIONAL] Toda ocasião que faz circular também escolhe o que não ' +
+      'circula. O relato que ficou de fora continua existindo — mas só onde ' +
+      'foi deixado.',
+    flavor: 'O que não coube na festa ficou esperando na esquina.',
+    effect: 'Permanece neste Território.',
+  },
+];
 
 export function getMemoryById(id: string): MemoryCard | undefined {
   return memories.find((m) => m.id === id);

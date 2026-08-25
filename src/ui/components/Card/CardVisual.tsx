@@ -1,5 +1,7 @@
 import { AnyCard, CardInstance } from '../../../core/cards/types';
-import { AFFINITY_LABEL, CARD_TYPE_LABEL, MEMORY_STATE_LABEL } from '../../../core/i18n/labels';
+import {
+  AFFINITY_LABEL, CARD_TYPE_LABEL, MEMORY_STATE_LABEL, TRANSFORMATION_LABEL,
+} from '../../../core/i18n/labels';
 import './CardVisual.css';
 
 interface CardVisualProps {
@@ -23,6 +25,7 @@ export default function CardVisual({
   onClick,
 }: CardVisualProps) {
   const state = instance?.memoryState ?? definition.memoryState;
+  const transformed = instance?.transformationState ?? definition.transformationState;
   const classes = [
     'card-visual',
     `card-${size}`,
@@ -64,6 +67,12 @@ export default function CardVisual({
       )}
 
       {state && <div className="card-state">{MEMORY_STATE_LABEL[state]}</div>}
+
+      {/* What the card has become. Visible because a transformation nobody
+          can see is a rule nobody can learn. */}
+      {transformed && (
+        <div className="card-transformed">{TRANSFORMATION_LABEL[transformed]}</div>
+      )}
 
       {definition.description && (
         <p className="description">{definition.description}</p>

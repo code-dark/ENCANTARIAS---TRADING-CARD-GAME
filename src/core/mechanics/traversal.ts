@@ -35,6 +35,20 @@ export function traversalCost(
   return TRAVESSIA_BASE_COST + (continuous ? 0 : TRAVESSIA_UNRELATED_SURCHARGE);
 }
 
+/**
+ * What crossing costs right now, after anything a card has opened this turn.
+ *
+ * Kept in one place because the price is asked twice — once to refuse the
+ * action, once to charge it — and those two answers must never disagree.
+ */
+export function effectiveTraversalCost(
+  from: TerritoryCard | undefined,
+  to: TerritoryCard,
+  flags: { travessiaLivre: boolean }
+): number {
+  return flags.travessiaLivre ? 0 : traversalCost(from, to);
+}
+
 export type MemoryPersistence = 'stays' | 'travels' | 'transforms';
 
 /**

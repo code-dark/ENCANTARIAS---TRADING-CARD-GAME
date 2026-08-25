@@ -156,9 +156,15 @@ export interface GameState {
 export interface TurnFlags {
   hasDrawn: boolean;
   hasTraversed: boolean;
+  /** A card opened the way: the next Travessia this turn is free. */
+  travessiaLivre: boolean;
 }
 
-export const FRESH_TURN_FLAGS: TurnFlags = { hasDrawn: false, hasTraversed: false };
+export const FRESH_TURN_FLAGS: TurnFlags = {
+  hasDrawn: false,
+  hasTraversed: false,
+  travessiaLivre: false,
+};
 
 export interface PendingDiscovery {
   playerId: string;

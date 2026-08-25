@@ -33,12 +33,18 @@ export const territories: TerritoryCard[] = [
 
     resonances: [
       {
+        id: 'ressonancia_serpente_ribeirao',
         cardId: 'legend_serpent_enchanted',
-        effect: 'Desbloqueia Guardiã da Fonte: ao recuperar uma Memória, ganhe 1 Vínculo.',
+        effect: 'A Guardiã reconhece quem escuta: +1 de Vínculo, e quem escutou aqui pode escutar de novo.',
+        effects: [
+          { kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 },
+          { kind: 'despertarPersonagens' },
+        ],
       },
       {
         affinity: 'Water',
-        effect: 'Cartas de afinidade Água ganham força neste Território.',
+        effect: 'A água guarda o que passa: +1 de Memória.',
+        effects: [{ kind: 'ganharRecurso', recurso: 'memoria', quantidade: 1 }],
       },
     ],
   },
@@ -72,11 +78,14 @@ export const territories: TerritoryCard[] = [
     resonances: [
       {
         affinity: 'Institution',
-        effect: 'Cartas de afinidade Instituição têm seus efeitos ampliados.',
+        effect: 'A instituição acolhe e prende: a narrativa passa a existir sob guarda.',
+        effects: [{ kind: 'transformar', para: 'Institutional', alvoTipo: 'Legend' }],
       },
       {
+        id: 'ressonancia_sinos_se',
         affinity: 'Faith',
-        effect: 'Cartas de afinidade Fé ficam protegidas de Transformações.',
+        effect: 'A devoção sustenta quem sustenta: +1 de Vínculo.',
+        effects: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
       },
     ],
   },
@@ -110,11 +119,13 @@ export const territories: TerritoryCard[] = [
     resonances: [
       {
         affinity: 'Passage',
-        effect: 'Cartas de afinidade Passagem permitem Travessia livre.',
+        effect: 'A passagem se abre: a próxima Travessia deste turno não custa nada.',
+        effects: [{ kind: 'travessiaLivre' }],
       },
       {
         affinity: 'Circulation',
-        effect: 'Narrativas em circulação ganham força.',
+        effect: 'O que circula alcança mais longe: +1 de Circulação.',
+        effects: [{ kind: 'ganharRecurso', recurso: 'circulacao', quantidade: 1 }],
       },
     ],
   },
@@ -148,11 +159,13 @@ export const territories: TerritoryCard[] = [
     resonances: [
       {
         affinity: 'Commerce',
-        effect: 'Trocas comerciais abrem novas possibilidades.',
+        effect: 'A troca abre caminho: compre uma carta.',
+        effects: [{ kind: 'comprarCarta', quantidade: 1 }],
       },
       {
         affinity: 'Craft',
-        effect: 'Cartas de afinidade Ofício ganham Vínculo.',
+        effect: 'O ofício se transmite de mão em mão: +1 de Vínculo.',
+        effects: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
       },
     ],
   },
@@ -191,7 +204,8 @@ export const territories: TerritoryCard[] = [
     resonances: [
       {
         affinity: 'Memory',
-        effect: 'Cartas de Memória encontram apoio neste Território.',
+        effect: 'O lugar sustenta o que se lembra: +1 de Vínculo.',
+        effects: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
       },
     ],
 
@@ -205,6 +219,11 @@ export const territories: TerritoryCard[] = [
         ],
         effect:
           'O cortejo se forma: a passagem abre uma camada do Território que nenhuma escuta alcança.',
+        effects: [
+          { kind: 'ganharRecurso', recurso: 'circulacao', quantidade: 1 },
+          // A passagem inteira reunida é vista, e ser vista muda o que ela é.
+          { kind: 'transformar', para: 'Popularized', alvoTipo: 'Legend' },
+        ],
       },
     ],
   },
