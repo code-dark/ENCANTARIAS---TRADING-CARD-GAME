@@ -303,3 +303,31 @@ button.tiny {
   font-weight: 700;
   color: #d9a05b;
 }
+
+/* Marks the place carries after something happened there. */
+.territory-marks {
+  margin-top: 12px;
+}
+
+.territory-marks h4 {
+  margin: 0 0 6px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #7aa3d5;
+}
+
+.mark-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mark-list .mark {
+  padding: 3px 8px;
+  border: 1px solid #c9a227;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  color: #f0e0b0;
+  background-color: rgba(90, 72, 20, 0.35);
+}

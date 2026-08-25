@@ -56,6 +56,23 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
           <p className="effect">{territory.permanentEffect.description}</p>
         )}
 
+        {/* What has happened here. The place keeps it after the turn ends, and
+            other cards read it — so it has to be on screen. */}
+        {Object.entries(active.counters).filter(([, n]) => n > 0).length > 0 && (
+          <div className="territory-marks">
+            <h4>O que ficou neste lugar</h4>
+            <div className="mark-list">
+              {Object.entries(active.counters)
+                .filter(([, n]) => n > 0)
+                .map(([mark, n]) => (
+                  <span key={mark} className="mark">
+                    {mark}{n > 1 ? ` ×${n}` : ''}
+                  </span>
+                ))}
+            </div>
+          </div>
+        )}
+
         <div className="territory-switcher">
           <h4>Seus Territórios</h4>
           <div className="territory-options">

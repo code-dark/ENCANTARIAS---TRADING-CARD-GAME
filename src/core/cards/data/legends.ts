@@ -19,6 +19,16 @@ export const legends: LegendCard[] = [
     description: '[PROVISIONAL] Uma serpente guardiã das águas e do subterrâneo.',
     flavor: 'Dizem que ela sonha a cidade. Dizem também que a cidade a sonha.',
 
+    // The ability the card has always claimed, now stated as a rule the
+    // engine reads: gatilho, condição implícita (estar aqui), efeito.
+    effectRules: [
+      {
+        quando: 'aoDescobrirMemoria',
+        texto: 'a Guardiã reconhece o que foi dito em voz alta.',
+        entao: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
+      },
+    ],
+
     resonanceManifestations: {
       'territorio_fonte_ribeirao': {
         name: 'Guardiã da Fonte',
@@ -91,6 +101,16 @@ export const legends: LegendCard[] = [
     mystery: 3,
     description: '[PROVISIONAL] Um guardião das passagens. Aparece onde as histórias se cruzam.',
     flavor: 'Siga o caminho e o caminho te mostra.',
+
+    // A rule with a condition: the place has to have been left changed.
+    effectRules: [
+      {
+        quando: 'aoEncerrarTurno',
+        se: { kind: 'territorioMarcado', marca: 'festa' },
+        texto: 'num lugar que ainda está em festa, há mais passagem do que de costume.',
+        entao: [{ kind: 'ganharRecurso', recurso: 'circulacao', quantidade: 1 }],
+      },
+    ],
 
     resonanceManifestations: {
       'territorio_escadaria_reviver': {

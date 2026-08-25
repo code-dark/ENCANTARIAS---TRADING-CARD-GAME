@@ -166,14 +166,23 @@ export const FRESH_TURN_FLAGS: TurnFlags = {
   travessiaLivre: false,
 };
 
+/**
+ * A Memory found and not yet transmitted.
+ *
+ * Two shapes, one rule. In 'escolha' the place offered more than one account
+ * and the player takes one; in 'leitura' everything here was surfaced and each
+ * one has to be read. Either way nothing is gained until it is read aloud —
+ * that is the rule about Memory itself, not about the action that found it.
+ */
 export interface PendingDiscovery {
   playerId: string;
-  /** One option normally; two when the roll opened a choice. */
+  /** What is waiting: alternatives in 'escolha', a queue in 'leitura'. */
   options: CardInstance[];
   /** Where it was found, and where it will be rooted. */
   territoryInstanceId: string;
-  /** What the die said, so the UI can explain the moment. */
+  /** What the die said, so the UI can explain the moment. Zero when no roll. */
   roll: number;
+  mode: 'escolha' | 'leitura';
 }
 
 export interface LogEntry {

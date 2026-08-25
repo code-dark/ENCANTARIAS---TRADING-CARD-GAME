@@ -6,6 +6,10 @@ import { executeEffects, executeEffect } from '../../src/core/effects/executor';
 import { GameEffect } from '../../src/core/effects/types';
 import { effectiveTraversalCost, traversalCost } from '../../src/core/mechanics/traversal';
 import { getCard } from '../../src/core/cards/cardRegistry';
+
+/** Memórias on the table — the Acontecimento that surfaced them is there too. */
+const memoriesOf = (s: GameState) =>
+  s.players[0].inPlay.filter((c) => getCard(c.cardId).type === 'Memory');
 import { TerritoryCard } from '../../src/core/cards/types';
 
 const FONTE = 'territorio_fonte_ribeirao';
@@ -26,7 +30,8 @@ const FESTA_MEMORIA_B = 'memory_festa_o_que_ficou_de_fora';
 
 beforeEach(() => resetInstanceIds());
 
-function setup(territoryIds = [FONTE], pool: string[] = []): GameState {
+/** Seed 1 makes the die read 5 — a find, without a choice. See game/random.ts. */
+function setup(territoryIds = [FONTE], pool: string[] = [], seed = 1): GameState {
   const p1 = emptyPlayer('p1', 'Player One');
   p1.territories = territoryIds.map((t) => createInstance(t, 'p1'));
   p1.activeTerritoryId = p1.territories[0].instanceId;
@@ -37,7 +42,22 @@ function setup(territoryIds = [FONTE], pool: string[] = []): GameState {
   p2.territories = [t2];
   p2.activeTerritoryId = t2.instanceId;
 
-  return createGameState([p1, p2], pool.map((id) => createInstance(id, 'world')));
+  return createGameState(
+    [p1, p2], pool.map((id) => createInstance(id, 'world')), 20, seed
+  );
+}
+
+/** Pass until this player's *next* turn reaches the phase. Always moves. */
+function nextTurnOf(state: GameState, playerId: string, phase: string): GameState {
+  let s = applyAction(state, {
+    type: 'PassPhase', playerId: getCurrentPlayer(state).id,
+  }).state;
+  let guard = 0;
+  while (!(s.phase === phase && getCurrentPlayer(s).id === playerId)) {
+    s = applyAction(s, { type: 'PassPhase', playerId: getCurrentPlayer(s).id }).state;
+    if (++guard > 120) throw new Error(`never reached ${phase} for ${playerId}`);
+  }
+  return s;
 }
 
 function place(state: GameState, cardId: string, exhausted = false) {
@@ -108,26 +128,42 @@ describe('the effect executor', () => {
     expect(logged(after, 'o deck acabou')).toBe(true);
   });
 
-  it('hands over what the world holds under an origin', () => {
+  it('surfaces what the world holds, and gains nothing until it is read', () => {
     const s = setup([FONTE], [FESTA_MEMORIA_A, FESTA_MEMORIA_B]);
     const after = executeEffect(
       s,
       { kind: 'revelarMemoria', fonte: 'acontecimento_tempo_de_festa', limite: 2 },
       ctx(s)
     );
-    expect(after.memoryPool).toHaveLength(0);
-    expect(after.players[0].inPlay).toHaveLength(2);
-    // Rooted where it was reached.
-    expect(after.players[0].inPlay[0].linkedTo).toBe(s.players[0].activeTerritoryId);
+
+    // Still in the world, and nothing on the table: the rule is about the
+    // Memory, not about which action turned it up.
+    expect(after.memoryPool).toHaveLength(2);
+    expect(after.players[0].inPlay).toHaveLength(0);
+    expect(after.pendingDiscovery!.mode).toBe('leitura');
+    expect(after.pendingDiscovery!.options).toHaveLength(2);
   });
 
-  it('respects the limit, leaving the rest in the world', () => {
+  it('respects the limit, leaving the rest unmentioned', () => {
     const s = setup([FONTE], [FESTA_MEMORIA_A, FESTA_MEMORIA_B]);
     const after = executeEffect(
       s, { kind: 'revelarMemoria', fonte: 'acontecimento_tempo_de_festa', limite: 1 }, ctx(s)
     );
-    expect(after.players[0].inPlay).toHaveLength(1);
-    expect(after.memoryPool).toHaveLength(1);
+    expect(after.pendingDiscovery!.options).toHaveLength(1);
+    expect(after.memoryPool).toHaveLength(2);
+  });
+
+  it('adds to what is already waiting instead of losing it', () => {
+    const s = setup([FONTE], [FESTA_MEMORIA_A, FESTA_MEMORIA_B]);
+    const once = executeEffect(
+      s, { kind: 'revelarMemoria', fonte: 'acontecimento_tempo_de_festa', limite: 1 }, ctx(s)
+    );
+    const twice = executeEffect(
+      once,
+      { kind: 'revelarMemoria', fonte: 'acontecimento_tempo_de_festa', limite: 2 },
+      ctx(once)
+    );
+    expect(twice.pendingDiscovery!.options.length).toBeGreaterThan(1);
   });
 
   it('never invents a Memory when nothing answers the origin', () => {
@@ -254,11 +290,7 @@ describe('a Travessia opened by a card', () => {
     }).state;
 
     // Back round to p1's Travessia phase.
-    let guard = 0;
-    while (!(s.phase === 'Travessia' && getCurrentPlayer(s).id === 'p1')) {
-      s = applyAction(s, { type: 'PassPhase', playerId: getCurrentPlayer(s).id }).state;
-      if (++guard > 120) throw new Error('never came round');
-    }
+    s = nextTurnOf(s, 'p1', 'Travessia');
     expect(s.turnFlags.travessiaLivre).toBe(false);
   });
 });
@@ -280,8 +312,55 @@ describe('cards whose text the engine executes', () => {
     s = result.state;
 
     expect(s.players[0].resources.circulacao).toBe(1);
+    expect(logged(s, 'Falta ler em voz alta')).toBe(true);
+
+    // Reading is a queue here: each one counts only once it has been read.
+    expect(s.pendingDiscovery!.options).toHaveLength(2);
+    s = applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }).state;
+    expect(s.pendingDiscovery!.options).toHaveLength(1);
+    expect(memoriesOf(s)).toHaveLength(1);
+
+    s = applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }).state;
+    expect(s.pendingDiscovery).toBeUndefined();
     expect(s.memoryPool).toHaveLength(0);
-    expect(logged(s, 'A Versão Que Correu na Festa')).toBe(true);
+    expect(memoriesOf(s)).toHaveLength(2);
+  });
+
+  it('lets a Memória surfaced outside the Ação phase be read at once', () => {
+    // Tempo de Festa is played in Manifestação, where TransmitMemory is not a
+    // phase action. Reading aloud resolves an interrupted moment instead.
+    let s = setup([FONTE], [FESTA_MEMORIA_A]);
+    hold(s, FESTA);
+    s = advanceTo(s, 'Manifestacao');
+    s = applyAction(s, {
+      type: 'PlayCard', playerId: 'p1', instanceId: s.players[0].hand[0].instanceId,
+    }).state;
+
+    expect(s.phase).toBe('Manifestacao');
+    const read = applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    });
+    expect(read.error).toBeUndefined();
+    expect(memoriesOf(read.state)).toHaveLength(1);
+  });
+
+  it('refuses everything else until what was found has been read', () => {
+    let s = setup([FONTE], [FESTA_MEMORIA_A]);
+    hold(s, FESTA);
+    s = advanceTo(s, 'Manifestacao');
+    s = applyAction(s, {
+      type: 'PlayCard', playerId: 'p1', instanceId: s.players[0].hand[0].instanceId,
+    }).state;
+
+    const blocked = applyAction(s, { type: 'PassPhase', playerId: 'p1' });
+    expect(blocked.error).toContain('Leia a Memória');
   });
 
   it('Abraço Institucional puts a Lenda under guard', () => {
@@ -331,5 +410,77 @@ describe('cards whose text the engine executes', () => {
   it('leaves Esquecimento inert on purpose, rather than faking a trigger', async () => {
     const { getEventById } = await import('../../src/core/cards/data/events');
     expect(getEventById('event_forgetting')!.effects).toBeUndefined();
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Trigger and condition as data
+ * ------------------------------------------------------------------ */
+
+describe('rules a card declares for itself', () => {
+  it('fires when the moment it named arrives', () => {
+    // The Serpente reacts to a Memory being read aloud here. Nothing in the
+    // resolver knows that; the card said so.
+    let s = setup([FONTE], ['memory_oral_serpent']);
+    place(s, SERPENTE);
+    place(s, OUVINTE);
+
+    s = advanceTo(s, 'Acao');
+    s = applyAction(s, { type: 'Explore', playerId: 'p1' }).state;
+    const before = s.players[0].resources.vinculo;
+
+    s = applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }).state;
+
+    expect(s.players[0].resources.vinculo).toBe(before + 1);
+    expect(logged(s, 'reconhece o que foi dito em voz alta')).toBe(true);
+  });
+
+  it('does not fire for a card standing somewhere else', () => {
+    let s = setup([FONTE, ESCADARIA], ['memory_oral_serpent']);
+    const serpent = place(s, SERPENTE);
+    place(s, OUVINTE);
+    // The Serpente stays rooted at a Território the player is not in.
+    s.players[0].inPlay = s.players[0].inPlay.map((c) =>
+      c.instanceId === serpent.instanceId
+        ? { ...c, linkedTo: s.players[0].territories[1].instanceId }
+        : c
+    );
+
+    s = advanceTo(s, 'Acao');
+    s = applyAction(s, { type: 'Explore', playerId: 'p1' }).state;
+    const before = s.players[0].resources.vinculo;
+    s = applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }).state;
+
+    expect(s.players[0].resources.vinculo).toBe(before);
+  });
+
+  it('holds back while its condition fails, and fires once it holds', () => {
+    let s = setup([ESCADARIA]);
+    place(s, CAMINHOS);
+
+    // No festa here yet: the rule stays quiet at Encerramento.
+    s = advanceTo(s, 'Encerramento');
+    expect(s.players[0].resources.circulacao).toBe(0);
+
+    // Mark the place, and the same rule now has something to answer to.
+    s = executeEffect(s, { kind: 'marcarTerritorio', marca: 'festa' }, ctx(s));
+    s = nextTurnOf(s, 'p1', 'Encerramento');
+    expect(s.players[0].resources.circulacao).toBe(1);
+    expect(logged(s, 'mais passagem do que de costume')).toBe(true);
+  });
+
+  it('leaves a mark on the place that outlives the turn', () => {
+    let s = setup([FONTE]);
+    s = executeEffect(s, { kind: 'marcarTerritorio', marca: 'festa' }, ctx(s));
+    expect(s.players[0].territories[0].counters.festa).toBe(1);
+
+    s = nextTurnOf(s, 'p1', 'Despertar');
+    expect(s.players[0].territories[0].counters.festa).toBe(1);
   });
 });

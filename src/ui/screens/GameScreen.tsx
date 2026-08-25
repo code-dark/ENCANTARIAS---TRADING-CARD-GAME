@@ -36,16 +36,21 @@ export default function GameScreen() {
       {gameState.pendingDiscovery && (
         <section className="transmission" role="dialog" aria-label="Memória encontrada">
           <div className="transmission-head">
-            <span className="die">{gameState.pendingDiscovery.roll}</span>
+            {gameState.pendingDiscovery.roll > 0 && (
+              <span className="die">{gameState.pendingDiscovery.roll}</span>
+            )}
             <div>
               <h3>
-                {gameState.pendingDiscovery.options.length > 1
+                {gameState.pendingDiscovery.mode === 'escolha'
                   ? 'O lugar oferece mais de um relato'
-                  : 'Algo veio à tona'}
+                  : gameState.pendingDiscovery.options.length > 1
+                    ? `${gameState.pendingDiscovery.options.length} relatos vieram à tona`
+                    : 'Algo veio à tona'}
               </h3>
               <p>
-                Leia o relato em voz alta. A Memória só é computada depois de
-                transmitida.
+                {gameState.pendingDiscovery.mode === 'escolha'
+                  ? 'Escolha um relato e leia-o em voz alta. O outro fica no mundo.'
+                  : 'Leia cada relato em voz alta. Uma Memória só é computada depois de transmitida.'}
               </p>
             </div>
           </div>

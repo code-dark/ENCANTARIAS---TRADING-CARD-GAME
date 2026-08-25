@@ -3,7 +3,7 @@
  * Data-driven card system with no hardcoded card logic
  */
 
-import type { GameEffect } from '../effects/types';
+import type { EffectRule, GameEffect } from '../effects/types';
 
 export type CardType = 'Territory' | 'Legend' | 'Character' | 'Memory' | 'Event' | 'Artifact';
 
@@ -54,6 +54,13 @@ export interface Card {
   tags?: string[];
 
   cost?: number;
+
+  /**
+   * Standing rules: at this moment, if this holds, do this. A card with these
+   * acts on its own when the match reaches the moment it named — which is what
+   * lets a new card react to something without the resolver learning about it.
+   */
+  effectRules?: EffectRule[];
 
   // Card state
   state?: string;

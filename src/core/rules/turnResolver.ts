@@ -24,6 +24,8 @@ import { getCard } from '../cards/cardRegistry';
 import { TerritoryCard } from '../cards/types';
 import { evaluateMemoryPersistence, effectiveTraversalCost } from '../mechanics/traversal';
 import { executeEffects } from '../effects/executor';
+import { meets } from '../effects/conditions';
+import { EffectTrigger } from '../effects/types';
 import { claimMemory } from './claimMemory';
 import {
   detectResonances,
@@ -113,7 +115,9 @@ export function runEncerramento(state: GameState): GameState {
   const territoryDef = getCard(territory.cardId) as TerritoryCard;
   const here = player.inPlay.filter((c) => c.linkedTo === territory.instanceId);
 
-  let next = state;
+  // What the cards themselves do as the turn closes, before the table is read
+  // for gatherings.
+  let next = fireTrigger(state, 'aoEncerrarTurno', player.id);
 
   for (const match of detectConjunctions(here, territoryDef)) {
     // Already opened here? Then it is part of the scenery now.
@@ -241,6 +245,54 @@ export function runAwaken(state: GameState): GameState {
   return appendLog(refreshed, player.id, `${player.name} desperta.`);
 }
 
+/**
+ * Give every card standing in the active Território its chance at this moment.
+ *
+ * The resolver announces moments; cards decide whether they care. Nothing here
+ * knows what any particular card does, which is the whole point: a card that
+ * reacts to a discovery is a data entry, not a branch in this file.
+ *
+ * Only what is present acts. A card left behind in another Território is not
+ * there to react, and a card kept inside an object is out of circulation.
+ */
+export function fireTrigger(
+  state: GameState,
+  trigger: EffectTrigger,
+  playerId: string,
+  /** Restrict to one card — used when the moment is about that card itself. */
+  onlyInstanceId?: string
+): GameState {
+  const player = state.players.find((p) => p.id === playerId);
+  if (!player) return state;
+
+  const territory = activeTerritoryOf(player);
+  if (!territory) return state;
+
+  const standing = [
+    ...player.inPlay.filter((c) => c.linkedTo === territory.instanceId),
+    territory,
+  ].filter((c) => !onlyInstanceId || c.instanceId === onlyInstanceId);
+
+  return standing.reduce((current, instance) => {
+    const def = getCard(instance.cardId);
+    const rules = (def.effectRules ?? []).filter((r) => r.quando === trigger);
+
+    return rules.reduce((afterRules, rule) => {
+      if (!meets(afterRules, rule.se, playerId)) return afterRules;
+
+      const announced = rule.texto
+        ? appendLog(afterRules, playerId, `${def.name}: ${rule.texto}`)
+        : afterRules;
+
+      return executeEffects(announced, rule.entao, {
+        playerId,
+        sourceName: def.name,
+        territoryInstanceId: territory.instanceId,
+      });
+    }, current);
+  }, state);
+}
+
 /* ------------------------------------------------------------------ *
  * Action resolution
  * ------------------------------------------------------------------ */
@@ -327,7 +379,10 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
     }
   }
 
-  return out;
+  // The card itself may have something to say about having arrived.
+  return def.type === 'Territory'
+    ? out
+    : fireTrigger(out, 'aoManifestar', playerId, instanceId);
 }
 
 /**
@@ -457,6 +512,8 @@ function resolveExplore(state: GameState, playerId: string): GameState {
       options,
       territoryInstanceId: territory.instanceId,
       roll,
+      // A 6 offers alternatives; anything else surfaced one account to read.
+      mode: outcome === 'choice' ? 'escolha' : 'leitura',
     },
   };
 }
@@ -476,19 +533,33 @@ function resolveTransmit(
   const pending = state.pendingDiscovery!;
   const chosen = pending.options.find((o) => o.instanceId === memoryInstanceId)!;
 
+  // In 'escolha' the options are alternatives and the rest stay in the world.
+  // In 'leitura' they are a queue: reading one leaves the others waiting.
+  const remaining =
+    pending.mode === 'leitura'
+      ? pending.options.filter((o) => o.instanceId !== memoryInstanceId)
+      : [];
+
   const claimed = claimMemory(
-    { ...state, pendingDiscovery: undefined },
+    {
+      ...state,
+      pendingDiscovery:
+        remaining.length > 0 ? { ...pending, options: remaining } : undefined,
+    },
     playerId,
     chosen,
     pending.territoryInstanceId
   );
 
   const player = state.players.find((p) => p.id === playerId)!;
-  return appendLog(
+  const spoken = appendLog(
     claimed, playerId,
     `${player.name} lê ${getCard(chosen.cardId).name} em voz alta. ` +
       `A Memória é lembrada.`
   );
+
+  // Something in this place may be listening for exactly this.
+  return fireTrigger(spoken, 'aoDescobrirMemoria', playerId);
 }
 
 /**
@@ -598,6 +669,9 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
       territoryInstanceId: territory.instanceId,
     });
   }
+
+  // Standing rules this card carries for its own resonance.
+  next = fireTrigger(next, 'aoRessoar', playerId, instanceId);
 
   // The manifestation opens layers of the place that listening alone cannot
   // reach. These Memories exist nowhere else in the game.

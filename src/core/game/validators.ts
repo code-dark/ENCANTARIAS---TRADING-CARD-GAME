@@ -41,6 +41,13 @@ export function validateAction(state: GameState, action: GameAction): Validation
     return VALID;
   }
 
+  // Reading aloud what you just found is not a phase action: it resolves an
+  // interrupted moment. Gating it by phase would soft-lock a Memory surfaced
+  // by an Acontecimento, which is played outside the Ação phase.
+  if (state.pendingDiscovery && action.type === 'TransmitMemory') {
+    return transmitCheck(state, action.memoryInstanceId);
+  }
+
   if (!PHASE_ACTIONS[state.phase].includes(action.type)) {
     return invalid(
       `${labelFor(action.type)} não está disponível na fase de ${PHASE_LABEL[state.phase]}.`
@@ -194,16 +201,8 @@ export function validateAction(state: GameState, action: GameAction): Validation
       return VALID;
     }
 
-    case 'TransmitMemory': {
-      const pending = state.pendingDiscovery;
-      if (!pending) {
-        return invalid('Não há Memória aguardando leitura.');
-      }
-      if (!pending.options.some((o) => o.instanceId === action.memoryInstanceId)) {
-        return invalid('Essa Memória não está entre as que você encontrou.');
-      }
-      return VALID;
-    }
+    case 'TransmitMemory':
+      return transmitCheck(state, action.memoryInstanceId);
 
     case 'ActivateResonance': {
       const card = current.inPlay.find((c) => c.instanceId === action.instanceId);
@@ -221,6 +220,17 @@ export function validateAction(state: GameState, action: GameAction): Validation
       return VALID;
     }
   }
+}
+
+function transmitCheck(state: GameState, memoryInstanceId: string): ValidationResult {
+  const pending = state.pendingDiscovery;
+  if (!pending) {
+    return invalid('Não há Memória aguardando leitura.');
+  }
+  if (!pending.options.some((o) => o.instanceId === memoryInstanceId)) {
+    return invalid('Essa Memória não está entre as que você encontrou.');
+  }
+  return VALID;
 }
 
 function labelFor(type: GameAction['type']): string {

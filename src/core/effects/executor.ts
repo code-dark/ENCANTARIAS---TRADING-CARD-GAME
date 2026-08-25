@@ -19,7 +19,6 @@ import {
 import { getCard } from '../cards/cardRegistry';
 import { LegendCard } from '../cards/types';
 import { findBySourceId } from '../mechanics/memory';
-import { claimMemory } from '../rules/claimMemory';
 import { EffectContext, GameEffect, Recurso } from './types';
 
 const RECURSO_LABEL: Record<Recurso, string> = {
@@ -56,6 +55,8 @@ export function executeEffect(
       return freeTraversal(state, context);
     case 'despertarPersonagens':
       return awakenCharacters(state, context);
+    case 'marcarTerritorio':
+      return markTerritory(state, effect.marca, effect.quantidade ?? 1, context);
     case 'transformar':
       return transform(state, effect, context);
   }
@@ -111,9 +112,14 @@ function drawCards(
 }
 
 /**
- * Hands over what the world holds under this origin. The origin is an opaque
+ * Surfaces what the world holds under this origin. The origin is an opaque
  * string; the executor never interprets it, which is what lets a new card name
  * a new origin without the engine changing.
+ *
+ * Nothing is gained here. What surfaces waits to be read aloud, exactly as a
+ * Memory found by listening does — the rule is about the Memory, not about
+ * which action turned it up, and a Memória handed over silently would not be
+ * a transmitted Memória at all.
  */
 function revealMemories(
   state: GameState,
@@ -132,15 +138,67 @@ function revealMemories(
     );
   }
 
-  return found.reduce((current, memory) => {
-    const claimed = claimMemory(
-      current, context.playerId, memory, context.territoryInstanceId!
-    );
-    return appendLog(
-      claimed, context.playerId,
-      `${context.sourceName} traz à tona ${getCard(memory.cardId).name}.`
-    );
-  }, state);
+  // Something already waiting? Add to it rather than overwriting: two effects
+  // in one card's list must not lose the first one's find.
+  const waiting = state.pendingDiscovery;
+  const options =
+    waiting && waiting.playerId === context.playerId
+      ? [...waiting.options, ...found]
+      : found;
+
+  const next: GameState = {
+    ...state,
+    pendingDiscovery: {
+      playerId: context.playerId,
+      options,
+      territoryInstanceId: context.territoryInstanceId,
+      roll: waiting?.roll ?? 0,
+      mode: 'leitura',
+    },
+  };
+
+  return appendLog(
+    next, context.playerId,
+    `${context.sourceName} traz à tona ` +
+      `${found.map((m) => getCard(m.cardId).name).join(', ')}. ` +
+      `Falta ler em voz alta.`
+  );
+}
+
+/**
+ * A mark on the place itself. It stays with the Território rather than with
+ * the player, so what happened there keeps being true after the turn ends and
+ * any card can ask about it by name.
+ */
+function markTerritory(
+  state: GameState,
+  marca: string,
+  quantidade: number,
+  context: EffectContext
+): GameState {
+  if (!context.territoryInstanceId) return state;
+
+  const player = state.players.find((p) => p.id === context.playerId)!;
+  const territory = player.territories.find(
+    (t) => t.instanceId === context.territoryInstanceId
+  );
+  if (!territory) return state;
+
+  const next = updatePlayer(state, context.playerId, (p) => ({
+    ...p,
+    territories: p.territories.map((t) =>
+      t.instanceId === context.territoryInstanceId
+        ? { ...t, counters: { ...t.counters, [marca]: (t.counters[marca] ?? 0) + quantidade } }
+        : t
+    ),
+  }));
+
+  return appendLog(
+    next, context.playerId,
+    `${getCard(territory.cardId).name} muda: ${marca} (${
+      (territory.counters[marca] ?? 0) + quantidade
+    }).`
+  );
 }
 
 function freeTraversal(state: GameState, context: EffectContext): GameState {

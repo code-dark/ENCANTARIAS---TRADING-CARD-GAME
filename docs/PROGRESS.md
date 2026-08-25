@@ -411,6 +411,47 @@ Fonte grants the Vínculo and the Memória its text promises, wakes nobody when
 nobody is spent, and reveals exactly one Memória — the one that names that
 relation.
 
+### Gatilho → condição → efeito, tudo como dado
+
+The executor above resolved effects, but the *moment* was still implied by
+where the list was attached and there was no way to say "only if". Both are
+data now.
+
+**`EffectRule` on any card**: `quando` (aoManifestar, aoRessoar,
+aoDescobrirMemoria, aoEncerrarTurno), `se` (a closed union of conditions —
+resource threshold, Memórias in play, a mark on the place, a card present, and
+negation), `entao` (the effects), plus the sentence the player reads. The
+resolver announces moments; cards decide whether they care. `fireTrigger` walks
+what is standing in the active Território — a card left behind elsewhere is not
+there to react.
+
+Two cards now carry their own written abilities as rules rather than as
+promises: the Serpente Encantada gains Vínculo when a Memória is read aloud
+where she stands, and the Guardião dos Caminhos gains Circulação at the end of
+a turn **only in a place still marked by a festa**.
+
+**A place can be changed, not just a card.** `marcarTerritorio` leaves a named
+mark on the active Território. It stays with the place after the turn ends, any
+card can ask about it by name without knowing what put it there, and the board
+shows it under "O que ficou neste lugar".
+
+**The read-aloud rule now covers every discovery.** `revelarMemoria` used to
+hand Memórias over silently, which made an Acontecimento a cheaper way to get
+memory than listening — and quietly contradicted the rule that a Memória counts
+only once transmitted. It now queues into `pendingDiscovery`, which grew a
+`mode`: `escolha` (the 6 offers alternatives, one is taken, the rest stay in the
+world) and `leitura` (everything surfaced must be read, one at a time).
+
+**A soft-lock this surfaced.** `TransmitMemory` was gated to the Ação phase, so
+a Memória surfaced by an Acontecimento — played in Manifestação — could never be
+read, and the pending-discovery gate blocks everything else. Reading aloud is
+not a phase action: it resolves an interrupted moment, and now short-circuits
+the phase check. A test plays the festival in Manifestação and reads there.
+
+Tests: 7 new (145 total). Verified in Chromium: Tempo de Festa marks the Fonte
+do Ribeirão, surfaces two accounts without granting them, and each is computed
+only after its own reading.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when

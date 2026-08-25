@@ -20,13 +20,16 @@ export const events: EventCard[] = [
     trigger: 'Jogado na mesa',
     condition: 'Sempre ativo',
     consequence:
-      'A ocasião faz circular: +1 de Circulação, e vêm à tona os relatos que ' +
-      'só aparecem quando há gente reunida.',
+      'A ocasião faz circular: +1 de Circulação, o Território fica em festa, ' +
+      'e vêm à tona os relatos que só aparecem quando há gente reunida.',
     duration: 'instant',
     description: '[PROVISIONAL] Quando a cidade celebra, as narrativas circulam soltas.',
     flavor: 'A festa traz todas as histórias à tona.',
     effects: [
       { kind: 'ganharRecurso', recurso: 'circulacao', quantidade: 1 },
+      // The place itself is left changed, and stays changed after the turn.
+      // Other cards ask about the mark by name, without knowing this card.
+      { kind: 'marcarTerritorio', marca: 'festa' },
       // Reaches what the world already holds under this occasion. If nothing
       // answers, nothing is added: the festival does not invent memory.
       { kind: 'revelarMemoria', fonte: 'acontecimento_tempo_de_festa', limite: 2 },
