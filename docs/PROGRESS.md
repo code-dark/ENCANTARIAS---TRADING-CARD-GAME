@@ -452,13 +452,48 @@ Tests: 7 new (145 total). Verified in Chromium: Tempo de Festa marks the Fonte
 do Ribeirão, surfaces two accounts without granting them, and each is computed
 only after its own reading.
 
+### First balance pass: what a Ressonância pays
+
+A Ressonância paid one Vínculo per relation recognised *and* ran the effects,
+so the Serpente at the Fonte — which meets that place twice, by name and by
+Water — handed out three Vínculo in a single action and raced any Jornada
+asking for the resource.
+
+**One Vínculo per activation now, however many relations match.** Extra
+relations still matter, and matter more: they widen what the Ressonância *does*.
+Two relations make the combination richer, not the progression three times
+faster.
+
+Four relations were paying Vínculo directly, which would have re-created the
+same payout one layer down. They were rewritten to enrich instead:
+
+| Lugar | Antes | Agora |
+| --- | --- | --- |
+| Fonte / Serpente | +1 Vínculo, e desperta | desperta quem escutou |
+| Igreja da Sé / Fé | +1 Vínculo | o lugar guarda a marca `devocao` |
+| CEPRAMA / Ofício | +1 Vínculo | quem trabalhou pode trabalhar de novo |
+| Cemitério / Memória | +1 Vínculo | o lugar acumula a marca `lembranca` |
+
+A test guards this at the data level: no shipped relation may hand over Vínculo,
+so a future card cannot quietly bring the per-relation payout back.
+
+Vínculo now comes from activating a Ressonância (once per turn, per card), from
+forming a gathering, and from cards that earn it — the Serpente gains one each
+time a Memória is read aloud where she stands. That last one is a card's own
+rule, which is where the resource should come from.
+
+Measured in Chromium on the same action that produced the problem: 3 → 1, with
+both relations still firing.
+
+Tests: 3 new (148 total).
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
   a Memória goes two turns unused" has nowhere to hook. `Esquecimento` waits on
   this.
-- A Ressonância grants Vínculo per relation matched *and* runs its effects, so
-  a two-relation place pays 3 Vínculo at once. Wants playtesting, not argument.
+- Vínculo income is now one per Ressonância per turn plus what cards earn.
+  Whether that is too slow for the Jornadas that ask for it wants playtesting.
 - Every shipped Memory declares an explicit `traversalBehavior`, which wins over
   its `memoryState`. The state-driven rules are proven by unit tests but are
   currently unreachable from card data — worth resolving as a design decision.

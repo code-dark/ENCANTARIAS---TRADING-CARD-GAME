@@ -484,3 +484,62 @@ describe('rules a card declares for itself', () => {
     expect(s.players[0].territories[0].counters.festa).toBe(1);
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * What a Ressonância pays
+ * ------------------------------------------------------------------ */
+
+describe('the price of resonating', () => {
+  it('pays one Vínculo per activation, however many relations match', () => {
+    // The Serpente meets the Fonte twice over: by name, and by Water.
+    let s = setup([FONTE]);
+    const legend = place(s, SERPENTE);
+    place(s, OUVINTE, true);
+
+    const territory = getCard(FONTE) as TerritoryCard;
+    const matching = (territory.resonances ?? []).filter(
+      (r) => r.cardId === SERPENTE || (r.affinity && getCard(SERPENTE).affinities.includes(r.affinity))
+    );
+    expect(matching.length).toBeGreaterThan(1);
+
+    s = advanceTo(s, 'Acao');
+    s = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
+    }).state;
+
+    expect(s.players[0].resources.vinculo).toBe(1);
+  });
+
+  it('still runs every relation it recognised', () => {
+    let s = setup([FONTE]);
+    const legend = place(s, SERPENTE);
+    const listener = place(s, OUVINTE, true);
+
+    s = advanceTo(s, 'Acao');
+    s = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
+    }).state;
+
+    // Both relations landed: the Water one gave Memória, the Serpente one woke
+    // the listener. Two relations are richer, not three times faster.
+    expect(s.players[0].resources.memoria).toBeGreaterThan(0);
+    expect(
+      s.players[0].inPlay.find((c) => c.instanceId === listener.instanceId)!.exhausted
+    ).toBe(false);
+  });
+
+  it('keeps Vínculo out of what a relation itself hands over', () => {
+    // A guard on the data, not the engine: a relation that pays Vínculo would
+    // quietly bring back the per-relation payout this balance pass removed.
+    for (const id of [FONTE, SE, ESCADARIA, CEPRAMA, GAVIAO]) {
+      const territory = getCard(id) as TerritoryCard;
+      for (const relation of territory.resonances ?? []) {
+        for (const effect of relation.effects ?? []) {
+          const paysVinculo =
+            effect.kind === 'ganharRecurso' && effect.recurso === 'vinculo';
+          expect(paysVinculo, `${id}: ${relation.effect}`).toBe(false);
+        }
+      }
+    }
+  });
+});

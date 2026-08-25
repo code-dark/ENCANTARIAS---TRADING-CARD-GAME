@@ -35,11 +35,8 @@ export const territories: TerritoryCard[] = [
       {
         id: 'ressonancia_serpente_ribeirao',
         cardId: 'legend_serpent_enchanted',
-        effect: 'A Guardiã reconhece quem escuta: +1 de Vínculo, e quem escutou aqui pode escutar de novo.',
-        effects: [
-          { kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 },
-          { kind: 'despertarPersonagens' },
-        ],
+        effect: 'A Guardiã reconhece quem escuta: quem escutou aqui pode escutar de novo.',
+        effects: [{ kind: 'despertarPersonagens' }],
       },
       {
         affinity: 'Water',
@@ -84,8 +81,8 @@ export const territories: TerritoryCard[] = [
       {
         id: 'ressonancia_sinos_se',
         affinity: 'Faith',
-        effect: 'A devoção sustenta quem sustenta: +1 de Vínculo.',
-        effects: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
+        effect: 'A devoção fica no lugar: a Sé guarda o gesto de quem veio.',
+        effects: [{ kind: 'marcarTerritorio', marca: 'devocao' }],
       },
     ],
   },
@@ -164,8 +161,8 @@ export const territories: TerritoryCard[] = [
       },
       {
         affinity: 'Craft',
-        effect: 'O ofício se transmite de mão em mão: +1 de Vínculo.',
-        effects: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
+        effect: 'O ofício se transmite de mão em mão: quem trabalhou aqui pode trabalhar de novo.',
+        effects: [{ kind: 'despertarPersonagens' }],
       },
     ],
   },
@@ -204,8 +201,8 @@ export const territories: TerritoryCard[] = [
     resonances: [
       {
         affinity: 'Memory',
-        effect: 'O lugar sustenta o que se lembra: +1 de Vínculo.',
-        effects: [{ kind: 'ganharRecurso', recurso: 'vinculo', quantidade: 1 }],
+        effect: 'O lugar sustenta o que se lembra: fica mais uma lembrança neste Território.',
+        effects: [{ kind: 'marcarTerritorio', marca: 'lembranca' }],
       },
     ],
 

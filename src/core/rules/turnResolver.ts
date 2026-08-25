@@ -642,7 +642,11 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     inPlay: p.inPlay.map((c) =>
       c.instanceId === instanceId ? { ...c, exhausted: true } : c
     ),
-    resources: { ...p.resources, vinculo: p.resources.vinculo + matches.length },
+    // One Vínculo for the act of resonating, however many relations the place
+    // recognises. Paying per relation made a two-relation Território hand out
+    // three Vínculo at once and race the Jornadas that ask for it. Extra
+    // relations still matter — they widen what the Ressonância *does*.
+    resources: { ...p.resources, vinculo: p.resources.vinculo + 1 },
     accomplishments: {
       ...p.accomplishments,
       // The same relation in the same place is one Ressonância, however many
