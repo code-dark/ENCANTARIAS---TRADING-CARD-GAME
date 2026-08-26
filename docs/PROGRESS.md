@@ -793,6 +793,14 @@ São dois workflows:
 - `Pages` — push em `main`, ou acionamento manual em qualquer branch:
   typecheck, testes, build, publicação.
 
+Uma restrição descoberta na primeira publicação manual: ao ligar o Pages, o
+GitHub cria o ambiente `github-pages` limitado ao branch padrão. O build roda e
+o artefato sobe, mas o job de deploy é recusado antes do primeiro passo. Liberar
+outro branch é uma configuração de ambiente (Settings → Environments →
+github-pages → Deployment branches and tags), fora do alcance do token dos
+workflows — a mesma classe de coisa que ligar o Pages. Publicar a partir de
+`main` não esbarra nisso.
+
 Duas consequências desejadas. Uma falha de deploy não pode mais deixar um Pull
 Request vermelho, porque o deploy não roda em Pull Request. E o link de
 playtest é estável: `main` é a única fonte automática, então o jogo no ar só

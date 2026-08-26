@@ -42,8 +42,14 @@ Pages. E `main` é a única fonte automática do site — para colocar um branch
 experimental na frente dos testadores antes do merge, use **Actions → Pages →
 Run workflow** e escolha o branch.
 
-O Pages já está ligado com **Source: GitHub Actions**; não há mais nenhuma
-etapa manual de configuração.
+O Pages já está ligado com **Source: GitHub Actions**.
+
+Uma ressalva sobre a publicação manual: ao ligar o Pages, o GitHub cria o
+ambiente `github-pages` restrito ao branch padrão. Enquanto essa restrição
+existir, `workflow_dispatch` a partir de um branch experimental constrói o site
+mas é barrado no passo de deploy. Para liberar, em **Settings → Environments →
+github-pages → Deployment branches and tags**, inclua o branch (ou `claude/*`).
+Publicações a partir de `main` não dependem disso.
 
 ## Rodar localmente
 
