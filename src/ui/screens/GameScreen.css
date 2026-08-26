@@ -417,3 +417,40 @@ button.primary:hover:not(:disabled) {
   0%, 100% { opacity: 0.25; }
   50%      { opacity: 1; }
 }
+
+/* ------------------------------------------------------------------ *
+ * Narrow screens
+ *
+ * The side panel has a fixed width, so on a phone it took everything and
+ * left the board — the Território, the cards, the Travessia — at 90px.
+ * Below this width the two stack instead of competing: the board first,
+ * because it is what the player is looking at, then the panel.
+ * ------------------------------------------------------------------ */
+@media (max-width: 820px) {
+  .game-main {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .board-area {
+    width: 100%;
+    overflow-y: visible;
+  }
+
+  .side-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #2a3f5f;
+    overflow-y: visible;
+  }
+
+  .game-header {
+    padding: 10px 14px;
+  }
+
+  /* The transmission panel is a dialog over everything; one account per row
+     so the text stays wide enough to actually be read aloud. */
+  .transmission-options {
+    flex-direction: column;
+  }
+}
