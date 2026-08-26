@@ -21,12 +21,29 @@ Depois de publicado, o endereço é:
 https://code-dark.github.io/ENCANTARIAS---TRADING-CARD-GAME/
 ```
 
-### Publicar (uma vez só)
+O endereço é estável: os testadores guardam esse link e ele continua valendo.
+Uma versão nova só substitui o jogo que está no ar quando uma publicação é
+disparada — nunca a cada commit.
 
-Em **Settings → Pages**, defina **Source: GitHub Actions**. É a única etapa
-manual: ligar o Pages é uma ação de administração do repositório, e o token dos
-workflows não a recebe — tentamos, e a API responde `Resource not accessible by
-integration`. Feito isso, todo push publica sozinho pelo workflow `Pages`.
+### Como o site é publicado
+
+Verificação e publicação são workflows separados, e é essa separação que
+mantém o link estável e o Pull Request honesto:
+
+| Workflow | Quando roda | O que faz |
+| --- | --- | --- |
+| `CI` | todo push e todo Pull Request | typecheck → 176 testes → build |
+| `Pages` | push em `main` | typecheck → testes → build → publica |
+| `Pages` | acionamento manual (`workflow_dispatch`) | publica a partir do branch escolhido |
+
+Assim uma falha de publicação nunca deixa um Pull Request vermelho: se o
+código está certo, o `CI` passa, independentemente do que aconteça com o
+Pages. E `main` é a única fonte automática do site — para colocar um branch
+experimental na frente dos testadores antes do merge, use **Actions → Pages →
+Run workflow** e escolha o branch.
+
+O Pages já está ligado com **Source: GitHub Actions**; não há mais nenhuma
+etapa manual de configuração.
 
 ## Rodar localmente
 

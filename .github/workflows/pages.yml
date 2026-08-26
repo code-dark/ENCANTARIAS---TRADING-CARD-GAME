@@ -3,14 +3,19 @@
 # The slice is entirely client-side — no server, no API, no storage — so the
 # whole game is the static bundle this produces. A tester opens the link and
 # plays; nothing is installed and nothing else has to be hosted alongside it.
+#
+# Deployment is deliberately separate from verification. CI runs on every push
+# and pull request; this runs only when the site should actually change, so a
+# deployment problem can never paint a pull request red.
 
 name: Pages
 
 on:
   push:
-    # The steady state once the work is merged, and the current branch so a
-    # link exists for playtesting before that happens.
-    branches: [main, claude/encantarias-cardgame-gkyzfd]
+    # main is the only automatic source of the public link.
+    branches: [main]
+  # Manual publication from any branch, for putting a version in front of
+  # testers before it is merged.
   workflow_dispatch:
 
 permissions:
@@ -28,6 +33,7 @@ jobs:
   build:
     name: Build the static site
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -39,7 +45,8 @@ jobs:
       - run: npm ci
 
       # Publishing something that does not typecheck or whose tests fail would
-      # hand testers a broken game and waste the session they gave us.
+      # hand testers a broken game and waste the session they gave us. CI has
+      # usually said this already; a deploy is the one place worth repeating it.
       - name: Typecheck
         run: npx tsc --noEmit
 
@@ -52,14 +59,7 @@ jobs:
       # Pages serves a project site from a subpath; vite.config.ts sets
       # `base: './'` so the bundle asks for its assets relatively and works
       # from wherever it lands.
-      #
-      # This step needs Pages already switched on for the repository, with its
-      # source set to GitHub Actions. Creating the site from here was tried and
-      # is not possible: the workflow token cannot do it —
-      #   Create Pages site failed. Resource not accessible by integration
-      # — because turning Pages on is a repository administration action, and
-      # no automation is granted that. It is one switch, once, by a person with
-      # admin on the repo; every deploy after it is automatic.
+      - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
         with:

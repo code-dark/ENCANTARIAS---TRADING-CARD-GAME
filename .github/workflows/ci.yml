@@ -1,8 +1,11 @@
+# Verification. Runs on every push and every pull request, and publishes
+# nothing — a red CI here means the code is broken, never that a deployment
+# setting is missing.
+
 name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
 
 # Cancel superseded runs on the same ref, so a rapid series of pushes
@@ -13,7 +16,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Typecheck, build and test
+    name: Typecheck, test and build
     runs-on: ubuntu-latest
 
     steps:
@@ -32,8 +35,10 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
-      - name: Build
-        run: npm run build
-
+      # The engine is the part worth protecting: the rules are pure functions
+      # and the simulator depends on them staying that way.
       - name: Test
         run: npm run test:run
+
+      - name: Build
+        run: npm run build

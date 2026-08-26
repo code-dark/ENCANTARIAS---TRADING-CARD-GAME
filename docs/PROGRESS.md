@@ -778,6 +778,27 @@ Turning Pages on is a repository administration action, and no automation is
 granted that. One switch, once, by someone with admin; every deploy after it is
 automatic. The repository is public, so Pages costs nothing and needs no plan.
 
+### CI e deploy separados
+
+O Pages foi ligado (Source: GitHub Actions), e com isso a decisão passou a ser
+de arquitetura, não de configuração. Publicar a cada push confundiria duas
+coisas diferentes: *o código está correto?* e *esta versão deve substituir o
+jogo que os testadores estão jogando?*
+
+São dois workflows:
+
+- `CI` — todo push e todo Pull Request: typecheck, 176 testes, build. Não
+  publica nada. Um vermelho aqui significa código quebrado, nunca uma
+  configuração faltando.
+- `Pages` — push em `main`, ou acionamento manual em qualquer branch:
+  typecheck, testes, build, publicação.
+
+Duas consequências desejadas. Uma falha de deploy não pode mais deixar um Pull
+Request vermelho, porque o deploy não roda em Pull Request. E o link de
+playtest é estável: `main` é a única fonte automática, então o jogo no ar só
+muda quando alguém decide publicar — um branch experimental vai ao ar por
+`workflow_dispatch`, sob demanda, e não por acidente de merge.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
