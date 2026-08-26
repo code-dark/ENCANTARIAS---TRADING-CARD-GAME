@@ -12,7 +12,12 @@ Não há pontos de vida nem captura. Uma partida termina quando alguém completa
 sua **Jornada** — e o outro não perde por ter sido derrotado, e sim por não ter
 chegado primeiro.
 
-## Rodar
+## Jogar
+
+O slice roda inteiro no navegador — sem servidor, sem API, sem instalação. A
+versão publicada está em **Settings → Pages** do repositório; basta abrir o link.
+
+## Rodar localmente
 
 ```bash
 npm install

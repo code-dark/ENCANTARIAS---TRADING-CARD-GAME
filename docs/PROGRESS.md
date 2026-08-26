@@ -738,6 +738,39 @@ run it and how the game is played.
 
 Tests: 4 new (176 total).
 
+### Playable from a link
+
+The slice needed nothing hosted alongside it. A grep for `fetch`, `XHR`,
+`WebSocket` and absolute URLs across the app finds nothing: the engine is pure,
+the RNG is seeded in the browser, and the whole game is the static bundle. So
+the deployment is just the bundle.
+
+Three things it did need:
+
+- **`base: './'`.** Pages serves a project site from `/<repo>/`, and absolute
+  asset paths would look for `/assets/…` at the domain root and find nothing.
+  Relative paths also mean the same `dist/` opens from a `file://` URL or any
+  static host without rebuilding.
+- **A real favicon.** `index.html` pointed at `/vite.svg`, which does not exist
+  and 404'd on every load. It is now an inline SVG data URI, so the page carries
+  its own icon and asks the host for nothing. The document also declares
+  `pt-BR`, which it should have all along.
+- **A layout that survives a phone.** At 390px the fixed 300px side panel took
+  everything and left the board — the Território, the cards, the Travessia — at
+  90px. Below 820px the two stack instead of competing, board first, because
+  that is what the player is looking at.
+
+The workflow typechecks, tests and builds before deploying. Publishing a broken
+game would waste the session a tester gave us, which is the scarcest thing in
+this phase.
+
+Verified by serving `dist/` from a subpath and playing a real turn in Chromium:
+no 404s, no page errors, the same match the dev server runs.
+
+**One thing outside the repository:** GitHub Pages has to be enabled with its
+source set to *GitHub Actions*, in Settings → Pages. That is a repository
+setting, not code, and it is the only manual step.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
