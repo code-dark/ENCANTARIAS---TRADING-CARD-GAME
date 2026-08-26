@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run --passWithNoTests",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "sim": "vite-node src/sim/cli.ts --",
+    "sim:trace": "vite-node src/sim/trace.ts --"
   },
   "dependencies": {
     "react": "^18.3.1",

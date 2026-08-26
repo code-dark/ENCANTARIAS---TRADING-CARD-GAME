@@ -530,6 +530,40 @@ Tests: 5 new (153 total). Verified in Chromium: the Recorte de Jornal at the Sé
 reaches A Reportagem do Centenário, waits to be read, and the card on the table
 reads **Midiática**.
 
+### The simulator
+
+`npm run sim -- --partidas 1000` plays matches headlessly and reports what
+happened. It exists because three questions were being decided by feel — does
+the Memória economy choke, does Vínculo arrive in time, are the Jornadas
+reachable — and the engine is pure and seeded, so they can be answered instead.
+
+**It plays the same game the interface plays.** The table is built by
+`core/setup/verticalSlice.ts`, which the UI now uses too, and every action goes
+through the same `applyAction` a person's click goes through. A policy has no
+privileges: it proposes an action and the validator refuses it exactly as it
+would refuse a person. If the simulator and a real match ever disagree, that is
+an engine bug, not a difference in the harness — which is the only reason its
+numbers are worth anything.
+
+Two policies, both deliberately dumb. **gulosa** chases its own Jornada:
+manifests a Personagem first, resonates with everything it can, listens, crosses
+when the Jornada asks for places. **passiva** only draws and manifests — the
+control, so whatever the greedy player achieves above that line is what
+listening, resonating and crossing are worth.
+
+`npm run sim:trace -- --seed 7` replays one match with its full log. A number in
+the report is worth what the match behind it is worth, and a suspicious average
+can always be traced back to the turns that produced it.
+
+Reported per run: duration (mean, median, range), matches decided by Jornada
+versus by turn limit, wins per Jornada, and per player the objectives met,
+Vínculo per turn, Ressonâncias activated, listens and how many found something,
+Memórias transmitted, Travessias, places used, gatherings, transformations, and
+what was left unspent.
+
+Tests: 6 new (159 total), including that a seed replays identically and that the
+simulator builds the same table the interface does.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
