@@ -52,7 +52,14 @@ jobs:
       # Pages serves a project site from a subpath; vite.config.ts sets
       # `base: './'` so the bundle asks for its assets relatively and works
       # from wherever it lands.
+      #
+      # `enablement` turns Pages on for the repository the first time this
+      # runs, using the `pages: write` permission above, so publishing needs
+      # no click in Settings. On later runs it finds the site already there
+      # and does nothing.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
