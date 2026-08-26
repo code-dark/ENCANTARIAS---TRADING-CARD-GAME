@@ -14,8 +14,19 @@ chegado primeiro.
 
 ## Jogar
 
-O slice roda inteiro no navegador — sem servidor, sem API, sem instalação. A
-versão publicada está em **Settings → Pages** do repositório; basta abrir o link.
+O slice roda inteiro no navegador — sem servidor, sem API, sem instalação.
+Depois de publicado, o endereço é:
+
+```
+https://code-dark.github.io/ENCANTARIAS---TRADING-CARD-GAME/
+```
+
+### Publicar (uma vez só)
+
+Em **Settings → Pages**, defina **Source: GitHub Actions**. É a única etapa
+manual: ligar o Pages é uma ação de administração do repositório, e o token dos
+workflows não a recebe — tentamos, e a API responde `Resource not accessible by
+integration`. Feito isso, todo push publica sozinho pelo workflow `Pages`.
 
 ## Rodar localmente
 

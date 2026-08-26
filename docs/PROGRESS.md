@@ -767,9 +767,16 @@ this phase.
 Verified by serving `dist/` from a subpath and playing a real turn in Chromium:
 no 404s, no page errors, the same match the dev server runs.
 
-**One thing outside the repository:** GitHub Pages has to be enabled with its
-source set to *GitHub Actions*, in Settings → Pages. That is a repository
-setting, not code, and it is the only manual step.
+**One thing outside the repository, and it cannot be brought inside.** Pages has
+to be switched on in Settings → Pages with its source set to *GitHub Actions*.
+Automating it was tried — `actions/configure-pages` takes an `enablement` flag
+that creates the site through the API — and the workflow token is refused:
+
+    Create Pages site failed. Resource not accessible by integration
+
+Turning Pages on is a repository administration action, and no automation is
+granted that. One switch, once, by someone with admin; every deploy after it is
+automatic. The repository is public, so Pages costs nothing and needs no plan.
 
 ### Known gaps carried into Phase C
 
