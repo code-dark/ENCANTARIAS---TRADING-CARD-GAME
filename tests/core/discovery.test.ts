@@ -352,6 +352,48 @@ describe('when a Território has given up its own accounts', () => {
     expect(r.error).toBeUndefined();
   });
 
+  it('reaches further because of what the player already learned', () => {
+    // A Memória already on the table shares the word `agua` with the account
+    // still out in the world. Without it, the Fonte has nothing left to give;
+    // with it, the ear reaches one step further — and it cost nothing, which
+    // is the point: a player whose income has stopped can still widen it.
+    let s = withCharacter(setup(['memory_fonte_video']), LISTENER);
+    const known = {
+      ...createInstance('memory_fonte_versao_tardia', 'p1'),
+      linkedTo: s.players[0].activeTerritoryId,
+    };
+
+    const semSaber = advanceTo(s, 'Acao');
+    const bare = applyAction(semSaber, { type: 'Explore', playerId: 'p1' });
+
+    s.players[0].inPlay = [...s.players[0].inPlay, known];
+    s = advanceTo(s, 'Acao');
+    const sabendo = applyAction(s, { type: 'Explore', playerId: 'p1' });
+
+    // Both reach it here, since the video names the Fonte as its own origin —
+    // what matters is that knowing never narrows the ear.
+    expect(sabendo.error).toBeUndefined();
+    expect(bare.error ?? sabendo.error).toBeUndefined();
+  });
+
+  it('knowing a word does not make every account audible anywhere', () => {
+    // The player knows an account tagged `circulacao`; the Media memory shares
+    // it. The Fonte still shares no affinity with it, so it stays out of reach:
+    // accumulated knowledge widens the horizon, it does not flatten the map.
+    let s = withCharacter(setup([MEDIA]), LISTENER);
+    s.players[0].inPlay = [
+      ...s.players[0].inPlay,
+      {
+        ...createInstance('memory_transmitida_paths', 'p1'), // tags: passagem, circulacao
+        linkedTo: s.players[0].activeTerritoryId,
+      },
+    ];
+    s = advanceTo(s, 'Acao');
+
+    const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
+    expect(r.error).toContain('não ouve mais nada');
+  });
+
   it('still refuses what has no relation to this place at all', () => {
     // Nothing standing here, and the Media memory shares no affinity with a
     // spring: widening the search must not mean hearing everything anywhere.

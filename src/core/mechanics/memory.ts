@@ -75,6 +75,14 @@ export interface ExploreContext {
    * standing in it is what keeps listening alive.
    */
   presentCards: AnyCard[];
+
+  /**
+   * Memórias the player has already learned, wherever they are on their table.
+   * What you already know is what lets you notice the next thing — and unlike
+   * a manifested Lenda, it costs nothing to have, so a player whose income has
+   * stopped can still widen their reach.
+   */
+  knownMemories: AnyCard[];
 }
 
 /**
@@ -114,13 +122,14 @@ function findByOwnSources(pool: CardInstance[], ctx: ExploreContext): CardInstan
  * world to be found again.
  */
 function findByRelation(pool: CardInstance[], ctx: ExploreContext): CardInstance[] {
-  // The place's own vocabulary and that of the Lendas manifested in it. A
-  // Personagem standing here does not widen what the ground holds: they are
-  // who listens, not what there is to hear.
+  // Three sources of vocabulary: the ground itself, the Lendas manifested in
+  // it, and everything the player has already learned. A Personagem standing
+  // here adds nothing — they are who listens, not what there is to hear.
   const legendsHere = ctx.presentCards.filter((c) => c.type === 'Legend');
   const vocabulary = new Set([
     ...(ctx.territory.tags ?? []),
     ...legendsHere.flatMap((c) => c.tags ?? []),
+    ...ctx.knownMemories.flatMap((c) => c.tags ?? []),
   ]);
   const legends = new Set(legendsHere.map((c) => c.id));
 
@@ -138,8 +147,8 @@ function findByRelation(pool: CardInstance[], ctx: ExploreContext): CardInstance
     // Otherwise the relation has to be real on two counts. Tags like `urbano`
     // sit on four of the five Territórios, so a shared word alone would make
     // every account audible everywhere — which is precisely the leak this
-    // fallback must not reopen. The place must also be somewhere the Memory
-    // could belong.
+    // fallback must not reopen. Accumulated knowledge widens the horizon of
+    // listening; it does not make any account audible in any place.
     const sharesVocabulary = (memory.tags ?? []).some((t) => vocabulary.has(t));
     return sharesVocabulary && belongsHere(memory, ctx.territory);
   });
@@ -236,5 +245,10 @@ export function exploreContext(
     presentCards: inPlay
       .filter((c) => c.linkedTo === territoryInstanceId)
       .map((c) => getCard(c.cardId)),
+    // Wherever they ended up — left behind by a Travessia, kept in a box. They
+    // were learned, and learning them is what widened the ear.
+    knownMemories: inPlay
+      .map((c) => getCard(c.cardId))
+      .filter((c) => c.type === 'Memory'),
   };
 }

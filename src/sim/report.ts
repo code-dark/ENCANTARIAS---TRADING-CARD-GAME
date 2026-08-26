@@ -55,7 +55,15 @@ export function report(results: MatchResult[]): string {
     if (!journeys.has(player.journeyId)) journeys.set(player.journeyId, 0);
   }
   for (const [id, wins] of [...journeys].sort((a, b) => b[1] - a[1])) {
-    lines.push(`  ${id.padEnd(28)} ${String(wins).padStart(5)}  ${pct(wins, total)}% das partidas`);
+    // When it wins, how long it takes — the clock each Jornada runs on.
+    const turnsWon = decided.filter((r) => r.winnerJourneyId === id).map((r) => r.turns);
+    const clock = turnsWon.length
+      ? ` · vence no turno ${num(median(turnsWon), 1)} (mediana), ` +
+        `${Math.min(...turnsWon)}–${Math.max(...turnsWon)}`
+      : ' · nunca vence';
+    lines.push(
+      `  ${id.padEnd(26)} ${String(wins).padStart(4)}  ${pct(wins, total).padStart(5)}%${clock}`
+    );
   }
 
   // Per player: the same policy in the same seat across every match.

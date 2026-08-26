@@ -654,25 +654,52 @@ Measured before and after, 500 matches, greedy against greedy:
 | duração mediana | — (limite) | 9 turnos |
 | Memórias transmitidas por p1 | 5 | 10 |
 
-#### Two findings this leaves open
+#### The widening reads what the player already knows
+
+The fallback above was gated behind manifesting a Lenda, which needs the income
+the widening was supposed to provide — so a player whose place ran dry stayed
+dry. It now also reads the vocabulary of the Memórias already on the player's
+table, wherever they ended up. What you have learned is what lets you notice the
+next thing, and unlike a Lenda it costs nothing to have.
+
+The territorial requirement stays: a known word widens the horizon of listening,
+it does not flatten the map. Sharing `circulacao` with an account does not make
+it audible at a spring that has no affinity with it.
+
+One rule, no content touched, measured over 1000 matches:
+
+| | antes | depois |
+| --- | --- | --- |
+| Guardiã da Memória | 100% | 63.4% |
+| O Cortejo | 0% | 36.6% |
+| turno mediano da vitória | 9 | 7 (ambas) |
+| Cortejos formados por partida | 0.00 | 0.39 |
+
+**Both Jornadas now win on the same clock** — median turn 7, ranges 7–11 and
+7–12 — which was the target: a plausible window for each before the policy's
+skill decides it, not an engineered 50/50. Against the passive control the
+greedy player still wins 100%, so listening, resonating and crossing are worth
+what they cost.
+
+**The Cortejo discount was therefore not applied.** The economy fix resolved the
+gap on its own, and tuning a Jornada now would be adjusting against a problem
+that no longer exists — and would blur which change did what, which is exactly
+what sequencing the two was for. The design for it is recorded below if the gap
+returns.
+
+> Preparação do Cortejo: standing in the required Território with the listener
+> and the narrative relation already established, the next Manifestação
+> belonging to the Cortejo costs 1 Memória less — so the Jornada's own
+> preparation pays part of the manifestation, rather than the steps only
+> accumulating cost.
+
+#### One finding this leaves open
 
 **The two Jornadas are not on the same clock.** Guardiã da Memória wins 100% of
 matches. Completing it costs about 5 Memória (a Personagem, then a Lenda to
 resonate with); O Cortejo costs about 10 — a Personagem, a Travessia, and two
 Lendas totalling 5 — on the same income. That is not a percentage to tune
 towards 25; it is one Jornada costing twice what the other does.
-
-**A player can still be starved into a dead end.** Given 30 turns and an
-opponent that cannot win, the Cortejo player stalls at turn 8 with two of three
-objectives met and 2 Memória, one short of the Lenda it needs — and stays there
-for twenty-two turns. The place has given up everything it holds, and the
-widening above cannot help, because it is gated behind manifesting a Lenda,
-which needs the income the widening was supposed to provide.
-
-The fix I would try: let the widening read what the player is already carrying —
-the tags of the Memórias on their own table. What you already know is what leads
-you to more, it costs nothing to unlock, and it cannot be reached only by
-spending.
 
 #### What the policy had to learn
 
@@ -694,10 +721,9 @@ revealed a real problem underneath.
 - Vínculo is one per relation, once. Whether that is too slow cannot be judged
   until the economy above is settled: today a player cannot afford the cards
   that would earn it.
-- A Território can still starve a player once it has given up its accounts; see
-  above.
-- O Cortejo costs roughly twice what Guardiã da Memória costs, on the same
-  income.
+- Guardiã da Memória still wins 63% against a greedy opponent. Within the range
+  a less greedy human player could shift, and not worth tuning against until
+  someone has actually played it.
 - The board's centre is largely empty; visual weight is Milestone 5.
 
 ## Next: Phase C (Ressonância effects, Transformação, Jornadas)
