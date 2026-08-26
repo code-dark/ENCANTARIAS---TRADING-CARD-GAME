@@ -392,3 +392,28 @@ button.primary:hover:not(:disabled) {
 .transmission-card button.primary:hover:not(:disabled) {
   background-color: #a5813f;
 }
+
+/* Says the opponent is mid-turn, so a pause reads as the game working
+   rather than as the game stuck. */
+.thinking {
+  margin-left: 8px;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: #c9a227;
+}
+
+.thinking::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background-color: #c9a227;
+  animation: pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 1; }
+}

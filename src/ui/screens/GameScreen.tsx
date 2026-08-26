@@ -1,4 +1,6 @@
 import { getCurrentPlayer, PHASE_ORDER } from '../../core/game/gameState';
+import { OPPONENT_IDS } from '../../core/setup/verticalSlice';
+import { useOpponent } from '../hooks/useOpponent';
 import { getCard } from '../../core/cards/cardRegistry';
 import { useGameStore } from '../../store/gameStore';
 import PhaseIndicator from '../components/HUD/PhaseIndicator';
@@ -10,9 +12,14 @@ import './GameScreen.css';
 
 export default function GameScreen() {
   const { gameState, dispatch, lastError, check } = useGameStore();
+  useOpponent(OPPONENT_IDS);
+
   if (!gameState) return null;
 
   const player = getCurrentPlayer(gameState);
+  // The board follows whoever is playing, so the opponent's turn can be
+  // watched rather than merely waited out.
+  const opponentPlaying = OPPONENT_IDS.includes(player.id) && !gameState.isEnded;
   const isLastPhase = gameState.phase === PHASE_ORDER[PHASE_ORDER.length - 1];
 
   const drawAction = { type: 'DrawCard' as const, playerId: player.id };
@@ -29,6 +36,7 @@ export default function GameScreen() {
         <h1>ENCANTARIAS</h1>
         <div className="turn-info">
           Turno {gameState.turn} · <strong>{player.name}</strong>
+          {opponentPlaying && <span className="thinking">está jogando…</span>}
         </div>
         <PhaseIndicator phase={gameState.phase} />
       </header>
@@ -153,7 +161,12 @@ export default function GameScreen() {
           ))}
         </div>
 
-        <button className="primary" onClick={() => dispatch({ type: 'PassPhase', playerId: player.id })}>
+        <button
+          className="primary"
+          disabled={opponentPlaying}
+          title={opponentPlaying ? 'Espere o oponente terminar o turno.' : undefined}
+          onClick={() => dispatch({ type: 'PassPhase', playerId: player.id })}
+        >
           {isLastPhase ? 'Encerrar turno →' : 'Avançar fase →'}
         </button>
       </footer>

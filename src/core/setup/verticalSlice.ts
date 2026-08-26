@@ -76,6 +76,12 @@ export const VERTICAL_SLICE: PlayerSetup[] = [
   },
 ];
 
+/**
+ * Who is not a person. The vertical slice is one human against the opponent in
+ * core/ai — the same policy the simulator measures the balance with.
+ */
+export const OPPONENT_IDS = ['p2'];
+
 export function buildPlayer(setup: PlayerSetup): Player {
   const player = emptyPlayer(setup.id, setup.name);
 

@@ -713,6 +713,31 @@ could form; and stays there instead of wandering on. Each of those was a
 measurement artifact before it was a heuristic — and each one, once fixed,
 revealed a real problem underneath.
 
+### An opponent
+
+The vertical slice is playable by one person. The greedy policy moved from the
+simulator into `core/ai/`, and the interface drives it through the same
+`dispatch` a click goes through — the opponent is subject to every rule a person
+is, the same validator, the same refusals, no back door into the state.
+
+**It is deliberately the same brain the simulator measures.** A bot that played
+differently from the one the balance was measured against would make every
+number in the section above a statement about a game nobody plays. A test fails
+if the two ever diverge.
+
+It waits 700ms between actions, which is not suspense: the bot resolves a turn
+in microseconds, and a turn that appears already finished teaches nobody what
+happened in it. The header says it is playing and the pass button is disabled
+while it does, so a pause reads as the game working rather than as the game
+stuck.
+
+Verified in Chromium end to end: a full match against the opponent, won by the
+person on Guardiã da Memória at turn 9, with the opponent reaching two of three
+objectives on O Cortejo by itself and no errors. The README now explains how to
+run it and how the game is played.
+
+Tests: 4 new (176 total).
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
@@ -724,7 +749,11 @@ revealed a real problem underneath.
 - Guardiã da Memória still wins 63% against a greedy opponent. Within the range
   a less greedy human player could shift, and not worth tuning against until
   someone has actually played it.
-- The board's centre is largely empty; visual weight is Milestone 5.
+- The board's centre is largely empty; visual weight is Milestone 5, and the
+  `three` dependency is still unused — a short spike should decide whether it
+  earns its place or comes out.
+- The opponent is a first one, not a good one: it does not bluff, does not
+  read the other player's Jornada, and never stores a Memória to protect it.
 
 ## Next: Phase C (Ressonância effects, Transformação, Jornadas)
 
