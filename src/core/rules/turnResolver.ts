@@ -33,7 +33,7 @@ import {
   participantNames,
 } from '../mechanics/resonance';
 import {
-  bestListener, escutaOf, findByExploring, findByResonance, findBySourceId,
+  bestListener, escutaOf, exploreContext, findByExploring, findByResonance, findBySourceId,
 } from '../mechanics/memory';
 import { findByObject } from '../mechanics/objects';
 import { rollD6, readExploreRoll, EXPLORE_SUCCESS } from '../game/random';
@@ -305,8 +305,9 @@ function resolveDraw(state: GameState, playerId: string): GameState {
     ...p,
     deck: rest,
     hand: [...p.hand, drawn],
-    // Recovering a Memory also yields the Memória that pays for manifestations.
-    resources: { ...p.resources, memoria: p.resources.memoria + 1 },
+    // Drawing gives a card and nothing else. The resource comes from listening
+    // to a place — see resolveTransmit. Granting it here as well would be the
+    // abstract income this design deliberately does not have.
   }));
 
   return appendLog(
@@ -379,6 +380,7 @@ function resolvePlay(state: GameState, playerId: string, instanceId: string): Ga
               territoryInstanceId: territory.instanceId,
               roll: 0,
               mode: 'leitura',
+              origin: 'outro',
             },
           },
           playerId,
@@ -481,21 +483,31 @@ function resolveExplore(state: GameState, playerId: string): GameState {
   const listener = bestListener(player.inPlay, territory.instanceId)!;
   const listenerName = getCard(listener.cardId).name;
 
-  const available = findByExploring(state.memoryPool, {
-    territory: territoryDef,
-    escuta: escutaOf(listener),
-  });
+  const available = findByExploring(
+    state.memoryPool,
+    exploreContext(territoryDef, escutaOf(listener), player.inPlay, territory.instanceId)
+  );
 
   const { value: roll, seed } = rollD6(state.rngSeed);
   const outcome = readExploreRoll(roll, available.length);
 
-  // The listening costs the Personagem their turn whatever the die says.
-  let next = updatePlayer({ ...state, rngSeed: seed }, playerId, (p) => ({
+  // The listening costs the Personagem their turn whatever the die says, and
+  // the Território's Escuta is one action per turn however many Personagens
+  // are standing in it.
+  let next = updatePlayer(
+    {
+      ...state,
+      rngSeed: seed,
+      turnFlags: { ...state.turnFlags, hasListened: true },
+    },
+    playerId,
+    (p) => ({
     ...p,
-    inPlay: p.inPlay.map((c) =>
-      c.instanceId === listener.instanceId ? { ...c, exhausted: true } : c
-    ),
-  }));
+      inPlay: p.inPlay.map((c) =>
+        c.instanceId === listener.instanceId ? { ...c, exhausted: true } : c
+      ),
+    })
+  );
 
   if (outcome === 'nothing') {
     return appendLog(
@@ -525,6 +537,7 @@ function resolveExplore(state: GameState, playerId: string): GameState {
       roll,
       // A 6 offers alternatives; anything else surfaced one account to read.
       mode: outcome === 'choice' ? 'escolha' : 'leitura',
+      origin: 'escuta',
     },
   };
 }
@@ -563,10 +576,32 @@ function resolveTransmit(
   );
 
   const player = state.players.find((p) => p.id === playerId)!;
+
+  /**
+   * Where the Memória that pays for things comes from.
+   *
+   * Not from drawing — a player does not gain mana. They listen to a place,
+   * find something the city had not given up yet, and say it out loud; only
+   * then is it theirs to spend. Which also means the resource cannot arrive
+   * before the reading: the reading is what completes the transmission.
+   *
+   * Only the Território's Escuta produces it. A record already in hand reaches
+   * a Memory that exists, but it does not make the city yield anything new,
+   * and paying for it would let a deck of documents print the economy.
+   */
+  const earns = pending.origin === 'escuta';
+
+  const paid = earns
+    ? updatePlayer(claimed, playerId, (p) => ({
+        ...p,
+        resources: { ...p.resources, memoria: p.resources.memoria + 1 },
+      }))
+    : claimed;
+
   const spoken = appendLog(
-    claimed, playerId,
+    paid, playerId,
     `${player.name} lê ${getCard(chosen.cardId).name} em voz alta. ` +
-      `A Memória é lembrada.`
+      `A Memória é lembrada${earns ? ', e vale +1 de Memória' : ''}.`
   );
 
   // Something in this place may be listening for exactly this.

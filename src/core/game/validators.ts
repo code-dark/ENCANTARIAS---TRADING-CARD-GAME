@@ -17,7 +17,7 @@ import { getCard } from '../cards/cardRegistry';
 import { PHASE_LABEL } from '../i18n/labels';
 import { TerritoryCard } from '../cards/types';
 import { effectiveTraversalCost } from '../mechanics/traversal';
-import { bestListener, escutaOf, findByExploring } from '../mechanics/memory';
+import { bestListener, escutaOf, exploreContext, findByExploring } from '../mechanics/memory';
 import { isStorage, remainingSpace, storedIn } from '../mechanics/objects';
 
 export function validateAction(state: GameState, action: GameAction): ValidationResult {
@@ -121,6 +121,10 @@ export function validateAction(state: GameState, action: GameAction): Validation
     }
 
     case 'Explore': {
+      if (state.turnFlags.hasListened) {
+        return invalid('Você já escutou este Território neste turno.');
+      }
+
       const territory = activeTerritoryOf(current);
       if (!territory) {
         return invalid('Você precisa de um Território ativo para explorar.');
@@ -137,10 +141,12 @@ export function validateAction(state: GameState, action: GameAction): Validation
 
       // Refuse a dead end before it costs anything, rather than spending the
       // Personagem on nothing.
-      const found = findByExploring(state.memoryPool, {
-        territory: territoryDef,
-        escuta: escutaOf(listener),
-      });
+      const found = findByExploring(
+        state.memoryPool,
+        exploreContext(
+          territoryDef, escutaOf(listener), current.inPlay, territory.instanceId
+        )
+      );
       if (found.length === 0) {
         return invalid(
           `${getCard(listener.cardId).name} não ouve mais nada em ${territoryDef.name}.`

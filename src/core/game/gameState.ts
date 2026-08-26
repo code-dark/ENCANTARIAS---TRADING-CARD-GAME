@@ -156,6 +156,8 @@ export interface GameState {
 export interface TurnFlags {
   hasDrawn: boolean;
   hasTraversed: boolean;
+  /** The Território's Escuta is one action per turn, not one per Personagem. */
+  hasListened: boolean;
   /** A card opened the way: the next Travessia this turn is free. */
   travessiaLivre: boolean;
 }
@@ -163,6 +165,7 @@ export interface TurnFlags {
 export const FRESH_TURN_FLAGS: TurnFlags = {
   hasDrawn: false,
   hasTraversed: false,
+  hasListened: false,
   travessiaLivre: false,
 };
 
@@ -183,6 +186,12 @@ export interface PendingDiscovery {
   /** What the die said, so the UI can explain the moment. Zero when no roll. */
   roll: number;
   mode: 'escolha' | 'leitura';
+  /**
+   * How it came to light. Only the Território's Escuta produces the Memória
+   * that pays for things: a record you already own does not make the city
+   * yield anything new.
+   */
+  origin: 'escuta' | 'outro';
 }
 
 export interface LogEntry {

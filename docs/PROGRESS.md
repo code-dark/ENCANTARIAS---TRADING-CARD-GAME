@@ -618,6 +618,74 @@ try them: income at Despertar independent of the deck; a Território's
 decks. The first is the smallest testable move; the second is the most
 ENCANTARIAS-shaped.
 
+### The Território is where Memória comes from
+
+The economy no longer comes from drawing. A player does not gain mana: they
+listen to a place, find something the city had not given up yet, say it out
+loud, and only then is it theirs to spend.
+
+    Território → Escuta → 1d6 → 2+ → busca contextual → leitura em voz alta → +1 Memória
+
+**The resource is computed after the reading, never before.** That is the same
+rule the game already had about Memory, now carrying the economy: the reading is
+what completes the transmission, so it is what completes the payment. A 6 offers
+two accounts and still pays +1 — the choice is the reward, not inflation. A 1
+pays nothing. **One Escuta per Território per turn**, however many Personagens
+are standing in it, which puts income at roughly 0.83 per turn.
+
+**Only the Escuta pays.** A record already in hand reaches a Memory that exists,
+but it does not make the city yield anything new — `pendingDiscovery` now
+remembers what surfaced it, so a deck of documents cannot print the economy.
+
+**Drawing gives a card and nothing else.**
+
+**A place no longer runs dry, in principle.** When a Território has given up its
+own accounts, listening widens: to what a Lenda manifested there carries with
+it, and to what shares the ground's vocabulary *and* could belong there. Both
+conditions are needed — tags like `urbano` sit on four of the five Territórios,
+so a shared word alone would make every account audible everywhere, which is the
+leak this must not reopen.
+
+Measured before and after, 500 matches, greedy against greedy:
+
+| | antes | depois |
+| --- | --- | --- |
+| partidas decididas por Jornada | 0% | 100% |
+| duração mediana | — (limite) | 9 turnos |
+| Memórias transmitidas por p1 | 5 | 10 |
+
+#### Two findings this leaves open
+
+**The two Jornadas are not on the same clock.** Guardiã da Memória wins 100% of
+matches. Completing it costs about 5 Memória (a Personagem, then a Lenda to
+resonate with); O Cortejo costs about 10 — a Personagem, a Travessia, and two
+Lendas totalling 5 — on the same income. That is not a percentage to tune
+towards 25; it is one Jornada costing twice what the other does.
+
+**A player can still be starved into a dead end.** Given 30 turns and an
+opponent that cannot win, the Cortejo player stalls at turn 8 with two of three
+objectives met and 2 Memória, one short of the Lenda it needs — and stays there
+for twenty-two turns. The place has given up everything it holds, and the
+widening above cannot help, because it is gated behind manifesting a Lenda,
+which needs the income the widening was supposed to provide.
+
+The fix I would try: let the widening read what the player is already carrying —
+the tags of the Memórias on their own table. What you already know is what leads
+you to more, it costs nothing to unlock, and it cannot be reached only by
+spending.
+
+#### What the policy had to learn
+
+None of the above was visible until the bot stopped playing badly in ways that
+hid it. It now listens before resonating (a single Personagem is both the only
+ear and sometimes the only card with a relation here, and income comes first);
+establishes a listener before crossing (crossing spends exactly the resource
+listening earns); holds Memória for a card its Jornada names rather than
+spending it on a cheaper one that merely resonates; crosses to where a gathering
+could form; and stays there instead of wandering on. Each of those was a
+measurement artifact before it was a heuristic — and each one, once fixed,
+revealed a real problem underneath.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
@@ -626,8 +694,10 @@ ENCANTARIAS-shaped.
 - Vínculo is one per relation, once. Whether that is too slow cannot be judged
   until the economy above is settled: today a player cannot afford the cards
   that would earn it.
-- The economy stops on turn 3 — measured, quantified above, waiting on a design
-  decision.
+- A Território can still starve a player once it has given up its accounts; see
+  above.
+- O Cortejo costs roughly twice what Guardiã da Memória costs, on the same
+  income.
 - The board's centre is largely empty; visual weight is Milestone 5.
 
 ## Next: Phase C (Ressonância effects, Transformação, Jornadas)

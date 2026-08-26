@@ -154,6 +154,7 @@ function revealMemories(
       territoryInstanceId: context.territoryInstanceId,
       roll: waiting?.roll ?? 0,
       mode: 'leitura',
+      origin: waiting?.origin ?? 'outro',
     },
   };
 

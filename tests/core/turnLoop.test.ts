@@ -94,7 +94,9 @@ describe('turn ownership', () => {
 });
 
 describe('Memory phase', () => {
-  it('draws one card and yields the Memória that pays for manifestations', () => {
+  it('draws one card and nothing else', () => {
+    // Drawing is not income. The Memória that pays for things comes from
+    // listening to a place and saying what you found out loud.
     let s = setup();
     s.players[0].deck = [createInstance(SERPENT, 'p1')];
     s = advanceTo(s, 'Memoria');
@@ -103,7 +105,7 @@ describe('Memory phase', () => {
 
     expect(s.players[0].hand).toHaveLength(1);
     expect(s.players[0].deck).toHaveLength(0);
-    expect(s.players[0].resources.memoria).toBe(1);
+    expect(s.players[0].resources.memoria).toBe(0);
   });
 
   it('allows only one recovery per turn', () => {

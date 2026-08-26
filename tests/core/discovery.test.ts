@@ -240,3 +240,125 @@ describe('a Memory that names where it comes from', () => {
     expect(s.memoryPool).toHaveLength(0);
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * The Território is where Memória comes from
+ * ------------------------------------------------------------------ */
+
+describe('the economy of listening', () => {
+  it('pays only after the reading, never before', () => {
+    let s = withCharacter(setup([ORAL]), LISTENER);
+    s = advanceTo(s, 'Acao');
+    const before = s.players[0].resources.memoria;
+
+    s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
+    // Found, not yet transmitted: nothing is owed.
+    expect(s.players[0].resources.memoria).toBe(before);
+
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
+    expect(s.players[0].resources.memoria).toBe(before + 1);
+  });
+
+  it('pays once on a 6, not twice — two accounts offered, one taken', () => {
+    let s = withCharacter(setup([ORAL, MEDIA], SEED.six), LISTENER);
+    s = advanceTo(s, 'Acao');
+    const before = s.players[0].resources.memoria;
+
+    s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
+    if (s.pendingDiscovery!.mode !== 'escolha') return; // this seed found only one
+
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
+    expect(s.players[0].resources.memoria).toBe(before + 1);
+    expect(s.pendingDiscovery).toBeUndefined();
+  });
+
+  it('pays nothing when the die refuses', () => {
+    let s = withCharacter(setup([ORAL], SEED.one), LISTENER);
+    s = advanceTo(s, 'Acao');
+    const before = s.players[0].resources.memoria;
+
+    s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
+    expect(s.players[0].resources.memoria).toBe(before);
+    expect(s.pendingDiscovery).toBeUndefined();
+  });
+
+  it('is one Escuta per turn, however many Personagens are standing here', () => {
+    let s = withCharacter(setup([ORAL, MEDIA]), LISTENER);
+    const second = {
+      ...createInstance(WANDERER, 'p1'),
+      linkedTo: s.players[0].activeTerritoryId,
+    };
+    s.players[0].inPlay = [...s.players[0].inPlay, second];
+    s = advanceTo(s, 'Acao');
+
+    s = expectOk(applyAction(s, { type: 'Explore', playerId: 'p1' }));
+    if (s.pendingDiscovery) {
+      s = expectOk(applyAction(s, {
+        type: 'TransmitMemory', playerId: 'p1',
+        memoryInstanceId: s.pendingDiscovery.options[0].instanceId,
+      }));
+    }
+
+    const again = applyAction(s, { type: 'Explore', playerId: 'p1' });
+    expect(again.error).toContain('já escutou este Território neste turno');
+  });
+
+  it('does not pay for a Memory a record merely reached', () => {
+    // A document in hand reaches something that exists. It does not make the
+    // city give up anything new, so it prints no resource.
+    let s = setup(['memory_beira_mar_imagem']);
+    const foto = createInstance('objeto_fotografia_beira_mar', 'p1');
+    s.players[0].hand = [foto];
+    s.players[0].resources.memoria = 3;
+    s = advanceTo(s, 'Manifestacao');
+
+    s = expectOk(applyAction(s, {
+      type: 'PlayCard', playerId: 'p1', instanceId: foto.instanceId,
+    }));
+    const afterCost = s.players[0].resources.memoria;
+
+    s = expectOk(applyAction(s, {
+      type: 'TransmitMemory', playerId: 'p1',
+      memoryInstanceId: s.pendingDiscovery!.options[0].instanceId,
+    }));
+    expect(s.players[0].resources.memoria).toBe(afterCost);
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * A place does not run out of things to hear
+ * ------------------------------------------------------------------ */
+
+describe('when a Território has given up its own accounts', () => {
+  it('reaches what a Lenda manifested here carries with it', () => {
+    // Os Caminhos Cruzados belongs to the Escadaria and CEPRAMA, not the
+    // Fonte — but it is linked to the Guardião dos Caminhos, who is standing
+    // here, and the narrative present brings its accounts with it.
+    let s = withCharacter(setup(['memory_transmitida_paths']), LISTENER);
+    const keeper = {
+      ...createInstance('legend_keeper_of_paths', 'p1'),
+      linkedTo: s.players[0].activeTerritoryId,
+    };
+    s.players[0].inPlay = [...s.players[0].inPlay, keeper];
+    s = advanceTo(s, 'Acao');
+
+    const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
+    expect(r.error).toBeUndefined();
+  });
+
+  it('still refuses what has no relation to this place at all', () => {
+    // Nothing standing here, and the Media memory shares no affinity with a
+    // spring: widening the search must not mean hearing everything anywhere.
+    let s = withCharacter(setup([MEDIA]), LISTENER);
+    s = advanceTo(s, 'Acao');
+
+    const r = applyAction(s, { type: 'Explore', playerId: 'p1' });
+    expect(r.error).toContain('não ouve mais nada');
+  });
+});
