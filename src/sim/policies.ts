@@ -16,7 +16,7 @@ import { GameAction } from '../core/game/actions';
 import { GameState, Player, getCurrentPlayer, activeTerritoryOf } from '../core/game/gameState';
 import { validateAction } from '../core/game/validators';
 import { getCard } from '../core/cards/cardRegistry';
-import { TerritoryCard } from '../core/cards/types';
+import { AnyCard, TerritoryCard } from '../core/cards/types';
 import { evaluateJourney } from '../core/mechanics/journey';
 import { canResonate } from '../core/mechanics/resonance';
 import { openContainers } from '../core/mechanics/objects';
@@ -163,15 +163,55 @@ export const greedy: Policy = {
       }
 
       case 'Manifestacao': {
-        // A Personagem first: nothing can be listened for without one.
-        const ranked = affordable(player).sort((a, b) => {
-          const rank = (t: string) =>
-            t === 'Character' ? 0 : t === 'Legend' ? 1 : t === 'Event' ? 2 : 3;
-          return rank(a.def.type) - rank(b.def.type);
-        });
+        // Saving up matters. A policy that spends its Memória on whatever is
+        // cheapest every turn can never afford the one card its Jornada needs,
+        // and then measures a game nobody would play that way.
+        const territory = activeTerritoryOf(player);
+        const territoryDef = territory
+          ? (getCard(territory.cardId) as TerritoryCard)
+          : undefined;
+
+        const useful = (def: AnyCard) =>
+          // A Personagem is how anything gets listened for at all.
+          def.type === 'Character' ||
+          // Anything that has a relation with where we are standing.
+          (territoryDef ? canResonate(def, territoryDef) : false);
+
+        const wanted = player.hand
+          .map((c) => ({ instance: c, def: getCard(c.cardId) }))
+          .filter(({ def }) => useful(def));
+
+        const affordableWanted = wanted.filter(
+          ({ def }) => (def.cost ?? 0) <= player.resources.memoria
+        );
+
+        // Something worth having and affordable: take it, cheapest first.
+        if (affordableWanted.length > 0) {
+          return firstLegal(
+            state,
+            [...affordableWanted]
+              .sort((a, b) => {
+                const rank = (t: string) => (t === 'Character' ? 0 : 1);
+                return (
+                  rank(a.def.type) - rank(b.def.type) ||
+                  (a.def.cost ?? 0) - (b.def.cost ?? 0)
+                );
+              })
+              .map(({ instance }) => ({
+                type: 'PlayCard' as const,
+                playerId: player.id,
+                instanceId: instance.instanceId,
+              }))
+          );
+        }
+
+        // Something worth having but out of reach: hold the Memória for it
+        // rather than spending it on something that does not help.
+        if (wanted.length > 0) return PASS(state);
+
         return firstLegal(
           state,
-          ranked.map(({ instance }) => ({
+          affordable(player).map(({ instance }) => ({
             type: 'PlayCard' as const,
             playerId: player.id,
             instanceId: instance.instanceId,
@@ -187,14 +227,26 @@ export const greedy: Policy = {
         if (territory) {
           const territoryDef = getCard(territory.cardId) as TerritoryCard;
           for (const card of hereWith(player)) {
-            if (canResonate(getCard(card.cardId), territoryDef)) {
-              candidates.push({
-                type: 'ActivateResonance',
-                playerId: player.id,
-                instanceId: card.instanceId,
-              });
-            }
+            const def = getCard(card.cardId);
+            if (!canResonate(def, territoryDef)) continue;
+
+            // A relation already recognised here pays no Vínculo again. Still
+            // worth re-activating when its effects are what is wanted, but a
+            // new relation comes first.
+            const known = player.accomplishments.resonancesActivated.includes(
+              `${def.id}@${territoryDef.id}`
+            );
+            candidates.push({
+              type: 'ActivateResonance',
+              playerId: player.id,
+              instanceId: card.instanceId,
+              ...(known ? { known: true } : {}),
+            } as GameAction);
           }
+          // New relations first.
+          candidates.sort(
+            (a, b) => Number('known' in a) - Number('known' in b)
+          );
         }
 
         // Then listen. A find has to be read before anything else happens,

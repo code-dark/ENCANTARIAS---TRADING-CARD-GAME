@@ -131,16 +131,20 @@ export function playMatch(options: MatchOptions): MatchResult {
     state = result.state;
   }
 
+  // The clock reads maxTurns + 1 the moment the limit ends a match; what was
+  // played is the turn before that.
+  const turnsPlayed = Math.min(state.turn, maxTurns);
+
   return {
     seed,
-    turns: state.turn,
+    turns: turnsPlayed,
     winnerId: state.winnerId,
     winnerJourneyId: state.players.find((p) => p.id === state.winnerId)?.journeyProgress
       ?.journeyId,
     endedByLimit: !state.winnerId,
     refusals,
     players: state.players.map((p) =>
-      measure(state, p, byPlayer.get(p.id)!.name, state.turn)
+      measure(state, p, byPlayer.get(p.id)!.name, turnsPlayed)
     ),
   };
 }

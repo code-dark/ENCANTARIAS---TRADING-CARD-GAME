@@ -23,6 +23,7 @@ const CAMINHOS = 'legend_keeper_of_paths';
 const CARRUAGEM = 'legend_carruagem_ana_jansen';
 const MULA = 'legend_mula_carruagem_ana_jansen';
 const OUVINTE = 'character_listener';
+const CAIXA = 'objeto_caixa_recordacoes';
 const FESTA = 'event_festival';
 const ABRACO = 'event_institutional_embrace';
 const FESTA_MEMORIA_A = 'memory_festa_versao_de_rua';
@@ -541,5 +542,74 @@ describe('the price of resonating', () => {
         }
       }
     }
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Who is allowed to resonate
+ * ------------------------------------------------------------------ */
+
+describe('what can enter into a Ressonância', () => {
+  it('refuses a Memória: it is what a Ressonância opens', () => {
+    let s = setup([FONTE]);
+    const memory = place(s, 'memory_oral_serpent');
+    s = advanceTo(s, 'Acao');
+
+    const result = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: memory.instanceId,
+    });
+    expect(result.error).toContain('não ressoa');
+  });
+
+  it('refuses a card standing in another Território', () => {
+    let s = setup([FONTE, ESCADARIA]);
+    const legend = place(s, SERPENTE);
+    s.players[0].inPlay = s.players[0].inPlay.map((c) =>
+      c.instanceId === legend.instanceId
+        ? { ...c, linkedTo: s.players[0].territories[1].instanceId }
+        : c
+    );
+    s = advanceTo(s, 'Acao');
+
+    const result = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
+    });
+    expect(result.error).toContain('não está neste Território');
+  });
+
+  it('refuses a card kept inside an object — that is what storing means', () => {
+    let s = setup([FONTE]);
+    const caixa = place(s, CAIXA);
+    const legend = place(s, SERPENTE);
+    s.players[0].inPlay = s.players[0].inPlay.map((c) =>
+      c.instanceId === legend.instanceId ? { ...c, linkedTo: caixa.instanceId } : c
+    );
+    s = advanceTo(s, 'Acao');
+
+    const result = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
+    });
+    expect(result.error).toContain('não está neste Território');
+  });
+
+  it('pays Vínculo the first time a relation is recognised, and not again', () => {
+    let s = setup([FONTE]);
+    const legend = place(s, SERPENTE);
+
+    s = advanceTo(s, 'Acao');
+    s = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
+    }).state;
+    expect(s.players[0].resources.vinculo).toBe(1);
+
+    // Same relation, same place, next turn: the effects run again, the Vínculo
+    // does not — recognising what you already recognise is not new.
+    s = nextTurnOf(s, 'p1', 'Acao');
+    const before = s.players[0].resources.memoria;
+    s = applyAction(s, {
+      type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
+    }).state;
+    expect(s.players[0].resources.vinculo).toBe(1);
+    expect(s.players[0].resources.memoria).toBe(before + 1); // the Water relation still pays
   });
 });

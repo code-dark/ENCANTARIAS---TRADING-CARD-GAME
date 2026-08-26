@@ -18,10 +18,13 @@ describe('the simulator', () => {
   });
 
   it('produces different matches from different seeds', () => {
-    const seeds = [1, 2, 3, 4, 5, 6, 7, 8].map(
-      (s) => playMatch({ seed: s, policies: [greedy, greedy] }).turns
-    );
-    expect(new Set(seeds).size).toBeGreaterThan(1);
+    // Compared on what the match produced rather than on its length: matches
+    // can share a length and still be nothing alike.
+    const shapes = [1, 2, 3, 4, 5, 6, 7, 8].map((s) => {
+      const r = playMatch({ seed: s, policies: [greedy, greedy] });
+      return r.players.map((p) => `${p.listens}/${p.listensThatFound}`).join('|');
+    });
+    expect(new Set(shapes).size).toBeGreaterThan(1);
   });
 
   it('never lets a policy make an illegal move stick', () => {
@@ -30,11 +33,12 @@ describe('the simulator', () => {
     const result = playMatch({ seed: 11, policies: [greedy, baseline] });
     expect(result.refusals).toBeGreaterThanOrEqual(0);
     expect(result.turns).toBeLessThanOrEqual(20);
+    expect(result.players.every((p) => p.objectivesMet <= 3)).toBe(true);
   });
 
   it('respects the turn limit', () => {
     const result = playMatch({ seed: 3, policies: [baseline, baseline], maxTurns: 4 });
-    expect(result.turns).toBeLessThanOrEqual(5);
+    expect(result.turns).toBeLessThanOrEqual(4);
   });
 
   it('builds the same table the interface builds', () => {

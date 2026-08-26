@@ -564,15 +564,70 @@ what was left unspent.
 Tests: 6 new (159 total), including that a seed replays identically and that the
 simulator builds the same table the interface does.
 
+### What the simulator found
+
+Three engine bugs, fixed, and one structural problem that is the author's to
+decide. The first run ended every match on turn 2 with the same Jornada winning
+100% of the time; after the fixes, no match finishes at all. Both extremes were
+real, and neither was visible from reading the code.
+
+**A Memória was resonating.** Any card on the table could activate a
+Ressonância, and affinity-matched relations accept any card carrying the
+affinity — so every account found became a second Vínculo engine. A Memória is
+what a Ressonância *opens*; it does not enter into one. Refused now.
+
+**A card that was not there could resonate.** The check never looked at where
+the card was standing, so one left behind in another Território — or kept
+inside a Caixa — still had a relation with the place the player was in. That
+undoes what storing a Memória is *for*. Only what is present resonates now.
+
+**A relation paid Vínculo every turn.** Re-activating the same card in the same
+place paid again each turn: the same faucet the per-relation payout opened in
+breadth, re-activation was opening in time. A relation is recognised once. Its
+effects still run on re-activation — that is why you would do it — but it does
+not pay again.
+
+**The policy had to learn to save.** With the leaks closed, the greedy player
+still never manifested its key card: spending on whatever was cheapest each
+turn, it could never bank the 3 a Lenda costs. A policy that cannot save
+measures a game nobody would play that way. It now holds Memória for a card its
+Jornada needs rather than spending it on one that does not help.
+
+#### The finding that is not a bug: the economy stops on turn 3
+
+| | Deck Água | Deck Instituição |
+| --- | --- | --- |
+| custo total das cartas | 9 | 11 |
+| renda total de Memória | 5 | 5 |
+| déficit | 4 | 6 |
+
+Memória — the resource that pays for manifesting *and* for crossing — is granted
+only by drawing, and a six-card deck with a three-card opening hand yields
+exactly three draws. **After turn 3 there is no income at all, for the rest of
+the match.** Roughly half of each deck is unplayable, permanently, and the trace
+shows it plainly: from turn 4 to turn 20, one player does nothing but wake up.
+
+Everything downstream follows from that, and none of it is a Jornada problem:
+Guardiã da Memória cannot reach 3 Vínculo because the only card that resonates
+in that Território costs 3 and can never be afforded; a Território also runs dry
+after about five listens, and without income there is nothing to do but pass.
+
+This wants a decision rather than a tuning pass. Options, in the order I would
+try them: income at Despertar independent of the deck; a Território's
+`placeAction` producing Memória, so the place is the source; or simply larger
+decks. The first is the smallest testable move; the second is the most
+ENCANTARIAS-shaped.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
   a Memória goes two turns unused" has nowhere to hook. `Esquecimento` waits on
   this.
-- Vínculo income is now one per Ressonância per turn plus what cards earn.
-  Whether that is too slow for the Jornadas that ask for it wants playtesting.
-- Economy is provisional: one Memória per turn against costs of 1-3 makes the
-  opening turns tight. Needs playtesting, not guessing.
+- Vínculo is one per relation, once. Whether that is too slow cannot be judged
+  until the economy above is settled: today a player cannot afford the cards
+  that would earn it.
+- The economy stops on turn 3 — measured, quantified above, waiting on a design
+  decision.
 - The board's centre is largely empty; visual weight is Milestone 5.
 
 ## Next: Phase C (Ressonância effects, Transformação, Jornadas)

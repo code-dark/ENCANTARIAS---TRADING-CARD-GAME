@@ -217,6 +217,23 @@ export function validateAction(state: GameState, action: GameAction): Validation
       if (!territory) {
         return invalid('A Ressonância precisa de um Território ativo.');
       }
+
+      // Only what is present resonates. A card left behind in another
+      // Território, or kept inside an object, is not here to have a relation
+      // with this place — that is what taking it out of circulation means.
+      if (card.linkedTo !== territory.instanceId) {
+        return invalid(
+          `${getCard(card.cardId).name} não está neste Território.`
+        );
+      }
+
+      // A Memória is what a Ressonância produces, not what enters into one.
+      // Letting it resonate turned every account found into a second engine
+      // for Vínculo.
+      if (getCard(card.cardId).type === 'Memory') {
+        return invalid('Uma Memória não ressoa: ela é o que a Ressonância abre.');
+      }
+
       return VALID;
     }
   }

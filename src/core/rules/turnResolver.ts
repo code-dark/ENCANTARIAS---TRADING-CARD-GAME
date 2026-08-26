@@ -648,6 +648,13 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     );
   }
 
+  // A relation is recognised once. Re-activating it in the same place every
+  // turn still runs its effects — that is why you would do it — but it does
+  // not pay Vínculo again: the same faucet the per-relation payout opened in
+  // breadth, re-activation was opening in time.
+  const relation = `${def.id}@${territoryDef.id}`;
+  const alreadyKnown = player.accomplishments.resonancesActivated.includes(relation);
+
   let next = updatePlayer(state, playerId, (p) => ({
     ...p,
     inPlay: p.inPlay.map((c) =>
@@ -657,15 +664,15 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     // recognises. Paying per relation made a two-relation Território hand out
     // three Vínculo at once and race the Jornadas that ask for it. Extra
     // relations still matter — they widen what the Ressonância *does*.
-    resources: { ...p.resources, vinculo: p.resources.vinculo + 1 },
+    resources: {
+      ...p.resources,
+      vinculo: p.resources.vinculo + (alreadyKnown ? 0 : 1),
+    },
     accomplishments: {
       ...p.accomplishments,
       // The same relation in the same place is one Ressonância, however many
       // times it is activated: the Jornada counts relations, not activations.
-      resonancesActivated: record(
-        p.accomplishments.resonancesActivated,
-        `${def.id}@${territoryDef.id}`
-      ),
+      resonancesActivated: record(p.accomplishments.resonancesActivated, relation),
     },
   }));
 
