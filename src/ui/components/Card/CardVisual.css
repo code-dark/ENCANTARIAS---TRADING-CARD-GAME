@@ -1,234 +1,263 @@
+/* A card is a physical object: always the same rectangle, whatever its text.
+   The old version grew with its description, so no two cards on screen were
+   the same shape — which is most of why the table did not read as a table.
+   Here the frame is fixed at 5:7 and the text scrolls inside it. */
+
 .card-visual {
-  --border-color: #4a6fa5;
-  background: linear-gradient(135deg, rgba(26, 31, 58, 0.9) 0%, rgba(15, 22, 41, 0.95) 100%);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  --card-w: 150px;
+  --accent: var(--azulejo);
+
+  position: relative;
+  width: var(--card-w);
+  aspect-ratio: 5 / 7;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 6px 14px -6px rgba(0, 0, 0, 0.75),
+    0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+  user-select: none;
+}
+
+/* The lit edge of a card sitting on a dark table. */
+.card-visual::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(35, 32, 26, 0.28);
+  pointer-events: none;
+}
+
+.card-frame {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  position: relative;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  gap: 3px;
+  padding: 7px 8px 6px;
+  overflow: hidden;
+  border-radius: inherit;
 }
 
-.card-visual:hover {
-  transform: translateY(-6px);
-  border-color: var(--border-color);
-  box-shadow: 0 8px 24px rgba(74, 111, 165, 0.4);
+/* --- type identity ------------------------------------------------------ */
+
+.card-type-Territory  { --accent: #4a7c59; }
+.card-type-Legend     { --accent: #b08324; }
+.card-type-Character  { --accent: #3a5fa5; }
+.card-type-Memory     { --accent: #8a5a7a; }
+.card-type-Artifact   { --accent: #8a6535; }
+.card-type-Event      { --accent: #a8452f; }
+
+/* A colour bar along the top edge: the type readable before the words are. */
+.card-frame::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--accent);
 }
 
-.card-visual.selected {
-  border-color: #7aa3d5;
-  box-shadow: 0 0 20px rgba(122, 163, 213, 0.6);
-  transform: scale(1.05);
-}
-
-/* Size variants */
-.card-small {
-  width: 116px;
-  padding: 8px;
-  font-size: 0.7rem;
-}
-
-.card-small .card-title {
-  font-size: 0.75rem;
-  line-height: 1.1;
-}
-
-.card-medium {
-  width: 120px;
-  min-height: 180px;
-}
-
-.card-large {
-  width: 200px;
-  min-height: 280px;
-  padding: 16px;
-}
-
-/* Card sections */
 .card-header {
+  flex: 0 0 auto;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(74, 111, 165, 0.3);
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: 2px;
 }
 
 .card-type {
-  font-size: 0.7rem;
+  font-family: var(--font-ui);
+  font-size: 8px;
   font-weight: 700;
-  color: var(--border-color);
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  color: var(--accent);
 }
 
 .card-cost {
-  width: 24px;
-  height: 24px;
-  background-color: var(--border-color);
-  color: #0a0e27;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
   border-radius: 50%;
+  background: var(--tinta);
+  color: var(--papel);
+  font-family: var(--font-ui);
+  font-size: 11px;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .card-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #9bc4e2;
-  line-height: 1.2;
-  margin-bottom: 6px;
+  flex: 0 0 auto;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.15;
+  text-wrap: balance;
+  hyphens: auto;
 }
 
+/* --- art ---------------------------------------------------------------- */
+
+.card-art {
+  flex: 1 1 30%;
+  display: grid;
+  place-items: center;
+  min-height: 26px;
+  border-radius: 5px;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(255, 255, 255, 0.7), transparent 70%),
+    color-mix(in srgb, var(--accent) 14%, #e6dac2);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(35, 32, 26, 0.14) inset;
+}
+
+.card-glyph {
+  width: 62%;
+  height: 62%;
+  opacity: 0.85;
+}
+
+/* --- affinities --------------------------------------------------------- */
+
 .card-affinities {
+  flex: 0 0 auto;
   display: flex;
-  gap: 4px;
-  margin-bottom: 8px;
   flex-wrap: wrap;
+  gap: 2px;
+  overflow: hidden;
+  max-height: 26px;
 }
 
 .affinity-badge {
-  display: inline-block;
-  background-color: rgba(74, 111, 165, 0.3);
-  color: #7aa3d5;
-  padding: 2px 5px;
-  border-radius: 2px;
-  font-size: 0.65rem;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: color-mix(in srgb, var(--accent) 75%, var(--tinta));
+  font-family: var(--font-ui);
+  font-size: 7.5px;
   font-weight: 600;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.card-body {
-  flex: 1;
-  margin-bottom: 8px;
-  font-size: 0.8rem;
-  line-height: 1.3;
+/* --- rules text --------------------------------------------------------- */
+
+.card-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-top: 2px;
+  border-top: 1px solid rgba(35, 32, 26, 0.16);
+  scrollbar-width: thin;
 }
 
-.description {
+.card-text .description {
   margin: 0;
-  color: #b0c4de;
-  font-size: 0.75rem;
+  font-size: 8.8px;
+  line-height: 1.36;
+  color: rgba(35, 32, 26, 0.86);
 }
 
-.card-flavor {
-  font-size: 0.7rem;
-  color: #7aa3d5;
-  font-style: italic;
-  opacity: 0.7;
-  margin-bottom: 8px;
-  padding: 6px;
-  background-color: rgba(122, 163, 213, 0.1);
-  border-left: 2px solid rgba(122, 163, 213, 0.3);
-}
-
-.card-footer {
+.card-foot {
+  flex: 0 0 auto;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 6px;
-  border-top: 1px solid rgba(74, 111, 165, 0.2);
-  font-size: 0.65rem;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-height: 12px;
 }
 
-.card-id-short {
-  color: rgba(122, 163, 213, 0.5);
+.card-state,
+.card-transformed,
+.card-flag {
+  font-family: var(--font-ui);
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
 }
 
-/* Card type specific colors */
-.card-type-Territory {
-  --border-color: #4a6fa5;
+.card-state      { background: rgba(35, 32, 26, 0.1); color: rgba(35, 32, 26, 0.7); }
+.card-transformed{ background: var(--ouro); color: #2a2205; }
+.card-flag       { background: rgba(168, 69, 47, 0.16); color: #8f3624; }
+
+/* --- states ------------------------------------------------------------- */
+
+/* Playable cards are the ones that answer to the mouse. Everything about the
+   affordance is here, so an unplayable card can never look clickable. */
+.card-visual.playable { cursor: pointer; }
+
+.card-visual.playable:hover,
+.card-visual.playable:focus-visible {
+  transform: translateY(-14px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 18px 30px -12px rgba(0, 0, 0, 0.85),
+    0 0 0 2px var(--ouro);
+  outline: none;
+  z-index: 5;
 }
 
-.card-type-Legend {
-  --border-color: #a84e4a;
+.card-visual.selected {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 26px -12px rgba(0, 0, 0, 0.85),
+    0 0 0 2px var(--ouro);
 }
-
-.card-type-Character {
-  --border-color: #7a6e4a;
-}
-
-.card-type-Memory {
-  --border-color: #4a6a7a;
-}
-
-.card-type-Event {
-  --border-color: #6a4a7a;
-}
-
-.card-type-Artifact {
-  --border-color: #6a7a4a;
-}
-
-/* --- Phase B additions --- */
 
 .card-visual.disabled {
-  opacity: 0.42;
   cursor: not-allowed;
-  filter: saturate(0.5);
+  opacity: 0.94;
 }
 
-.card-visual.disabled:hover {
-  transform: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+/* The faintest cool veil — enough to separate it from a card you can play,
+   not enough to stop anyone reading it. */
+.card-visual.disabled .card-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(16, 29, 61, 0.1);
+  pointer-events: none;
 }
 
-.card-visual.exhausted {
-  transform: rotate(1.5deg);
-  border-style: dashed;
+/* A playable card is lit from the table: a gold rim, sitting slightly proud
+   of the others even before the mouse arrives. */
+.card-visual.playable {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 10px 20px -8px rgba(0, 0, 0, 0.8),
+    0 0 0 2px rgba(201, 162, 39, 0.75),
+    0 0 18px -4px rgba(201, 162, 39, 0.5);
+  transform: translateY(-5px);
 }
 
-.card-visual:focus-visible {
-  outline: 2px solid #9bc4e2;
-  outline-offset: 2px;
-}
+.card-visual.exhausted { transform: rotate(4deg); }
+.card-visual.exhausted.playable:hover { transform: rotate(4deg) translateY(-14px); }
 
-/* Memory / transformation state, the marker the GDD asks to stay readable. */
-.card-state {
-  align-self: flex-start;
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  margin-bottom: 6px;
-  border: 1px solid rgba(155, 196, 226, 0.45);
-  border-radius: 2px;
-  color: #9bc4e2;
-}
+/* --- sizes -------------------------------------------------------------- */
 
-.card-flag {
-  margin-top: auto;
-  font-size: 0.62rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #d9a05b;
-}
+.card-small  { --card-w: 118px; }
+.card-medium { --card-w: 150px; }
+.card-large  { --card-w: 196px; }
 
-.card-affinities {
-  gap: 3px;
-}
+.card-small .card-title { font-size: 11px; }
+.card-small .card-text .description { font-size: 8px; }
+.card-large .card-title { font-size: 17px; }
+.card-large .card-text .description { font-size: 11px; }
 
-.card-small .description,
-.card-small .card-state {
-  display: none;
-}
-
-/* A card that has become something else says so. */
-.card-transformed {
-  margin-top: 4px;
-  padding: 2px 6px;
-  border: 1px solid #8a6bbf;
-  border-radius: 3px;
-  align-self: flex-start;
-  font-size: 0.6rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #c7aef0;
-  background-color: rgba(70, 45, 110, 0.35);
+@media (prefers-reduced-motion: reduce) {
+  .card-visual { transition: none; }
+  .card-visual.playable:hover,
+  .card-visual.playable:focus-visible { transform: none; }
 }

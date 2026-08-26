@@ -1,3 +1,37 @@
+/* Design tokens and reset.
+ *
+ * The game is São Luís after dark: a table lit from above, cards as pale
+ * objects on it, colonial tile blue for structure and candle gold for the
+ * one thing that should catch the eye.
+ *
+ * The display face is an old-style serif with the lapidary feel of the
+ * lettering on the city's façades, taken from fonts that are already on the
+ * machine. A webfont was tried and taken back out: it made the build depend
+ * on a third-party host, which costs the property that matters most for a
+ * playtest link — one request, works from anywhere, works offline. If a
+ * specific face is wanted later, embedding it as a data URI keeps both.
+ */
+
+:root {
+  --noite: #070c1e;
+  --mesa: #101d3d;
+  --mesa-borda: #1b2b52;
+  --azulejo: #3a6ea5;
+  --ouro: #c9a227;
+  --papel: #f0e6d2;
+  --tinta: #23201a;
+
+  --texto: #dfe4f2;
+  --texto-fraco: #8f9bbb;
+  --alerta: #d4694f;
+
+  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+    'Times New Roman', serif;
+  --font-ui: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+
+  color-scheme: dark;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -7,68 +41,82 @@
 html, body, #root {
   width: 100%;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-ui);
+  font-size: 15px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0a0e27;
-  color: #e0e0e0;
+  background-color: var(--noite);
+  color: var(--texto);
 }
 
-body {
-  overflow: hidden;
+body { overflow: hidden; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-wrap: balance;
 }
 
-/* Typography */
-h1, h2, h3 { font-weight: 600; }
-h1 { font-size: 2rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.25rem; }
-
-/* Cards */
-.card {
-  background: linear-gradient(135deg, #1a1f3a 0%, #0f1629 100%);
-  border: 2px solid #2a3f5f;
-  border-radius: 8px;
-  padding: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  border-color: #4a6fa5;
-  box-shadow: 0 8px 20px rgba(74, 111, 165, 0.3);
-}
-
-.card.selected {
-  border-color: #7aa3d5;
-  box-shadow: 0 0 15px rgba(122, 163, 213, 0.5);
-}
-
-/* Buttons */
 button {
-  background-color: #2a3f5f;
-  color: #e0e0e0;
-  border: 1px solid #4a6fa5;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 14px;
   font-weight: 500;
-  transition: all 0.2s ease;
+  color: var(--texto);
+  background: rgba(58, 110, 165, 0.16);
+  border: 1px solid rgba(58, 110, 165, 0.5);
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
 }
 
-button:hover {
-  background-color: #3a4f7f;
-  border-color: #6a9fd5;
+button:hover:not(:disabled) {
+  background: rgba(58, 110, 165, 0.3);
+  border-color: var(--azulejo);
 }
 
-button:active {
-  transform: scale(0.98);
+button:active:not(:disabled) { transform: translateY(1px); }
+
+button:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 2px;
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* The one control that always means "go on". */
+button.primary {
+  background: linear-gradient(180deg, #d8b23c, var(--ouro));
+  border-color: #8f7318;
+  color: #241d04;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+button.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #e6c04c, #d4ac2c);
+  border-color: #a5860f;
+}
+
+button.tiny {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(143, 155, 187, 0.28);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

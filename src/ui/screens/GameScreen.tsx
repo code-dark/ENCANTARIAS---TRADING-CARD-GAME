@@ -1,6 +1,7 @@
 import { getCurrentPlayer, PHASE_ORDER } from '../../core/game/gameState';
 import { OPPONENT_IDS } from '../../core/setup/verticalSlice';
 import { useOpponent } from '../hooks/useOpponent';
+import { useAutoAdvance } from '../hooks/useAutoAdvance';
 import { getCard } from '../../core/cards/cardRegistry';
 import { useGameStore } from '../../store/gameStore';
 import PhaseIndicator from '../components/HUD/PhaseIndicator';
@@ -10,9 +11,12 @@ import { JourneyPanel, RivalJourneys } from '../components/HUD/JourneyPanel';
 import MatchEnd from '../components/HUD/MatchEnd';
 import './GameScreen.css';
 
+const HUMAN_ID = 'p1';
+
 export default function GameScreen() {
   const { gameState, dispatch, lastError, check } = useGameStore();
   useOpponent(OPPONENT_IDS);
+  useAutoAdvance(HUMAN_ID);
 
   if (!gameState) return null;
 
@@ -33,12 +37,18 @@ export default function GameScreen() {
       {gameState.isEnded && <MatchEnd state={gameState} />}
 
       <header className="game-header">
-        <h1>ENCANTARIAS</h1>
+        <div className="brand">
+          <h1>ENCANTARIAS</h1>
+          <span className="brand-sub">Lendas do Maranhão</span>
+        </div>
+
+        <PhaseIndicator phase={gameState.phase} />
+
         <div className="turn-info">
-          Turno {gameState.turn} · <strong>{player.name}</strong>
+          <span className="turn-count">Turno {gameState.turn}</span>
+          <strong className={opponentPlaying ? 'rival' : 'you'}>{player.name}</strong>
           {opponentPlaying && <span className="thinking">está jogando…</span>}
         </div>
-        <PhaseIndicator phase={gameState.phase} />
       </header>
 
       {gameState.pendingDiscovery && (
@@ -91,84 +101,101 @@ export default function GameScreen() {
       )}
 
       <main className="game-main">
-        <div className="board-area">
-          <Board player={player} isActivePlayer />
+        <div className="table-area">
+          <Board player={player} isActivePlayer={!opponentPlaying} />
         </div>
 
-        <aside className="side-panel">
+        <aside className="side-rail">
           <div className="resources">
-            <div className="resource">
-              <span>Vínculo</span><strong>{player.resources.vinculo}</strong>
+            <div className="resource resource-vinculo">
+              <strong>{player.resources.vinculo}</strong>
+              <span>Vínculo</span>
+            </div>
+            <div className="resource resource-memoria">
+              <strong>{player.resources.memoria}</strong>
+              <span>Memória</span>
             </div>
             <div className="resource">
-              <span>Memória</span><strong>{player.resources.memoria}</strong>
+              <strong>{player.deck.length}</strong>
+              <span>Deck</span>
             </div>
-            <div className="resource">
-              <span>Deck</span><strong>{player.deck.length}</strong>
+            <div
+              className="resource resource-world"
+              title="Memórias que ainda aguardam no mundo, sem dono"
+            >
+              <strong>{gameState.memoryPool.length}</strong>
+              <span>No mundo</span>
             </div>
           </div>
 
-          <div className="world-pool" title="Memórias que ainda aguardam no mundo, sem dono">
-            <span>Memórias no mundo</span>
-            <strong>{gameState.memoryPool.length}</strong>
-          </div>
+          <section className="rail-block">
+            <h4>Sua Jornada</h4>
+            <JourneyPanel player={player} />
+          </section>
 
-          {gameState.phase === 'Memoria' && (
-            <button
-              className="primary"
-              disabled={!drawVerdict.valid}
-              title={drawVerdict.reason}
-              onClick={() => dispatch(drawAction)}
-            >
-              Comprar carta
-            </button>
-          )}
+          <section className="rail-block">
+            <h4>Outras Jornadas</h4>
+            <RivalJourneys players={gameState.players} activeId={player.id} />
+          </section>
 
-          {gameState.phase === 'Acao' && (
-            <button
-              className="primary"
-              disabled={!exploreVerdict.valid}
-              title={
-                exploreVerdict.valid
-                  ? 'Um Personagem escuta o Território e recupera uma Memória'
-                  : exploreVerdict.reason
-              }
-              onClick={() => dispatch(exploreAction)}
-            >
-              Escutar o Território
-            </button>
-          )}
-
-          <h4>Jornada</h4>
-          <JourneyPanel player={player} />
-
-          <h4>Outras Jornadas</h4>
-          <RivalJourneys players={gameState.players} activeId={player.id} />
-
-          <h4>Mão</h4>
-          <Hand cards={player.hand} playerId={player.id} />
+          <section className="rail-block rail-log">
+            <h4>O que aconteceu</h4>
+            <div className="log">
+              {gameState.log.slice(-6).map((entry, i) => (
+                <div key={i} className="log-entry">
+                  <span className="log-phase">{entry.phase}</span> {entry.message}
+                </div>
+              ))}
+            </div>
+          </section>
         </aside>
       </main>
 
-      <footer className="game-footer">
+      <footer className="hand-dock">
         {lastError && <div className="error-banner" role="alert">{lastError}</div>}
 
-        <div className="log">
-          {gameState.log.slice(-4).map((entry, i) => (
-            <div key={i} className="log-entry">
-              <span className="log-phase">{entry.phase}</span> {entry.message}
-            </div>
-          ))}
-        </div>
+        <div className="dock-inner">
+          <div className="dock-hand">
+            <Hand cards={player.hand} playerId={player.id} />
+          </div>
 
-        <button
-          className="primary"
-          disabled={opponentPlaying}
-          title={opponentPlaying ? 'Espere o oponente terminar o turno.' : undefined}
-          onClick={() => dispatch({ type: 'PassPhase', playerId: player.id })}
-        >
-          {isLastPhase ? 'Encerrar turno →' : 'Avançar fase →'}
-        </button>
+          <div className="dock-actions">
+            {gameState.phase === 'Memoria' && (
+              <button
+                className="primary"
+                disabled={!drawVerdict.valid}
+                title={drawVerdict.reason}
+                onClick={() => dispatch(drawAction)}
+              >
+                Comprar carta
+              </button>
+            )}
+
+            {gameState.phase === 'Acao' && (
+              <button
+                className="primary"
+                disabled={!exploreVerdict.valid}
+                title={
+                  exploreVerdict.valid
+                    ? 'Um Personagem escuta o Território e recupera uma Memória'
+                    : exploreVerdict.reason
+                }
+                onClick={() => dispatch(exploreAction)}
+              >
+                Escutar o Território
+              </button>
+            )}
+
+            <button
+              className={isLastPhase ? 'primary' : ''}
+              disabled={opponentPlaying}
+              title={opponentPlaying ? 'Espere o oponente terminar o turno.' : undefined}
+              onClick={() => dispatch({ type: 'PassPhase', playerId: player.id })}
+            >
+              {isLastPhase ? 'Encerrar turno →' : 'Avançar fase →'}
+            </button>
+          </div>
+        </div>
       </footer>
     </div>
   );
