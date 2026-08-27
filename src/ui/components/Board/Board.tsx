@@ -13,6 +13,10 @@ interface BoardProps {
   isActivePlayer: boolean;
 }
 
+/** How many places the felt shows. Enough to read as a table, not so many
+ *  that an early turn looks empty. */
+const SLOTS = 5;
+
 export default function Board({ player, isActivePlayer }: BoardProps) {
   const { dispatch, check } = useGameStore();
   const active = activeTerritoryOf(player);
@@ -113,7 +117,6 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
       <section className="manifestations">
         <h4>Manifestações aqui ({here.length})</h4>
         <div className="card-row">
-          {here.length === 0 && <p className="muted">Nada manifestado neste Território.</p>}
           {here.map((c) => {
             const action = {
               type: 'ActivateResonance' as const,
@@ -159,6 +162,12 @@ export default function Board({ player, isActivePlayer }: BoardProps) {
               </div>
             );
           })}
+
+          {/* Empty places drawn on the felt. A zone that is simply void reads
+              as a bug; drawn slots read as a table waiting for cards. */}
+          {Array.from({ length: Math.max(0, SLOTS - here.length) }).map((_, i) => (
+            <div key={`slot-${i}`} className="table-slot" aria-hidden="true" />
+          ))}
         </div>
 
         {containers.length > 0 && (

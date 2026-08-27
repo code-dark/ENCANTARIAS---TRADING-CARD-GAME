@@ -60,7 +60,7 @@ const PATHS: Record<CardType, JSX.Element> = {
 export default function CardGlyph({ type }: { type: CardType }) {
   return (
     <svg className="card-glyph" viewBox="0 0 48 52" aria-hidden="true" focusable="false">
-      <g fill="none" stroke="currentColor" strokeWidth="1.6"
+      <g fill="none" stroke="currentColor" strokeWidth="2.2"
          strokeLinecap="round" strokeLinejoin="round">
         {PATHS[type]}
       </g>

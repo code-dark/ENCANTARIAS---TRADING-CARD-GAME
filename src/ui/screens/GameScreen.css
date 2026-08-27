@@ -197,7 +197,7 @@
 
 /* Slightly smaller in hand than on the table's own terms, so a full hand and
    its rules text both fit above the fold. */
-.dock-hand .card-visual { --card-w: 138px; }
+.dock-hand .hand-cards .card-visual { --card-w: 152px; }
 
 .dock-actions {
   display: flex;

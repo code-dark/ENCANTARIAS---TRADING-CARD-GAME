@@ -21,6 +21,10 @@
   --papel: #f0e6d2;
   --tinta: #23201a;
 
+  /* The azulejo motif that tiles the card frames — the one ornament the
+     city puts on everything, drawn once and reused rather than imported. */
+  --azulejo-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.17)' stroke-width='1'%3E%3Cpath d='M11 1.5 20.5 11 11 20.5 1.5 11Z'/%3E%3Ccircle cx='11' cy='11' r='3.4'/%3E%3Ccircle cx='11' cy='11' r='1'/%3E%3C/g%3E%3C/svg%3E");
+
   --texto: #dfe4f2;
   --texto-fraco: #8f9bbb;
   --alerta: #d4694f;
