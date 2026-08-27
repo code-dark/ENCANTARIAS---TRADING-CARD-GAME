@@ -13,7 +13,7 @@ import './GameScreen.css';
 
 const HUMAN_ID = 'p1';
 
-export default function GameScreen() {
+export default function GameScreen({ onShowHelp }: { onShowHelp: () => void }) {
   const { gameState, dispatch, lastError, check } = useGameStore();
   useOpponent(OPPONENT_IDS);
   useAutoAdvance(HUMAN_ID);
@@ -45,6 +45,9 @@ export default function GameScreen() {
         <PhaseIndicator phase={gameState.phase} />
 
         <div className="turn-info">
+          <button className="help-button" onClick={onShowHelp} title="Rever as regras">
+            Como se joga
+          </button>
           <span className="turn-count">Turno {gameState.turn}</span>
           <strong className={opponentPlaying ? 'rival' : 'you'}>{player.name}</strong>
           {opponentPlaying && <span className="thinking">está jogando…</span>}

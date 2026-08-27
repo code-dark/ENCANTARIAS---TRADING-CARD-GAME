@@ -337,3 +337,21 @@
   .dock-inner { grid-template-columns: 1fr; }
   .dock-actions { flex-direction: row; min-width: 0; }
 }
+
+/* Reopening the briefing. Quiet, but always in the same place — a player who
+   forgets how Escuta works should not have to remember where the help was. */
+.help-button {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  color: var(--texto-fraco);
+  background: none;
+  border-color: var(--mesa-borda);
+}
+
+.help-button:hover:not(:disabled) {
+  color: var(--ouro);
+  border-color: rgba(201, 162, 39, 0.55);
+  background: rgba(201, 162, 39, 0.08);
+}
