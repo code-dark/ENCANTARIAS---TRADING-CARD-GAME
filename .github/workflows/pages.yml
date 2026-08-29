@@ -1,0 +1,77 @@
+# Publishes the playable build to GitHub Pages.
+#
+# The slice is entirely client-side — no server, no API, no storage — so the
+# whole game is the static bundle this produces. A tester opens the link and
+# plays; nothing is installed and nothing else has to be hosted alongside it.
+#
+# Deployment is deliberately separate from verification. CI runs on every push
+# and pull request; this runs only when the site should actually change, so a
+# deployment problem can never paint a pull request red.
+
+name: Pages
+
+on:
+  push:
+    # main is the only automatic source of the public link.
+    branches: [main]
+  # Manual publication from any branch, for putting a version in front of
+  # testers before it is merged.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time, and never cancel one midway: a half-published
+# site is worse than an outdated one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build the static site
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      # Publishing something that does not typecheck or whose tests fail would
+      # hand testers a broken game and waste the session they gave us. CI has
+      # usually said this already; a deploy is the one place worth repeating it.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Test
+        run: npm run test:run
+
+      - name: Build
+        run: npm run build
+
+      # Pages serves a project site from a subpath; vite.config.ts sets
+      # `base: './'` so the bundle asks for its assets relatively and works
+      # from wherever it lands.
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

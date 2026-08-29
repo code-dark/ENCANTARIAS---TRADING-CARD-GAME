@@ -1,0 +1,126 @@
+/* Design tokens and reset.
+ *
+ * The game is São Luís after dark: a table lit from above, cards as pale
+ * objects on it, colonial tile blue for structure and candle gold for the
+ * one thing that should catch the eye.
+ *
+ * The display face is an old-style serif with the lapidary feel of the
+ * lettering on the city's façades, taken from fonts that are already on the
+ * machine. A webfont was tried and taken back out: it made the build depend
+ * on a third-party host, which costs the property that matters most for a
+ * playtest link — one request, works from anywhere, works offline. If a
+ * specific face is wanted later, embedding it as a data URI keeps both.
+ */
+
+:root {
+  --noite: #070c1e;
+  --mesa: #101d3d;
+  --mesa-borda: #1b2b52;
+  --azulejo: #3a6ea5;
+  --ouro: #c9a227;
+  --papel: #f0e6d2;
+  --tinta: #23201a;
+
+  /* The azulejo motif that tiles the card frames — the one ornament the
+     city puts on everything, drawn once and reused rather than imported. */
+  --azulejo-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.17)' stroke-width='1'%3E%3Cpath d='M11 1.5 20.5 11 11 20.5 1.5 11Z'/%3E%3Ccircle cx='11' cy='11' r='3.4'/%3E%3Ccircle cx='11' cy='11' r='1'/%3E%3C/g%3E%3C/svg%3E");
+
+  --texto: #dfe4f2;
+  --texto-fraco: #8f9bbb;
+  --alerta: #d4694f;
+
+  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+    'Times New Roman', serif;
+  --font-ui: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+
+  color-scheme: dark;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--noite);
+  color: var(--texto);
+}
+
+body { overflow: hidden; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-wrap: balance;
+}
+
+button {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--texto);
+  background: rgba(58, 110, 165, 0.16);
+  border: 1px solid rgba(58, 110, 165, 0.5);
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: rgba(58, 110, 165, 0.3);
+  border-color: var(--azulejo);
+}
+
+button:active:not(:disabled) { transform: translateY(1px); }
+
+button:focus-visible {
+  outline: 2px solid var(--ouro);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The one control that always means "go on". */
+button.primary {
+  background: linear-gradient(180deg, #d8b23c, var(--ouro));
+  border-color: #8f7318;
+  color: #241d04;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+button.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #e6c04c, #d4ac2c);
+  border-color: #a5860f;
+}
+
+button.tiny {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(143, 155, 187, 0.28);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

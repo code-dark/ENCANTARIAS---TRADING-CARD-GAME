@@ -1,0 +1,357 @@
+/* The screen is a table seen from the player's seat: felt in the middle,
+   state on a narrow rail to the right, the hand along the near edge.
+   The previous layout put the hand in the rail and left the table empty,
+   which is the single reason the game did not look like a card game. */
+
+.game-screen {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  background:
+    radial-gradient(90% 60% at 50% 28%, #16264e 0%, transparent 62%),
+    var(--noite);
+}
+
+/* --- header ------------------------------------------------------------- */
+
+.game-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 22px;
+  border-bottom: 1px solid var(--mesa-borda);
+  background: rgba(7, 12, 30, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.brand { display: flex; flex-direction: column; gap: 1px; }
+
+.brand h1 {
+  font-family: var(--font-display);
+  font-size: 21px;
+  letter-spacing: 0.24em;
+  color: var(--papel);
+  line-height: 1;
+}
+
+.brand-sub {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.turn-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.turn-count {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.turn-info strong { font-size: 16px; font-weight: 700; }
+.turn-info .you   { color: var(--ouro); }
+.turn-info .rival { color: var(--azulejo); }
+
+.thinking {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--texto-fraco);
+}
+
+/* --- table + rail ------------------------------------------------------- */
+
+.game-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 16px;
+  padding: 16px 18px 8px;
+  min-height: 0;
+}
+
+.table-area {
+  min-height: 0;
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 16px;
+  background:
+    radial-gradient(70% 55% at 50% 34%, rgba(58, 110, 165, 0.14), transparent 70%),
+    linear-gradient(180deg, var(--mesa), #0b1430);
+  box-shadow:
+    0 0 0 1px var(--mesa-borda),
+    0 30px 60px -40px #000 inset;
+}
+
+.side-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.resources {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.resource {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 9px 6px;
+  border-radius: 8px;
+  background: rgba(58, 110, 165, 0.1);
+  box-shadow: 0 0 0 1px var(--mesa-borda);
+}
+
+.resource strong {
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--papel);
+}
+
+.resource span {
+  font-size: 9.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.resource-vinculo strong { color: var(--ouro); }
+.resource-memoria strong { color: #8fc4e8; }
+.resource-world  { background: rgba(143, 155, 187, 0.07); }
+
+.rail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rail-block > h4 {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--texto-fraco);
+}
+
+.rail-log { min-height: 0; }
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.26);
+  box-shadow: 0 0 0 1px var(--mesa-borda);
+}
+
+.log-entry {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: rgba(223, 228, 242, 0.82);
+}
+
+.log-phase {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--azulejo);
+  margin-right: 5px;
+}
+
+/* --- hand dock ---------------------------------------------------------- */
+
+.hand-dock {
+  border-top: 1px solid var(--mesa-borda);
+  background: linear-gradient(180deg, rgba(7, 12, 30, 0.5), rgba(4, 7, 18, 0.95));
+}
+
+.dock-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 0 20px 8px;
+}
+
+.dock-hand { min-width: 0; }
+
+/* Slightly smaller in hand than on the table's own terms, so a full hand and
+   its rules text both fit above the fold. */
+.dock-hand .hand-cards .card-visual { --card-w: 152px; }
+
+.dock-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.dock-actions button { width: 100%; }
+
+.error-banner {
+  margin: 8px 20px 0;
+  padding: 7px 12px;
+  border-radius: 6px;
+  background: rgba(212, 105, 79, 0.14);
+  box-shadow: 0 0 0 1px rgba(212, 105, 79, 0.45);
+  color: #f0b3a2;
+  font-size: 13px;
+}
+
+/* --- the read-aloud gate ------------------------------------------------ */
+
+.transmission {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 28px;
+  background: rgba(4, 7, 18, 0.86);
+  backdrop-filter: blur(5px);
+}
+
+.transmission-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 640px;
+  text-align: left;
+}
+
+.transmission-head h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--papel);
+}
+
+.transmission-head p {
+  font-size: 14px;
+  color: var(--texto-fraco);
+  margin-top: 3px;
+}
+
+.die {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 8px 20px -8px #000;
+}
+
+.transmission-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  max-width: 900px;
+}
+
+.transmission-card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 320px;
+  padding: 18px;
+  border-radius: 11px;
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: 0 20px 40px -20px #000;
+}
+
+.transmission-card h4 {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.transmission-card .fact { font-size: 13.5px; line-height: 1.5; }
+
+.transmission-card .fact-flavor {
+  font-size: 12.5px;
+  font-style: italic;
+  color: rgba(35, 32, 26, 0.62);
+}
+
+.transmission-card button { margin-top: 4px; }
+
+/* --- narrow screens ----------------------------------------------------- */
+
+@media (max-width: 980px) {
+  /* Stacked, the rail's content was pushing the table down to a sliver.
+     The table keeps a real height and the whole column scrolls instead. */
+  .game-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    overflow-y: auto;
+  }
+  .table-area {
+    min-height: 360px;
+    overflow-y: visible;
+  }
+  .side-rail {
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-x: auto;
+  }
+  .side-rail .rail-block { flex: 1 1 220px; }
+  .resources { flex: 1 1 100%; grid-template-columns: repeat(4, 1fr); }
+}
+
+@media (max-width: 820px) {
+  .game-header {
+    grid-template-columns: 1fr;
+    justify-items: start;
+    gap: 8px;
+  }
+  .turn-info { justify-content: flex-start; }
+  .dock-inner { grid-template-columns: 1fr; }
+  .dock-actions { flex-direction: row; min-width: 0; }
+}
+
+/* Reopening the briefing. Quiet, but always in the same place — a player who
+   forgets how Escuta works should not have to remember where the help was. */
+.help-button {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  color: var(--texto-fraco);
+  background: none;
+  border-color: var(--mesa-borda);
+}
+
+.help-button:hover:not(:disabled) {
+  color: var(--ouro);
+  border-color: rgba(201, 162, 39, 0.55);
+  background: rgba(201, 162, 39, 0.08);
+}

@@ -1,0 +1,334 @@
+/* Card construction.
+ *
+ * The references are Hearthstone, Arena, Master Duel and Pokémon Live, and
+ * what they share is not a style — it is that a card is built from layered
+ * surfaces, each catching light differently: a frame with real thickness, an
+ * art window sunk into it, a nameplate sitting proud, a text box recessed
+ * again. A flat box with text on it never reads as a card no matter what
+ * colours it wears.
+ *
+ * The identity stays São Luís rather than fantasy: the art window is arched
+ * like the city's doorways, the frame carries an azulejo tile motif, and the
+ * face is paper under lamplight.
+ */
+
+.card-visual {
+  --card-w: 158px;
+  --accent: var(--azulejo);
+  --accent-dark: #1f3f63;
+
+  position: relative;
+  width: var(--card-w);
+  aspect-ratio: 5 / 7;
+  flex: 0 0 auto;
+  border-radius: calc(var(--card-w) * 0.055);
+  transition: transform 170ms cubic-bezier(0.2, 0.7, 0.3, 1),
+              box-shadow 170ms ease, filter 170ms ease;
+  user-select: none;
+}
+
+/* --- the frame ---------------------------------------------------------- */
+
+.card-frame {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: calc(var(--card-w) * 0.058);
+  background:
+    /* the tile motif, faint, in the frame's own colour */
+    var(--azulejo-tile),
+    linear-gradient(160deg,
+      color-mix(in srgb, var(--accent) 88%, white 12%) 0%,
+      var(--accent) 38%,
+      var(--accent-dark) 100%);
+  background-size: 13px 13px, auto;
+  box-shadow:
+    /* the bevel: lit from above, shadowed below */
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.4) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 8px 16px -7px rgba(0, 0, 0, 0.85);
+}
+
+/* --- the face ----------------------------------------------------------- */
+
+.card-face {
+  position: absolute;
+  inset: calc(var(--card-w) * 0.058);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--card-w) * 0.016);
+  padding: calc(var(--card-w) * 0.03);
+  border-radius: calc(var(--card-w) * 0.03);
+  background:
+    radial-gradient(120% 70% at 50% 0%, #fbf5e8, transparent 62%),
+    var(--papel);
+  color: var(--tinta);
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+
+/* --- type identity ------------------------------------------------------ */
+
+.card-type-Territory { --accent: #4f7f5e; --accent-dark: #24402c; }
+.card-type-Legend    { --accent: #b4862a; --accent-dark: #5c4310; }
+.card-type-Character { --accent: #3f6aa8; --accent-dark: #1d3358; }
+.card-type-Memory    { --accent: #8e5c80; --accent-dark: #472a40; }
+.card-type-Artifact  { --accent: #8d6a3a; --accent-dark: #46331a; }
+.card-type-Event     { --accent: #ab4a33; --accent-dark: #552115; }
+
+/* --- cost gem ----------------------------------------------------------- */
+
+.card-cost {
+  position: absolute;
+  top: calc(var(--card-w) * -0.045);
+  left: calc(var(--card-w) * -0.045);
+  display: grid;
+  place-items: center;
+  width: calc(var(--card-w) * 0.23);
+  height: calc(var(--card-w) * 0.23);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 28%, #fdf3d6 0%, var(--ouro) 42%, #7d6413 100%);
+  box-shadow:
+    0 0 0 1.5px #2b2206,
+    0 2px 5px rgba(0, 0, 0, 0.75),
+    0 0 12px -2px rgba(201, 162, 39, 0.7);
+}
+
+.card-cost > span {
+  font-family: var(--font-display);
+  font-size: calc(var(--card-w) * 0.115);
+  font-weight: 700;
+  line-height: 1;
+  color: #2b2206;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* --- art window --------------------------------------------------------- */
+
+.card-art {
+  position: relative;
+  flex: 0 0 auto;
+  height: 46%;
+  display: grid;
+  place-items: center;
+  /* An arched top: the doorways and windows of the historic centre. */
+  border-radius: 50% 50% 5px 5px / 32% 32% 5px 5px;
+  background:
+    radial-gradient(100% 78% at 50% 8%, #fffaf0 0%, transparent 64%),
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--accent) 22%, #efe4cd),
+      color-mix(in srgb, var(--accent) 10%, #e2d5ba));
+  color: var(--accent-dark);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45) inset,
+    0 0 0 1px rgba(35, 32, 26, 0.32);
+  overflow: hidden;
+}
+
+.card-glyph {
+  width: 66%;
+  height: 66%;
+  opacity: 1;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.55));
+}
+
+/* --- nameplate ---------------------------------------------------------- */
+
+.card-plate {
+  flex: 0 0 auto;
+  /* Rides up over the arch so the plate reads as laid on top of the art. */
+  margin-top: calc(var(--card-w) * -0.036);
+  padding: calc(var(--card-w) * 0.019) calc(var(--card-w) * 0.03);
+  border-radius: calc(var(--card-w) * 0.022);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 78%, white 22%),
+    var(--accent-dark));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.32) inset,
+    0 1px 3px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: calc(var(--card-w) * 0.088);
+  font-weight: 400;
+  line-height: 1.1;
+  text-align: center;
+  color: #fdf6e6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  text-wrap: balance;
+  hyphens: auto;
+  overflow-wrap: anywhere;
+}
+
+/* --- type line ---------------------------------------------------------- */
+
+.card-typeline {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding-bottom: 1px;
+  border-bottom: 1px solid rgba(35, 32, 26, 0.26);
+}
+
+.card-type,
+.card-state {
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.052);
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card-type  { color: var(--accent-dark); }
+.card-state { color: rgba(35, 32, 26, 0.55); }
+
+/* --- affinities --------------------------------------------------------- */
+
+.card-affinities {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  overflow: hidden;
+  max-height: calc(var(--card-w) * 0.245);
+}
+
+.affinity-badge {
+  padding: 1px calc(var(--card-w) * 0.026);
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--accent) 45%, transparent);
+  color: color-mix(in srgb, var(--accent-dark) 80%, var(--tinta));
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.047);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* --- text box ----------------------------------------------------------- */
+
+.card-textbox {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: calc(var(--card-w) * 0.026);
+  border-radius: calc(var(--card-w) * 0.018);
+  /* Recessed: a panel sunk into the face, the way a printed text box is. */
+  background: linear-gradient(180deg, #e9dcc2, #f2e8d5);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.22) inset,
+    0 0 0 0.5px rgba(35, 32, 26, 0.22);
+  scrollbar-width: thin;
+}
+
+.card-textbox .description {
+  margin: 0;
+  font-size: calc(var(--card-w) * 0.058);
+  line-height: 1.34;
+  color: rgba(35, 32, 26, 0.9);
+}
+
+.card-foot {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  min-height: 0;
+}
+
+.card-transformed,
+.card-flag {
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.046);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.card-transformed { background: var(--ouro); color: #2a2205; }
+.card-flag        { background: rgba(168, 69, 47, 0.2); color: #8f3624; }
+
+/* --- states ------------------------------------------------------------- */
+
+.card-visual.playable { cursor: pointer; }
+
+/* Lit from the table: a gold rim, and sitting proud of its neighbours before
+   the mouse ever arrives. */
+.card-visual.playable .card-frame {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.4) inset,
+    0 0 0 1.5px rgba(201, 162, 39, 0.85),
+    0 0 16px -3px rgba(201, 162, 39, 0.55),
+    0 10px 20px -8px rgba(0, 0, 0, 0.85);
+}
+
+.card-visual.playable { transform: translateY(-6px); }
+
+.card-visual.playable:hover,
+.card-visual.playable:focus-visible {
+  transform: translateY(-20px) scale(1.04);
+  outline: none;
+  z-index: 20;
+}
+
+.card-visual.playable:hover .card-frame,
+.card-visual.playable:focus-visible .card-frame {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 0 0 2px var(--ouro),
+    0 0 28px -4px rgba(201, 162, 39, 0.8),
+    0 22px 34px -14px rgba(0, 0, 0, 0.9);
+}
+
+.card-visual.selected .card-frame {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 0 0 2px var(--ouro),
+    0 0 22px -4px rgba(201, 162, 39, 0.7),
+    0 12px 22px -10px rgba(0, 0, 0, 0.85);
+}
+
+.card-visual.disabled { cursor: not-allowed; }
+
+/* A card you cannot play stays fully legible — only cooler, and flat on the
+   table rather than lifted. */
+.card-visual.disabled .card-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 34, 68, 0.13);
+  pointer-events: none;
+}
+
+.card-visual.exhausted { transform: rotate(5deg); }
+.card-visual.exhausted .card-face { filter: grayscale(0.3); }
+
+/* --- sizes -------------------------------------------------------------- */
+
+.card-small  { --card-w: 122px; }
+.card-medium { --card-w: 158px; }
+.card-large  { --card-w: 244px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-visual { transition: none; }
+  .card-visual.playable,
+  .card-visual.playable:hover,
+  .card-visual.playable:focus-visible { transform: none; }
+}

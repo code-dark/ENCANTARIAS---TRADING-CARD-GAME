@@ -1,0 +1,73 @@
+.phase-indicator {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: rgba(42, 63, 95, 0.5);
+  padding: 12px 16px;
+  border-radius: 6px;
+  min-width: 0;
+  max-width: 340px;
+}
+
+.phase-display {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.phase-icon {
+  font-size: 1.5rem;
+  color: #7aa3d5;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.phase-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.phase-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #9bc4e2;
+}
+
+.phase-description {
+  font-size: 0.85rem;
+  color: #7aa3d5;
+  opacity: 0.8;
+}
+
+.phase-progress {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.phase-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(122, 163, 213, 0.2);
+  border: 1px solid rgba(122, 163, 213, 0.4);
+  transition: all 0.3s ease;
+}
+
+.phase-dot.active {
+  background-color: #7aa3d5;
+  border-color: #9bc4e2;
+  box-shadow: 0 0 8px rgba(122, 163, 213, 0.6);
+}
+
+.phase-dot.completed {
+  background-color: rgba(122, 163, 213, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
