@@ -92,13 +92,24 @@ export interface Accomplishments {
   listensByTerritory: Record<string, number>;
 }
 
-export const FRESH_ACCOMPLISHMENTS: Accomplishments = {
-  territoriesVisited: [],
-  resonancesActivated: [],
-  conjunctionsFormed: [],
-  transformations: [],
-  listensByTerritory: {},
-};
+/**
+ * A fresh record for a new player.
+ *
+ * This is a function and not a constant on purpose. As a constant, spreading it
+ * copied the *references* to its arrays and its map, so every player in every
+ * match shared the same containers — harmless while nothing wrote to them in
+ * place, and a silent cross-match leak the moment anything did. It bit once:
+ * a write to one match's listensByTerritory showed up in the next one.
+ */
+export function freshAccomplishments(): Accomplishments {
+  return {
+    territoriesVisited: [],
+    resonancesActivated: [],
+    conjunctionsFormed: [],
+    transformations: [],
+    listensByTerritory: {},
+  };
+}
 
 /** Add to an accomplishment list without repeating an entry. */
 export function record(list: string[], entry: string): string[] {
@@ -153,8 +164,18 @@ export interface GameState {
   turnFlags: TurnFlags;
   isEnded: boolean;
   winnerId?: string;
+  /**
+   * A safety bound, not a rule. A match ends when someone completes a Jornada
+   * and at no other time — nobody is timed out of their own story. The number
+   * exists so a harness that plays thousands of matches can notice one that
+   * never finishes and say so, instead of running forever; `NO_TURN_LIMIT`
+   * means exactly that, and is what a real match is built with.
+   */
   maxTurns: number;
 }
+
+/** A match with no bound at all — the default for anything a person plays. */
+export const NO_TURN_LIMIT = Number.POSITIVE_INFINITY;
 
 /**
  * Guards the actions the GDD limits to one per turn. Without these, Memory
@@ -211,7 +232,7 @@ export interface LogEntry {
 export function createGameState(
   players: Player[],
   memoryPool: CardInstance[] = [],
-  maxTurns = 20,
+  maxTurns = NO_TURN_LIMIT,
   /** Pin this in tests; any number works for a real match. */
   rngSeed = Date.now() >>> 0
 ): GameState {

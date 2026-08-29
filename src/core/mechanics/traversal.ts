@@ -56,8 +56,17 @@ export function traversalCost(
  */
 export const TRAVESSIA_VINCULO = 1;
 
-export function traversalVinculoCost(flags: { travessiaLivre: boolean }): number {
-  return flags.travessiaLivre ? 0 : TRAVESSIA_VINCULO;
+export function traversalVinculoCost(
+  flags: { travessiaLivre: boolean },
+  /** True when the player has never listened in the place they are going to. */
+  firstTimeThere = false
+): number {
+  if (flags.travessiaLivre) return 0;
+  // Going somewhere you have never heard is the move the game is about, so it
+  // is paid in Memória alone. Vínculo is what it costs to retread — to go back
+  // to a place you have already asked, which is the move that adds nothing.
+  if (firstTimeThere) return 0;
+  return TRAVESSIA_VINCULO;
 }
 
 export function effectiveTraversalCost(

@@ -17,7 +17,7 @@ import {
   updatePlayer,
   appendLog,
   record,
-  FRESH_ACCOMPLISHMENTS,
+  freshAccomplishments,
 } from '../game/gameState';
 import { evaluateJourney, completedObjectiveIds } from '../mechanics/journey';
 import { getCard } from '../cards/cardRegistry';
@@ -215,6 +215,9 @@ export function endTurn(state: GameState): GameState {
   const wrapped = nextIndex === 0;
   const turn = wrapped ? state.turn + 1 : state.turn;
 
+  // Not a losing condition: a match is decided by a Jornada and by nothing
+  // else. This only stops a harness that would otherwise loop forever, and a
+  // real match is built with NO_TURN_LIMIT so it never trips.
   const ended = turn > state.maxTurns;
 
   const rotated: GameState = {
@@ -227,7 +230,11 @@ export function endTurn(state: GameState): GameState {
   };
 
   if (ended) {
-    return appendLog(rotated, state.players[state.currentPlayerIndex].id, 'A partida atingiu o limite de turnos.');
+    return appendLog(
+      rotated,
+      state.players[state.currentPlayerIndex].id,
+      'A simulação atingiu o limite de turnos sem que nenhuma Jornada se completasse.'
+    );
   }
 
   // Despertar resolves immediately for the incoming player.
@@ -417,7 +424,7 @@ function resolveTraverse(
   const fromDef = from ? (getCard(from.cardId) as TerritoryCard) : undefined;
   const toDef = getCard(to.cardId) as TerritoryCard;
   const cost = effectiveTraversalCost(fromDef, toDef, state.turnFlags);
-  const vinculoCost = traversalVinculoCost(state.turnFlags);
+
 
   // Arriving somewhere you have never listened gives the turn's Escuta back.
   //
@@ -428,6 +435,7 @@ function resolveTraverse(
   // has to buy something now, not merely cost less later; what it buys is the
   // first account of a place that has not been asked yet.
   const firstTimeHere = (player.accomplishments.listensByTerritory[to.cardId] ?? 0) === 0;
+  const vinculoCost = traversalVinculoCost(state.turnFlags, firstTimeHere);
 
   const stayed: string[] = [];
   const travelled: string[] = [];
@@ -808,6 +816,6 @@ export function emptyPlayer(id: string, name: string): Player {
     territories: [],
     activeTerritoryId: '',
     resources: { vinculo: 0, memoria: 0, circulacao: 0 },
-    accomplishments: { ...FRESH_ACCOMPLISHMENTS },
+    accomplishments: freshAccomplishments(),
   };
 }

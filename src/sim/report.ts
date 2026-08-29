@@ -36,7 +36,7 @@ export function report(results: MatchResult[]): string {
   );
   lines.push(
     `Decididas por Jornada: ${decided.length} (${pct(decided.length, total)}%) · ` +
-      `por limite de turnos: ${byLimit.length} (${pct(byLimit.length, total)}%)`
+      `não terminaram: ${byLimit.length} (${pct(byLimit.length, total)}%)`
   );
 
   const refusals = results.map((r) => r.refusals);

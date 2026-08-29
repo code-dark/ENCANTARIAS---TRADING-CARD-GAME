@@ -20,7 +20,8 @@ function arg(name: string, fallback: string): string {
 }
 
 const seed = Number(arg('seed', '1'));
-const maxTurns = Number(arg('turnos', '20'));
+/** Safety bound for the harness only — a real match has none. */
+const maxTurns = Number(arg('turnos', '200'));
 const names = arg('politicas', 'gulosa,gulosa').split(',');
 const policies = names.map((n) => POLICIES[n.trim()]);
 

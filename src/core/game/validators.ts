@@ -110,7 +110,9 @@ export function validateAction(state: GameState, action: GameAction): Validation
         getCard(target.cardId) as TerritoryCard,
         state.turnFlags
       );
-      const vinculo = traversalVinculoCost(state.turnFlags);
+      const neverHeardThere =
+        (current.accomplishments.listensByTerritory[target.cardId] ?? 0) === 0;
+      const vinculo = traversalVinculoCost(state.turnFlags, neverHeardThere);
       if (cost > current.resources.memoria) {
         return invalid(
           `Travessia para ${getCard(target.cardId).name} custa ${cost} de Memória; ` +

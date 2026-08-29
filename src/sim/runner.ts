@@ -99,7 +99,7 @@ export interface MatchOptions {
 }
 
 export function playMatch(options: MatchOptions): MatchResult {
-  const { seed, policies, setups = VERTICAL_SLICE, maxTurns = 20, maxActions = 4000 } = options;
+  const { seed, policies, setups = VERTICAL_SLICE, maxTurns = 200, maxActions = 40000 } = options;
 
   resetInstanceIds();
   let state = buildMatch(setups, maxTurns, seed);

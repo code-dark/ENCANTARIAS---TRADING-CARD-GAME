@@ -6,7 +6,7 @@
  * every number it produces would be about that other game instead of this one.
  */
 
-import { createGameState, GameState, Player } from '../game/gameState';
+import { createGameState, GameState, Player, NO_TURN_LIMIT } from '../game/gameState';
 import { emptyPlayer } from '../rules/turnResolver';
 import { createInstance, createInstances } from '../cards/cardRegistry';
 import { memories } from '../cards/data/memories';
@@ -87,6 +87,14 @@ export function buildPlayer(setup: PlayerSetup): Player {
 
   player.territories = setup.territories.map((t) => createInstance(t, setup.id));
   player.activeTerritoryId = player.territories[0].instanceId;
+  // Where you begin is a place you have been. It was only ever recorded on a
+  // Travessia, so the Território a player started in counted for nothing —
+  // which quietly shortchanged every Jornada asking how many places you have
+  // been, and made the simulator's count of places used one too few.
+  player.accomplishments = {
+    ...player.accomplishments,
+    territoriesVisited: [player.territories[0].cardId],
+  };
 
   const cards = createInstances(setup.deck, setup.id);
   player.hand = cards.slice(0, 3);
@@ -106,7 +114,7 @@ export function buildPlayer(setup: PlayerSetup): Player {
 
 export function buildMatch(
   setups: PlayerSetup[] = VERTICAL_SLICE,
-  maxTurns = 20,
+  maxTurns = NO_TURN_LIMIT,
   seed?: number
 ): GameState {
   const players = setups.map(buildPlayer);

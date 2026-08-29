@@ -863,6 +863,51 @@ preciso ensinar ao bot cada incentivo novo e ele foi escrito para a economia
 antiga. A decisao seguinte e de forma da partida — duracao, ou recompensa
 imediata e grande por mover — e pede playtest humano.
 
+### Sem limite de turnos, e a Escuta rendendo onde se chega
+
+Duas decisoes de design. A partida nao tem mais teto de turnos: ela termina
+quando alguem completa uma Jornada e em nenhum outro momento — ninguem e
+expulso da propria historia por tempo. O numero continua existindo como
+`maxTurns`, mas so como trava de seguranca do simulador, e um jogo real e
+construido com `NO_TURN_LIMIT`. Estatisticamente nao mudou nada: o limite
+nunca estava sendo atingido (0% antes, 0% depois). E principio, nao correcao.
+
+A segunda foi apostar no que o playtest gostou. Chegar a um Territorio nunca
+escutado ja devolvia a Escuta do turno; agora ir a um lugar nunca ouvido custa
+**so Memoria**. Vinculo passou a ser o preco de *retornar* — de voltar a um
+lugar que ja se perguntou, que e o movimento que nao acrescenta nada.
+
+O efeito foi o que faltava desde o inicio:
+
+| | antes | depois |
+| --- | --- | --- |
+| Travessias por partida | 0.3 / 0.8 | **1.1 / 1.0** |
+| Territorios usados | 1 | **2.0 / 2.0** |
+| Ressonancias (p1) | 1.6 | **3.4** |
+| Vinculo por turno (p1) | 0.27 | **0.50** |
+
+### Dois bugs que a mudanca revelou
+
+**Estado compartilhado entre partidas.** `FRESH_ACCOMPLISHMENTS` era uma
+constante, e espalha-la copiava as *referencias* dos seus containers — todo
+jogador de toda partida dividia o mesmo mapa. Inofensivo enquanto nada
+escrevia nele no lugar; um vazamento silencioso no instante em que algo
+escreveu. Numa corrida de 500 partidas isso envenenaria todos os numeros
+depois do primeiro. Agora e uma funcao, com teste de regressao.
+
+**O Territorio inicial nao contava.** `territoriesVisited` so registrava numa
+Travessia, entao o lugar onde o jogador comeca valia zero. Isso nao era so uma
+metrica torta no simulador: a Jornada que pede quantos lugares voce visitou
+estava cobrando um a mais do que anunciava.
+
+### O extremo que apareceu
+
+88.8% x 11.2%. A Guardia da Memoria ganhou muito com um sistema que recompensa
+mover; o Cortejo nao ganhou nada, porque a Jornada dele recompensa ficar parado
+para reunir — ressonancias 0.0, Vinculo 0.01 por turno. Nao vou perseguir esse
+numero: e exatamente o problema de Jornada que ja estava previsto como o passo
+seguinte, e agora ele esta visivel em dados em vez de ser uma suspeita.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when

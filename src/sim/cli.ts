@@ -16,7 +16,10 @@ function arg(name: string, fallback: string): string {
 
 const matches = Number(arg('partidas', '500'));
 const seed = Number(arg('seed', '1'));
-const maxTurns = Number(arg('turnos', '20'));
+// A safety bound for the harness, not a rule of the game: a real match is
+// built with NO_TURN_LIMIT. A match that reaches this did not finish, and
+// the report says so rather than calling it a draw.
+const maxTurns = Number(arg('turnos', '200'));
 const names = arg('politicas', 'gulosa,gulosa').split(',');
 
 const policies: Policy[] = names.map((n) => {
@@ -30,6 +33,6 @@ const results = Array.from({ length: matches }, (_, i) =>
 );
 
 console.log(`\nENCANTARIAS — simulação`);
-console.log(`políticas ${names.join(' vs ')} · seed ${seed} · limite ${maxTurns} turnos\n`);
+console.log(`políticas ${names.join(' vs ')} · seed ${seed} · teto de segurança ${maxTurns} turnos\n`);
 console.log(report(results));
 console.log('');
