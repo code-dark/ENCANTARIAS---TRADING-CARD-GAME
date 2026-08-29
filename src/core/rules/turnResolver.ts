@@ -22,7 +22,9 @@ import {
 import { evaluateJourney, completedObjectiveIds } from '../mechanics/journey';
 import { getCard } from '../cards/cardRegistry';
 import { TerritoryCard } from '../cards/types';
-import { evaluateMemoryPersistence, effectiveTraversalCost } from '../mechanics/traversal';
+import {
+  evaluateMemoryPersistence, effectiveTraversalCost, traversalVinculoCost,
+} from '../mechanics/traversal';
 import { executeEffects } from '../effects/executor';
 import { meets } from '../effects/conditions';
 import { EffectTrigger } from '../effects/types';
@@ -36,7 +38,7 @@ import {
   bestListener, escutaOf, exploreContext, findByExploring, findByResonance, findBySourceId,
 } from '../mechanics/memory';
 import { findByObject } from '../mechanics/objects';
-import { rollD6, readExploreRoll, EXPLORE_SUCCESS } from '../game/random';
+import { rollD6, readExploreRoll, exploreThreshold } from '../game/random';
 import { ArtifactCard, EventCard } from '../cards/types';
 
 export interface ApplyResult {
@@ -415,6 +417,17 @@ function resolveTraverse(
   const fromDef = from ? (getCard(from.cardId) as TerritoryCard) : undefined;
   const toDef = getCard(to.cardId) as TerritoryCard;
   const cost = effectiveTraversalCost(fromDef, toDef, state.turnFlags);
+  const vinculoCost = traversalVinculoCost(state.turnFlags);
+
+  // Arriving somewhere you have never listened gives the turn's Escuta back.
+  //
+  // Without this, standing still was strictly dominant and no amount of tuning
+  // fixed it: listening cost nothing and crossing cost 1–2 Memória plus a
+  // Vínculo, so the arithmetic said stay. 500 matches agreed — 1.0 Território
+  // used per player, every match, across every threshold we tried. Crossing
+  // has to buy something now, not merely cost less later; what it buys is the
+  // first account of a place that has not been asked yet.
+  const firstTimeHere = (player.accomplishments.listensByTerritory[to.cardId] ?? 0) === 0;
 
   const stayed: string[] = [];
   const travelled: string[] = [];
@@ -422,7 +435,11 @@ function resolveTraverse(
   const next = updatePlayer(state, playerId, (p) => ({
     ...p,
     activeTerritoryId: territoryInstanceId,
-    resources: { ...p.resources, memoria: p.resources.memoria - cost },
+    resources: {
+      ...p.resources,
+      memoria: p.resources.memoria - cost,
+      vinculo: p.resources.vinculo - vinculoCost,
+    },
     accomplishments: {
       ...p.accomplishments,
       territoriesVisited: record(p.accomplishments.territoriesVisited, to.cardId),
@@ -447,18 +464,26 @@ function resolveTraverse(
   }));
 
   const parts = [
-    cost === 0
+    cost === 0 && vinculoCost === 0
       ? `${player.name} atravessa para ${toDef.name} sem custo`
-      : `${player.name} atravessa para ${toDef.name} por ${cost} de Memória`,
+      : `${player.name} atravessa para ${toDef.name} por ${cost} de Memória ` +
+        `e ${vinculoCost} de Vínculo`,
   ];
   if (travelled.length) parts.push(`levando ${travelled.join(', ')}`);
   if (stayed.length) parts.push(`deixando ${stayed.join(', ')} para trás`);
+  if (firstTimeHere) parts.push('e o lugar ainda tem tudo a dizer');
 
   return appendLog(
     {
       ...next,
-      // A free crossing is spent by crossing, not by the turn ending.
-      turnFlags: { ...next.turnFlags, hasTraversed: true, travessiaLivre: false },
+      turnFlags: {
+        ...next.turnFlags,
+        // A free crossing is spent by crossing, not by the turn ending.
+        hasTraversed: true,
+        travessiaLivre: false,
+        // Somewhere never listened to gives this turn's Escuta back.
+        hasListened: firstTimeHere ? false : next.turnFlags.hasListened,
+      },
     },
     playerId,
     `${parts.join('; ')}.`
@@ -488,8 +513,12 @@ function resolveExplore(state: GameState, playerId: string): GameState {
     exploreContext(territoryDef, escutaOf(listener), player.inPlay, territory.instanceId)
   );
 
+  // What this place has already told this player raises the die.
+  const heard = player.accomplishments.listensByTerritory[territory.cardId] ?? 0;
+  const threshold = exploreThreshold(heard);
+
   const { value: roll, seed } = rollD6(state.rngSeed);
-  const outcome = readExploreRoll(roll, available.length);
+  const outcome = readExploreRoll(roll, available.length, threshold);
 
   // The listening costs the Personagem their turn whatever the die says, and
   // the Território's Escuta is one action per turn however many Personagens
@@ -502,18 +531,27 @@ function resolveExplore(state: GameState, playerId: string): GameState {
     },
     playerId,
     (p) => ({
-    ...p,
+      ...p,
       inPlay: p.inPlay.map((c) =>
         c.instanceId === listener.instanceId ? { ...c, exhausted: true } : c
       ),
+      // The attempt counts, not the result: a place gives up what it has to
+      // someone who keeps asking, and then has less to give.
+      accomplishments: {
+        ...p.accomplishments,
+        listensByTerritory: {
+          ...p.accomplishments.listensByTerritory,
+          [territory.cardId]: heard + 1,
+        },
+      },
     })
   );
 
   if (outcome === 'nothing') {
     return appendLog(
       next, playerId,
-      `${listenerName} escuta em ${territoryDef.name} — rola ${roll}. ` +
-        `Nada vem à tona desta vez.`
+      `${listenerName} escuta em ${territoryDef.name} — rola ${roll} ` +
+        `(precisava ${threshold}+). Nada vem à tona desta vez.`
     );
   }
 
@@ -525,7 +563,7 @@ function resolveExplore(state: GameState, playerId: string): GameState {
       ? `${listenerName} escuta em ${territoryDef.name} — rola ${roll}. ` +
           `O lugar oferece mais de um relato.`
       : `${listenerName} escuta em ${territoryDef.name} — rola ${roll} ` +
-          `(${EXPLORE_SUCCESS}+). Algo vem à tona.`
+          `(${threshold}+). Algo vem à tona.`
   );
 
   return {
@@ -687,8 +725,9 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
   // turn still runs its effects — that is why you would do it — but it does
   // not pay Vínculo again: the same faucet the per-relation payout opened in
   // breadth, re-activation was opening in time.
+  // Still recorded per relation: the Jornada counts relations recognised, not
+  // times activated. Only the payment stopped being capped.
   const relation = `${def.id}@${territoryDef.id}`;
-  const alreadyKnown = player.accomplishments.resonancesActivated.includes(relation);
 
   let next = updatePlayer(state, playerId, (p) => ({
     ...p,
@@ -699,9 +738,16 @@ function resolveResonance(state: GameState, playerId: string, instanceId: string
     // recognises. Paying per relation made a two-relation Território hand out
     // three Vínculo at once and race the Jornadas that ask for it. Extra
     // relations still matter — they widen what the Ressonância *does*.
+    //
+    // It pays on every activation, including a relation already recognised.
+    // The cap existed because Vínculo was income with nothing to spend it on,
+    // so an uncapped faucet simply raced the Jornada that counts it. Now that
+    // Travessia is paid in Vínculo the faucet has a drain, and capping it
+    // instead produced deadlock: a player needed Vínculo to reach the new
+    // relations that were the only source of Vínculo.
     resources: {
       ...p.resources,
-      vinculo: p.resources.vinculo + (alreadyKnown ? 0 : 1),
+      vinculo: p.resources.vinculo + 1,
     },
     accomplishments: {
       ...p.accomplishments,

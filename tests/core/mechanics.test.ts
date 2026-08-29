@@ -36,9 +36,10 @@ function setup(): GameState {
   p2.territories = [t2];
   p2.activeTerritoryId = t2.instanceId;
 
-  // Travessia costs Memória; these tests are about what crossing does, not
-  // about affording it, so fund the crossing player.
+  // Travessia costs Memória and Vínculo; these tests are about what crossing
+  // does, not about affording it, so fund the crossing player with both.
   p1.resources.memoria = 5;
+  p1.resources.vinculo = 3;
 
   return createGameState([p1, p2]);
 }
@@ -213,6 +214,7 @@ describe('Travessia cost', () => {
   it('deducts the cost from Memória when crossing', () => {
     let s = setup();
     s.players[0].resources.memoria = 4;
+    s.players[0].resources.vinculo = 2;
     s = advanceTo(s, 'Travessia');
 
     s = expectOk(
@@ -268,11 +270,14 @@ describe('Ressonância', () => {
     s.players[0].inPlay = [serpent];
 
     s = advanceTo(s, 'Acao');
+    const before = s.players[0].resources.vinculo;
     s = expectOk(
       applyAction(s, { type: 'ActivateResonance', playerId: 'p1', instanceId: serpent.instanceId })
     );
 
-    expect(s.players[0].resources.vinculo).toBe(0);
+    // What matters is that nothing was earned, not the absolute figure — the
+    // fixture funds Vínculo so its players can afford to cross.
+    expect(s.players[0].resources.vinculo).toBe(before);
     expect(s.log[s.log.length - 1].message).toContain('não encontra Ressonância');
   });
 

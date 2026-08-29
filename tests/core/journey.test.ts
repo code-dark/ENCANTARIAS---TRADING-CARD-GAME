@@ -140,6 +140,8 @@ describe('what the match records as done', () => {
   it('records each Território travessed, once', () => {
     let s = setup('journey_caminhante_cidade', [FONTE, ESCADARIA]);
     s.players[0].resources.memoria = 10;
+    // Crossing costs Vínculo too; this test is about what gets recorded.
+    s.players[0].resources.vinculo = 10;
     const escadaria = s.players[0].territories[1].instanceId;
     const fonte = s.players[0].territories[0].instanceId;
 

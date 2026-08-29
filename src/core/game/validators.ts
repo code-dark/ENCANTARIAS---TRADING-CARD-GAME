@@ -16,7 +16,7 @@ import {
 import { getCard } from '../cards/cardRegistry';
 import { PHASE_LABEL } from '../i18n/labels';
 import { TerritoryCard } from '../cards/types';
-import { effectiveTraversalCost } from '../mechanics/traversal';
+import { effectiveTraversalCost, traversalVinculoCost } from '../mechanics/traversal';
 import { bestListener, escutaOf, exploreContext, findByExploring } from '../mechanics/memory';
 import { isStorage, remainingSpace, storedIn } from '../mechanics/objects';
 
@@ -110,10 +110,18 @@ export function validateAction(state: GameState, action: GameAction): Validation
         getCard(target.cardId) as TerritoryCard,
         state.turnFlags
       );
+      const vinculo = traversalVinculoCost(state.turnFlags);
       if (cost > current.resources.memoria) {
         return invalid(
           `Travessia para ${getCard(target.cardId).name} custa ${cost} de Memória; ` +
             `você tem ${current.resources.memoria}.`
+        );
+      }
+      if (vinculo > current.resources.vinculo) {
+        return invalid(
+          `Travessia custa ${vinculo} de Vínculo além de ${cost} de Memória; ` +
+            `você tem ${current.resources.vinculo} de Vínculo. ` +
+            `Vínculo vem de Ressonância — manifeste algo que este lugar reconheça.`
         );
       }
 

@@ -592,7 +592,7 @@ describe('what can enter into a Ressonância', () => {
     expect(result.error).toContain('não está neste Território');
   });
 
-  it('pays Vínculo the first time a relation is recognised, and not again', () => {
+  it('pays Vínculo on every activation, and still counts the relation once', () => {
     let s = setup([FONTE]);
     const legend = place(s, SERPENTE);
 
@@ -601,15 +601,20 @@ describe('what can enter into a Ressonância', () => {
       type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
     }).state;
     expect(s.players[0].resources.vinculo).toBe(1);
+    expect(s.players[0].accomplishments.resonancesActivated).toHaveLength(1);
 
-    // Same relation, same place, next turn: the effects run again, the Vínculo
-    // does not — recognising what you already recognise is not new.
+    // The payment used to stop here. It was capped because Vínculo had nothing
+    // to spend it on, so an uncapped faucet just raced the Jornada counting it.
+    // Now Travessia is paid in Vínculo, and capping it deadlocked the game:
+    // a player needed Vínculo to reach the new relations that were its only
+    // source. The Jornada still counts relations, not activations.
     s = nextTurnOf(s, 'p1', 'Acao');
     const before = s.players[0].resources.memoria;
     s = applyAction(s, {
       type: 'ActivateResonance', playerId: 'p1', instanceId: legend.instanceId,
     }).state;
-    expect(s.players[0].resources.vinculo).toBe(1);
+    expect(s.players[0].resources.vinculo).toBe(2);
+    expect(s.players[0].accomplishments.resonancesActivated).toHaveLength(1);
     expect(s.players[0].resources.memoria).toBe(before + 1); // the Water relation still pays
   });
 });

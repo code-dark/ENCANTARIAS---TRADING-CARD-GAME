@@ -84,6 +84,12 @@ export interface Accomplishments {
   conjunctionsFormed: string[];
   /** instanceIds of cards whose state has changed. */
   transformations: string[];
+  /**
+   * How many accounts the player has already taken from each Território,
+   * keyed by cardId. It raises the Escuta die: a place tells less to someone
+   * who has been standing in it all match.
+   */
+  listensByTerritory: Record<string, number>;
 }
 
 export const FRESH_ACCOMPLISHMENTS: Accomplishments = {
@@ -91,6 +97,7 @@ export const FRESH_ACCOMPLISHMENTS: Accomplishments = {
   resonancesActivated: [],
   conjunctionsFormed: [],
   transformations: [],
+  listensByTerritory: {},
 };
 
 /** Add to an accomplishment list without repeating an entry. */

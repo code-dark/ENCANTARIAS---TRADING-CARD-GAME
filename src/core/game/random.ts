@@ -38,8 +38,39 @@ export const EXPLORE_BOON = 6;
 
 export type ExploreOutcome = 'nothing' | 'found' | 'choice';
 
-export function readExploreRoll(value: number, available: number): ExploreOutcome {
-  if (value < EXPLORE_SUCCESS) return 'nothing';
-  if (value === EXPLORE_BOON && available > 1) return 'choice';
+/**
+ * How hard it is to hear something here, given how much you have already heard.
+ *
+ * A place never runs dry — a 6 always finds something, however long you have
+ * stood in it. But it has less left to tell someone who has been listening all
+ * match, so each account already taken from a Território raises the die by one,
+ * to a floor of the boon face.
+ *
+ * This is what gives Travessia a reason. Before it, listening cost nothing and
+ * never got worse, so the measured game was one action repeated: 7.6 listens in
+ * 7.6 turns, 1.0 Território used, 0.0 traversals. Somewhere you have not been
+ * is now the easiest place to hear something new.
+ */
+export const EXPLORE_HARDEST = 4;
+
+export function exploreThreshold(listensHere: number): number {
+  // Half a step per account, and never past a coin flip. Climbing a full step
+  // each time reached 6 by the fourth listen, which did not nudge a player
+  // elsewhere — it starved them: measured at 27% success, income collapsed and
+  // matches showed players with eleven consecutive turns of no legal action at
+  // all. A place should have less to say, not nothing.
+  return Math.min(EXPLORE_SUCCESS + Math.floor(listensHere / 2), EXPLORE_HARDEST);
+}
+
+export function readExploreRoll(
+  value: number,
+  available: number,
+  threshold: number = EXPLORE_SUCCESS
+): ExploreOutcome {
+  if (value < threshold) return 'nothing';
+  // The luxury of choosing belongs to a place still full of stories.
+  if (value === EXPLORE_BOON && threshold === EXPLORE_SUCCESS && available > 1) {
+    return 'choice';
+  }
   return 'found';
 }

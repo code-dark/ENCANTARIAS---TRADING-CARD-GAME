@@ -25,6 +25,7 @@ import { AnyCard, CardInstance, TerritoryCard } from '../cards/types';
 import { evaluateJourney } from '../mechanics/journey';
 import { canResonate } from '../mechanics/resonance';
 import { openContainers } from '../mechanics/objects';
+import { exploreThreshold } from '../game/random';
 
 export interface Policy {
   name: string;
@@ -123,6 +124,42 @@ function crossingTarget(player: Player, wantsGathering: boolean): GameAction | u
     : undefined;
 }
 
+/**
+ * Whether this Território still has enough left to say to be worth an action.
+ *
+ * The die needed here climbs with every account already taken. At 2+ or 3+ a
+ * listen succeeds more often than not; from 4+ it is a coin flip at best, and
+ * the turn is better spent earning the Vínculo that pays for going elsewhere.
+ */
+function listenIsWorthIt(player: Player): boolean {
+  const active = activeTerritoryOf(player);
+  if (!active) return false;
+  const heard = player.accomplishments.listensByTerritory[active.cardId] ?? 0;
+  return exploreThreshold(heard) <= 3;
+}
+
+/** The die this player would need in a Território, given what they have heard. */
+function dieAt(player: Player, cardId: string): number {
+  return exploreThreshold(player.accomplishments.listensByTerritory[cardId] ?? 0);
+}
+
+/**
+ * Whether somewhere else would answer more easily than here.
+ *
+ * This is the whole reason Travessia exists now, so the policy has to be able
+ * to see it. Judging staleness only by an absolute threshold made the bot sit
+ * still through every calibration we tried, which measured the policy rather
+ * than the rule.
+ */
+function somewhereBetter(player: Player): boolean {
+  const active = activeTerritoryOf(player);
+  if (!active) return false;
+  const here = dieAt(player, active.cardId);
+  return player.territories.some(
+    (t) => t.instanceId !== active.instanceId && dieAt(player, t.cardId) < here
+  );
+}
+
 export const greedy: Policy = {
   name: 'gulosa',
   decide(state) {
@@ -167,8 +204,14 @@ export const greedy: Policy = {
         // Crossing costs the same Memória that manifests, so it is only worth
         // it when the Jornada asks for somewhere else — a place not yet been,
         // or the one place a gathering could form.
+        // Somewhere you have not been is the easiest place to hear something
+        // new, so a Território that has stopped answering is itself a reason
+        // to move — not only a Jornada that names another place.
+        const stale = !listenIsWorthIt(player) || somewhereBetter(player);
         const nothingToPlay = affordable(player).length === 0;
-        if (!wantsPlaces && !wantsGathering && !nothingToPlay) return PASS(state);
+        if (!wantsPlaces && !wantsGathering && !nothingToPlay && !stale) {
+          return PASS(state);
+        }
 
         const crossing = crossingTarget(player, wantsGathering);
         return crossing && legal(state, crossing) ? crossing : PASS(state);
@@ -276,12 +319,14 @@ export const greedy: Policy = {
       case 'Acao': {
         const candidates: GameAction[] = [];
 
-        // Listening comes first, because listening is the income. A single
-        // Personagem is both the only ear and, sometimes, the only card with a
-        // relation to this place — spending them on a Ressonância leaves
-        // nobody to listen, and a player with no Memória cannot do anything
-        // else either.
-        candidates.push({ type: 'Explore', playerId: player.id });
+        // Listening used to come first unconditionally, because listening was
+        // the income and it never got worse. Now a place tells less the longer
+        // you stand in it, and Vínculo — which only Ressonância pays — is what
+        // buys the way out. So the order depends on whether this place still
+        // has much to say: while it does, listen; once the die has climbed, a
+        // new relation is worth more than another failed attempt.
+        const fresh = listenIsWorthIt(player);
+        if (fresh) candidates.push({ type: 'Explore', playerId: player.id });
 
         // Resonate with everything that can, one card per turn each.
         const territory = activeTerritoryOf(player);
@@ -309,6 +354,9 @@ export const greedy: Policy = {
             (a, b) => Number('known' in a) - Number('known' in b)
           );
         }
+
+        // A stale place is still better listened to than not acted in at all.
+        if (!fresh) candidates.push({ type: 'Explore', playerId: player.id });
 
         // With room to spare and nothing else to do, put something away.
         const container = openContainers(player.inPlay)[0];

@@ -807,6 +807,62 @@ playtest é estável: `main` é a única fonte automática, então o jogo no ar 
 muda quando alguém decide publicar — um branch experimental vai ao ar por
 `workflow_dispatch`, sob demanda, e não por acidente de merge.
 
+### O playtest disse "contemplativo"; a medição disse por quê
+
+Os jogadores relataram tres coisas: nao entenderam o objetivo, o ganho de
+Memoria parecia desajustado, e o jogo tinha pouca acao. As tres tem a mesma
+causa mecanica, e ela aparece numa busca de uma linha:
+
+    onde Vinculo era gasto no motor:
+      journeys.ts:65  requirement: { recurso: 'vinculo', minimo: 3 }
+
+Vinculo era ganho e contado. Nunca era preco de nada. Existiam duas moedas e so
+uma delas era moeda: Memoria entrava toda rodada pela Escuta (83% de sucesso,
+sem custo, sem teto) e pagava cartas e Travessia; Vinculo entrava raramente pela
+Ressonancia e nao pagava nada.
+
+Um jogador racional entao faz Escuta todo turno e ignora o resto. 500 partidas
+mediram exatamente isso: 7.6 Escutas em 7.6 turnos, 1.6 Ressonancias, **0.0
+Travessias**, 1.0 Territorio usado, 3.5 de Vinculo ocioso no fim. O Territorio —
+a tese inteira do jogo — era uma constante na pratica.
+
+A Jornada cumprida por acumulo e o que faz o objetivo parecer arbitrario: nada
+que o jogador escolheu causou a vitoria.
+
+### O que foi feito, e o que o instrumento pegou no caminho
+
+Travessia passou a custar Memoria **e** Vinculo, e a Escuta passou a ficar mais
+dificil quanto mais ja se ouviu naquele lugar. As duas juntas, na primeira
+calibragem, produziram uma trava: o limiar subia um passo inteiro por escuta e
+chegava a 6 na quarta, a renda desabava para 27%, e uma partida rastreada
+mostrou **onze turnos seguidos em que o jogador so despertava** — sem compra,
+jogada, Escuta ou Travessia possiveis. Vinculo so vinha de relacoes novas, que
+em geral estao em outros lugares: era preciso Vinculo para alcancar a unica
+fonte de Vinculo.
+
+Tres correcoes fecharam o ciclo:
+
+- o limiar sobe meio passo por relato e para em 4+ — o lugar tem menos a dizer,
+  nunca fica mudo (teste cobre isso explicitamente);
+- Ressonancia paga Vinculo em **toda** ativacao. O teto existia porque Vinculo
+  era renda sem dreno; agora que tem dreno, o teto so travava;
+- chegar a um Territorio nunca escutado devolve a Escuta do turno, para que
+  atravessar compre algo em vez de apenas custar.
+
+### O que continua sem resolver
+
+A estrategia dominante nao mudou. Ainda sao ~1 Escuta por turno, todo turno, e
+0.3–0.8 Travessias por partida — e quando acontecem, por volta do turno 7 de 9.
+A aritmetica explica: ficar parado da 0.5 de Memoria por turno de graca; mover
+custa 2 de Memoria e 1 de Vinculo de uma renda vitalicia de ~7. Numa partida de
+9 turnos, qualquer investimento com retorno acima de ~3 turnos e irracional.
+
+Isso nao se resolve por calibragem, e o simulador ja nao e o instrumento certo:
+cada numero agora mede tanto a politica gulosa quanto o design, porque foi
+preciso ensinar ao bot cada incentivo novo e ele foi escrito para a economia
+antiga. A decisao seguinte e de forma da partida — duracao, ou recompensa
+imediata e grande por mover — e pede playtest humano.
+
 ### Known gaps carried into Phase C
 
 - No temporal or conditional triggers: an Acontecimento that should fire "when
