@@ -1,0 +1,286 @@
+/* Card construction — pixel-art direction.
+ *
+ * The reference builds a card out of four flat things: a bone-coloured border,
+ * a hard near-black outline, a flat face carrying the suit colour, and a hard
+ * offset shadow. No blur anywhere, no soft gradient, no rounded corner larger
+ * than a pixel or two. The rank sits in the corner in a pixel face.
+ *
+ * The parts here keep the names they had — frame, face, art, plate, typeline,
+ * textbox — so the markup did not have to change; only what they are made of.
+ */
+
+.card-visual {
+  --card-w: 158px;
+  --face: #8a5a3c;
+  --face-escura: #5e3a26;
+
+  position: relative;
+  width: var(--card-w);
+  aspect-ratio: 5 / 7;
+  flex: 0 0 auto;
+  /* Steps, not easing: movement in a pixel interface snaps. */
+  transition: transform 90ms steps(3);
+  user-select: none;
+}
+
+/* --- frame: the bone border --------------------------------------------- */
+
+.card-frame {
+  position: absolute;
+  inset: 0;
+  padding: 5px;
+  background: var(--papel);
+  border: 2px solid var(--contorno);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 2px 0 #fbf4e2,
+    inset 0 -2px 0 #c9b893,
+    var(--sombra);
+}
+
+/* --- face: the flat colour ---------------------------------------------- */
+
+.card-face {
+  position: absolute;
+  inset: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  overflow: hidden;
+  border: 2px solid var(--contorno);
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--face) 0%, var(--face-escura) 100%);
+  color: var(--texto);
+}
+
+/* --- type identity: flat, saturated, nothing muted ----------------------- */
+
+.card-type-Territory { --face: #4f8a52; --face-escura: #2f5c38; }
+.card-type-Legend    { --face: #b0792c; --face-escura: #6f4718; }
+.card-type-Character { --face: #3f6aa8; --face-escura: #27406c; }
+.card-type-Memory    { --face: #8a4a76; --face-escura: #552c49; }
+.card-type-Artifact  { --face: #8a6a3a; --face-escura: #553f20; }
+.card-type-Event     { --face: #b0452c; --face-escura: #6e2817; }
+
+/* --- cost: the corner chip ---------------------------------------------- */
+
+.card-cost {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  background: var(--ouro);
+  border: 2px solid var(--contorno);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 2px 0 #f6d98a,
+    inset 0 -2px 0 #a97c15,
+    var(--sombra);
+}
+
+.card-cost > span {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1;
+  color: #2b1a06;
+  text-shadow: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- art: the window ----------------------------------------------------- */
+
+.card-art {
+  flex: 1 1 36%;
+  display: grid;
+  place-items: center;
+  min-height: 26px;
+  border: 2px solid var(--contorno);
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.18));
+  color: var(--papel);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.14);
+}
+
+.card-glyph {
+  width: 62%;
+  height: 62%;
+  /* A hard pixel shadow under the line art, matching everything else. */
+  filter: drop-shadow(2px 2px 0 rgba(27, 14, 12, 0.6));
+}
+
+/* --- nameplate ----------------------------------------------------------- */
+
+.card-plate {
+  flex: 0 0 auto;
+  padding: 3px 4px;
+  background: var(--areia);
+  border: 2px solid var(--contorno);
+  border-radius: 2px;
+  box-shadow: inset 0 2px 0 var(--areia-alta), inset 0 -2px 0 var(--areia-sombra);
+}
+
+.card-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.062);
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--tinta);
+  text-shadow: none;
+  overflow-wrap: anywhere;
+}
+
+/* --- type line ------------------------------------------------------------ */
+
+.card-typeline {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.card-type,
+.card-state {
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.044);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 var(--contorno);
+}
+
+.card-type  { color: var(--ouro); }
+.card-state { color: rgba(246, 236, 216, 0.72); }
+
+/* --- affinities ----------------------------------------------------------- */
+
+.card-affinities {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  overflow: hidden;
+  max-height: calc(var(--card-w) * 0.2);
+}
+
+.affinity-badge {
+  padding: 1px 3px;
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  color: var(--texto);
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.038);
+  line-height: 1.3;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 var(--contorno);
+}
+
+/* --- rules text ----------------------------------------------------------- */
+
+.card-textbox {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.26);
+  border: 2px solid rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
+  scrollbar-width: thin;
+}
+
+.card-textbox .description {
+  margin: 0;
+  /* Pixelify reads at a smaller size than Silkscreen does; rules text is the
+     one place on a card with real sentences in it. */
+  font-family: var(--font-texto);
+  font-size: calc(var(--card-w) * 0.062);
+  line-height: 1.28;
+  color: rgba(246, 236, 216, 0.95);
+}
+
+.card-foot {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  min-height: 0;
+}
+
+.card-transformed,
+.card-flag {
+  font-family: var(--font-ui);
+  font-size: calc(var(--card-w) * 0.038);
+  padding: 1px 3px;
+  border: 1px solid var(--contorno);
+  text-shadow: none;
+}
+
+.card-transformed { background: var(--ouro); color: #2b1a06; }
+.card-flag        { background: var(--vermelho); color: #fbe9e2; }
+
+/* --- states --------------------------------------------------------------- */
+
+.card-visual.playable { cursor: pointer; }
+
+/* A playable card is lifted and lit at the edge. */
+.card-visual.playable { transform: translateY(-8px); }
+
+.card-visual.playable .card-frame {
+  border-color: var(--ouro);
+  box-shadow:
+    inset 0 2px 0 #fbf4e2,
+    inset 0 -2px 0 #c9b893,
+    0 0 0 2px rgba(232, 179, 58, 0.45),
+    var(--sombra-forte);
+}
+
+.card-visual.playable:hover,
+.card-visual.playable:focus-visible {
+  transform: translateY(-22px);
+  outline: none;
+  z-index: 20;
+}
+
+.card-visual.selected .card-frame {
+  border-color: var(--ouro);
+  box-shadow:
+    inset 0 2px 0 #fbf4e2,
+    inset 0 -2px 0 #c9b893,
+    0 0 0 3px var(--ouro),
+    var(--sombra-forte);
+}
+
+.card-visual.disabled { cursor: not-allowed; }
+
+/* Unplayable stays legible — only cooler and flat on the table. */
+.card-visual.disabled .card-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(27, 16, 51, 0.3);
+  pointer-events: none;
+}
+
+.card-visual.exhausted { transform: rotate(4deg); }
+.card-visual.exhausted .card-face { filter: saturate(0.4); }
+
+/* --- sizes ---------------------------------------------------------------- */
+
+.card-small  { --card-w: 122px; }
+.card-medium { --card-w: 158px; }
+.card-large  { --card-w: 244px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-visual,
+  .card-visual.playable,
+  .card-visual.playable:hover,
+  .card-visual.playable:focus-visible { transform: none; transition: none; }
+}
