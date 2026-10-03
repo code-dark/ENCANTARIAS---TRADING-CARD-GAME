@@ -195,7 +195,8 @@ export default function GameScreen({ onShowHelp }: { onShowHelp: () => void }) {
               title={opponentPlaying ? 'Espere o oponente terminar o turno.' : undefined}
               onClick={() => dispatch({ type: 'PassPhase', playerId: player.id })}
             >
-              {isLastPhase ? 'Encerrar turno →' : 'Avançar fase →'}
+              {isLastPhase ? 'Encerrar turno' : 'Avançar fase'}
+              <i className="arrow" aria-hidden="true" />
             </button>
           </div>
         </div>

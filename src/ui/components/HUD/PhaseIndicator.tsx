@@ -6,15 +6,14 @@ interface PhaseIndicatorProps {
   phase: GamePhase;
 }
 
-const PHASE_ICONS: Record<GamePhase, string> = {
-  Despertar: '✦',
-  Memoria: '◈',
-  Travessia: '→',
-  Manifestacao: '∴',
-  Acao: '⚡',
-  Acontecimento: '⌁',
-  Encerramento: '✧',
-};
+/**
+ * Where in the turn you are, as a number.
+ *
+ * It used to be a symbol per phase — ✦ ◈ → ∴ ⚡ — none of which exists in a
+ * pixel typeface, so each would have rendered as an empty box. A step count
+ * says more anyway: it tells you how far along the turn is, which a glyph
+ * never did.
+ */
 
 const PHASE_DESCRIPTIONS: Record<GamePhase, string> = {
   Despertar: 'Reative cartas usadas',
@@ -32,7 +31,9 @@ export default function PhaseIndicator({ phase }: PhaseIndicatorProps) {
   return (
     <div className="phase-indicator">
       <div className="phase-display">
-        <span className="phase-icon">{PHASE_ICONS[phase]}</span>
+        <span className="phase-step">
+          {currentIndex + 1}<small>/{PHASE_ORDER.length}</small>
+        </span>
         <div className="phase-text">
           <div className="phase-name">{PHASE_LABEL[phase]}</div>
           <div className="phase-description">{PHASE_DESCRIPTIONS[phase]}</div>

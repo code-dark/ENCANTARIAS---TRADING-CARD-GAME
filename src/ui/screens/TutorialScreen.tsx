@@ -70,7 +70,7 @@ function buildSteps(): Step[] {
           <ul>
             {JORNADA.objectives.map((o) => (
               <li key={o.id}>
-                <span className="tut-diamond">◇</span> {o.description}
+                <span className="pip" aria-hidden="true" /> {o.description}
               </li>
             ))}
           </ul>
@@ -178,7 +178,7 @@ function buildSteps(): Step[] {
             <span><b className="boon-dot" /> você escolhe entre duas</span>
           </div>
           <p className="tut-flow">
-            Escuta → 1d6 → 2+ → o relato aparece → você lê em voz alta → +1 Memória
+            Escuta · 1d6 · 2+ · o relato aparece · você lê em voz alta · +1 Memória
           </p>
         </div>
       ),
@@ -202,7 +202,7 @@ function buildSteps(): Step[] {
       figure: (
         <div className="tut-travel">
           <div className="tut-place"><h5>{FONTE.name}</h5></div>
-          <div className="tut-arrow">→</div>
+          <div className="tut-arrow"><i className="arrow" aria-hidden="true" /></div>
           <div className="tut-place"><h5>{IGREJA.name}</h5></div>
           <div className="tut-stay">o que é enraizado fica para trás</div>
         </div>
@@ -271,10 +271,11 @@ export default function TutorialScreen({ onDone }: { onDone: () => void }) {
 
           <div className="tut-nav">
             <button disabled={i === 0} onClick={() => setI((n) => n - 1)}>
-              ← Voltar
+              Voltar
             </button>
             <button className="primary" onClick={() => (last ? onDone() : setI((n) => n + 1))}>
-              {last ? 'Começar a partida' : 'Continuar →'}
+              {last ? 'Começar a partida' : 'Continuar'}
+              {!last && <i className="arrow" aria-hidden="true" />}
             </button>
           </div>
         </footer>

@@ -22,7 +22,10 @@ export function JourneyPanel({ player }: { player: Player }) {
       <ul className="journey-objectives">
         {status.objectives.map((o) => (
           <li key={o.objective.id} className={o.met ? 'met' : ''}>
-            <span className="mark" aria-hidden="true">{o.met ? '◆' : '◇'}</span>
+            <span
+              className={o.met ? 'pip pip-met' : 'pip'}
+              aria-hidden="true"
+            />
             <span className="objective-text">{o.objective.description}</span>
             <span className="objective-count">
               {Math.min(o.current, o.needed)}/{o.needed}

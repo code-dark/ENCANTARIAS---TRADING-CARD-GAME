@@ -1,37 +1,55 @@
-/* Design tokens and reset.
+/* Design tokens and reset — pixel-art direction.
  *
- * The game is São Luís after dark: a table lit from above, cards as pale
- * objects on it, colonial tile blue for structure and candle gold for the
- * one thing that should catch the eye.
+ * The reference is a pixel roguelike: sand-coloured plates with brown wells
+ * sunk into them, every edge a hard 1px outline, every shadow a hard offset
+ * with no blur, a pixel typeface with a dark drop shadow, and a purple night
+ * sky behind it all.
  *
- * The display face is an old-style serif with the lapidary feel of the
- * lettering on the city's façades, taken from fonts that are already on the
- * machine. A webfont was tried and taken back out: it made the build depend
- * on a third-party host, which costs the property that matters most for a
- * playtest link — one request, works from anywhere, works offline. If a
- * specific face is wanted later, embedding it as a data URI keeps both.
+ * The subject stays São Luís. The night sky is the one it already had, pushed
+ * from navy toward the purple-to-maroon the reference uses; the plates are the
+ * colour of lime-washed stucco and the wells of the wood behind it. Nothing of
+ * the reference's own content is borrowed — no tarot pips, no zodiac, no boss
+ * portrait. Only the grammar.
  */
 
+@import './ui/styles/fonts.css';
+
 :root {
-  --noite: #070c1e;
-  --mesa: #101d3d;
-  --mesa-borda: #1b2b52;
-  --azulejo: #3a6ea5;
-  --ouro: #c9a227;
-  --papel: #f0e6d2;
-  --tinta: #23201a;
+  /* the sky */
+  --noite-topo: #1b1033;
+  --noite-base: #43182f;
+  --estrela: #e8dcc8;
+  /* A fixed star field, drawn once instead of a thousand DOM nodes. */
+  --estrelas: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect x='302' y='103' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='380' y='86' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='153' y='114' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='206' y='383' width='2' height='2' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='222' y='277' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='95' y='134' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='226' y='283' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='66' y='319' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='291' y='105' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='32' y='307' width='3' height='3' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='302' y='242' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='207' y='219' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='325' y='72' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='165' y='26' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='20' y='345' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='178' y='304' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='213' y='182' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='369' y='207' width='3' height='3' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='377' y='266' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='135' y='332' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='344' y='132' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='380' y='376' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='305' y='302' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='92' y='290' width='3' height='3' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='359' y='204' width='3' height='3' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='329' y='289' width='3' height='3' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='346' y='28' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='37' y='79' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='51' y='44' width='3' height='3' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='85' y='291' width='3' height='3' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='286' y='150' width='3' height='3' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='380' y='376' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='192' y='199' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='372' y='178' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='81' y='163' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='222' y='247' width='3' height='3' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='237' y='360' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='106' y='268' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='37' y='252' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='381' y='383' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='312' y='86' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='87' y='54' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='332' y='386' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='191' y='102' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='360' y='166' width='3' height='3' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='371' y='76' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='361' y='183' width='2' height='2' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='343' y='203' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='63' y='377' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='94' y='192' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='306' y='207' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='274' y='219' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='167' y='38' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='107' y='233' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='381' y='229' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='317' y='329' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='103' y='38' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='215' y='4' width='3' height='3' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='313' y='164' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='151' y='287' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='149' y='396' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='88' y='285' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='15' y='3' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='332' y='284' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='235' y='247' width='1' height='1' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='89' y='153' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='319' y='220' width='2' height='2' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='165' y='15' width='3' height='3' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='70' y='286' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='360' y='133' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='333' y='282' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='48' y='82' width='1' height='1' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='354' y='78' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='334' y='192' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='67' y='13' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='373' y='321' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='133' y='84' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='347' y='395' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='281' y='293' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='140' y='64' width='2' height='2' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='393' y='6' width='2' height='2' fill='%23e8dcc8' opacity='0.7'/%3E%3Crect x='269' y='239' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='368' y='89' width='3' height='3' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='165' y='361' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='78' y='122' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3Crect x='184' y='161' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='13' y='323' width='1' height='1' fill='%23e8dcc8' opacity='0.25'/%3E%3Crect x='217' y='247' width='1' height='1' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='292' y='19' width='2' height='2' fill='%23e8dcc8' opacity='0.35'/%3E%3Crect x='185' y='27' width='2' height='2' fill='%23e8dcc8' opacity='0.5'/%3E%3C/svg%3E");
 
-  /* The azulejo motif that tiles the card frames — the one ornament the
-     city puts on everything, drawn once and reused rather than imported. */
-  --azulejo-tile: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cg fill='none' stroke='rgba(255,255,255,0.17)' stroke-width='1'%3E%3Cpath d='M11 1.5 20.5 11 11 20.5 1.5 11Z'/%3E%3Ccircle cx='11' cy='11' r='3.4'/%3E%3Ccircle cx='11' cy='11' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  /* plates and wells */
+  --areia: #dcc49a;
+  --areia-alta: #ece0c4;
+  --areia-sombra: #b89a6c;
+  --poco: #a8794e;
+  --poco-fundo: #7d5736;
+  --contorno: #2b1a16;
 
-  --texto: #dfe4f2;
-  --texto-fraco: #8f9bbb;
-  --alerta: #d4694f;
+  /* ink */
+  --tinta: #2b1a16;
+  --texto: #f6ecd8;
+  --texto-fraco: #c7ad86;
 
-  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
-    'Times New Roman', serif;
-  --font-ui: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  /* the accents */
+  --ouro: #e8b33a;
+  --vermelho: #d8432a;
+  --verde: #4fa83d;
+  --azulejo: #3f7fae;
+
+  /* card faces */
+  --papel: #ece0c4;
+
+  --font-ui: 'Silkscreen', 'Courier New', monospace;
+  --font-texto: 'Pixelify Sans', 'Segoe UI', system-ui, sans-serif;
+
+  /* One shadow for the whole interface: hard, offset down-right, no blur. */
+  --sombra: 3px 3px 0 rgba(27, 14, 12, 0.55);
+  --sombra-forte: 4px 4px 0 rgba(27, 14, 12, 0.7);
 
   color-scheme: dark;
 }
@@ -45,77 +63,132 @@
 html, body, #root {
   width: 100%;
   height: 100%;
-  font-family: var(--font-ui);
+  font-family: var(--font-texto);
   font-size: 15px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: var(--noite);
   color: var(--texto);
+  background: var(--noite-topo);
+  /* Pixel art must never be smoothed. */
+  image-rendering: pixelated;
+  /* Pixelify ships an "fi" ligature that reads as a broken glyph at this size:
+     "afinidade" and "fim" both came out looking like typos. */
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
 }
 
 body { overflow: hidden; }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display);
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-ui);
   font-weight: 400;
-  text-wrap: balance;
+  letter-spacing: 0.02em;
+  text-shadow: 2px 2px 0 var(--contorno);
 }
+
+/* --- the plate and well pattern ----------------------------------------- */
+
+/* A raised sand plate: what panels are made of. */
+.plate {
+  background: var(--areia);
+  border: 2px solid var(--contorno);
+  box-shadow:
+    inset 0 2px 0 var(--areia-alta),
+    inset 0 -2px 0 var(--areia-sombra),
+    var(--sombra);
+}
+
+/* A well sunk into a plate: what readings and lists sit in. */
+.well {
+  background: var(--poco);
+  border: 2px solid var(--contorno);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -2px 0 var(--poco-fundo);
+}
+
+/* --- buttons ------------------------------------------------------------ */
 
 button {
   font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.04em;
   color: var(--texto);
-  background: rgba(58, 110, 165, 0.16);
-  border: 1px solid rgba(58, 110, 165, 0.5);
-  padding: 8px 16px;
-  border-radius: 5px;
+  text-shadow: 2px 2px 0 var(--contorno);
+  background: var(--poco);
+  border: 2px solid var(--contorno);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.3),
+    var(--sombra);
+  padding: 9px 16px;
   cursor: pointer;
-  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+  transition: transform 90ms steps(2), filter 90ms steps(2);
 }
 
-button:hover:not(:disabled) {
-  background: rgba(58, 110, 165, 0.3);
-  border-color: var(--azulejo);
-}
+button:hover:not(:disabled) { filter: brightness(1.15); }
 
-button:active:not(:disabled) { transform: translateY(1px); }
+/* Pressed means pressed: the button moves into its own shadow. */
+button:active:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+}
 
 button:focus-visible {
-  outline: 2px solid var(--ouro);
+  outline: 3px solid var(--ouro);
   outline-offset: 2px;
 }
 
 button:disabled {
-  opacity: 0.4;
+  filter: saturate(0.3) brightness(0.72);
   cursor: not-allowed;
 }
 
-/* The one control that always means "go on". */
 button.primary {
-  background: linear-gradient(180deg, #d8b23c, var(--ouro));
-  border-color: #8f7318;
-  color: #241d04;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  background: var(--verde);
+  color: #f6ecd8;
 }
 
-button.primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, #e6c04c, #d4ac2c);
-  border-color: #a5860f;
-}
+button.danger { background: var(--vermelho); }
 
 button.tiny {
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 4px;
+  font-size: 10px;
+  padding: 4px 8px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    2px 2px 0 rgba(27, 14, 12, 0.55);
 }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
+/* --- a drawn diamond and arrow -------------------------------------------
+ * Neither face has U+25C7 or U+2192, so they are shapes, not characters. */
+
+.pip {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--ouro);
+  transform: rotate(45deg);
+  flex: 0 0 auto;
+}
+
+.arrow {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 6px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid currentColor;
+  vertical-align: middle;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.25); }
 ::-webkit-scrollbar-thumb {
-  background: rgba(143, 155, 187, 0.28);
-  border-radius: 4px;
+  background: var(--poco);
+  border: 2px solid var(--contorno);
 }
 
 @media (prefers-reduced-motion: reduce) {
